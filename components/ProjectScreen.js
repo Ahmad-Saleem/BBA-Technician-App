@@ -5,13 +5,14 @@ import { BaseRouter } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
+
 export default class ProjectScreen extends React.Component {
     constructor(props){
         super(props);
     }
 
     _renderItem = (item) => (
-      <TouchableOpacity style={{height:100, padding:20, borderWidth:2}}>
+      <TouchableOpacity style={{borderWidth:3,margin:1}} onPress={() => this.props.navigation.navigate('Requirements')}>
         <Text style={{ paddingBottom:20, fontSize:17, fontWeight:"200"}}>OMH-001</Text>
         <View style={{flexDirection:"row", alignItems:"baseline"}}>
         <Text style={{width:100}}>CFM:16000</Text>
