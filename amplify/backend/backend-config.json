@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "bbatechnicianappe7759570": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}

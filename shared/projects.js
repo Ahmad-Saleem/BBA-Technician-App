@@ -34,14 +34,5 @@ export const PROJECTS=[
         "pcontact":"Leonardo Da Vinci",
         "pdesig":"Director of institute",
         "noahu":20
-    },
-    {   "id":4,
-        "name": "P5name",
-        "aline1": "211 n Ervy Street ",
-        "aline2":"Dallas tx 753060",
-        "stdate":"08202020",
-        "pcontact":"God",
-        "pdesig":"Director of engineering",
-        "noahu":30
     }
 ]
