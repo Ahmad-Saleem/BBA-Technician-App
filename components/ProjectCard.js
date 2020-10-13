@@ -22,11 +22,11 @@ class ProjectCard extends React.Component {
     const equipments = this.props.equipments.equipments.filter(
       (item) => item.projId === project.id
     );
-    const completed = equipments.filter((obj) =>
-      this.props.completed.includes(obj.id)
+    const completed = equipments.map((obj) =>
+      this.props.completed.includes(obj.id) && obj.id
     );
     const totalDuration = this.props.timestamps
-      .map((obj) => (this.props.completed.includes(obj.id) ? obj.duration : 0))
+      .map((obj) => (completed.includes(obj.id) ? obj.duration : 0))
       .reduce((a, b) => a + b, 0);
 
     return (
@@ -42,7 +42,7 @@ class ProjectCard extends React.Component {
           <Text style={{ fontSize: 20, fontWeight: "400" }}>
             {project.name}
           </Text>
-          {completed.length == equipments.length ? (
+          {completed.length == equipments.length && completed.includes(false) ? (
             <View style={[styles.mediaButton, { marginRight: 8, width: 100 }]}>
               <Icon
                 type="FontAwesome"
@@ -114,7 +114,7 @@ class ProjectCard extends React.Component {
 
             <Text style={{ color: "black" }}>{project.stdate}</Text>
           </View>
-          {completed.length == equipments.length ? (
+          {completed.length == equipments.length && completed.includes(false) ? (
             <View
               style={[
                 styles.mediaButton,
