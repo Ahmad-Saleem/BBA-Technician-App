@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Image,
+  
 } from "react-native";
 import { connect } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
 import * as Permissions from "expo-permissions";
-import { Button, Icon } from "native-base";
+import { Button, Icon, Form, Textarea } from "native-base";
 import { Video } from "expo-av";
 import {
   postTimestamp,
@@ -22,8 +24,15 @@ import {
   deleteTimestamps,
   postNote,
   deleteNote,
+  deleteImages,
 } from "../redux/ActionCreators";
-import { Stopwatch } from "react-native-stopwatch-timer";
+import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
+import { AssetsSelector } from "expo-images-picker";
+import { Ionicons } from "@expo/vector-icons";
+import { MaterialIcons } from '@expo/vector-icons'; 
+import { FontAwesome5 } from '@expo/vector-icons'; 
+import { SimpleLineIcons } from '@expo/vector-icons'; 
 
 const mapStateToProps = (state) => {
   return {
@@ -32,6 +41,7 @@ const mapStateToProps = (state) => {
     notes: state.notes.notes,
     projects: state.projects.projects,
     completed: state.completed,
+    selectedImages: state.selectedImages,
   };
 };
 
@@ -43,6 +53,8 @@ const mapDispatchToProps = (dispatch) => ({
   deleteTimestamps: (eId) => dispatch(deleteTimestamps(eId)),
   postCompleted: (eId) => dispatch(postCompleted(eId)),
   deleteCompleted: (eId) => dispatch(deleteCompleted(eId)),
+  deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
+
   // postComment: (dishId, rating, author, comment) =>
   //   dispatch(postComment(dishId, rating, author, comment)),
 });
@@ -54,23 +66,15 @@ class Requirements extends React.Component {
     this.state = {
       preread: 1,
       postread: 1,
-      image: null,
-      video: null,
-      stopwatchStart: false,
-      totalDuration: 90000,
-      stopwatchReset: false,
       duration: 0,
       note: "",
+      toggleInput: false,
+      selection: [],
     };
-    this.resetStopwatch = this.resetStopwatch.bind(this);
   }
 
   componentDidMount() {
     this.getPermissionAsync();
-  }
-
-  resetStopwatch() {
-    this.setState({ stopwatchStart: false, stopwatchReset: true });
   }
 
   getFormattedTime(time) {
@@ -83,24 +87,6 @@ class Requirements extends React.Component {
       if (status !== "granted") {
         alert("Sorry, we need camera roll permissions to make this work!");
       }
-    }
-  };
-
-  _pickImage = async () => {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-      if (!result.cancelled) {
-        this.setState({ image: result.uri });
-      }
-
-      // console.log(result);
-    } catch (E) {
-      console.log(E);
     }
   };
 
@@ -126,34 +112,8 @@ class Requirements extends React.Component {
     title: "Requirements",
   };
 
-  toggleModal() {
-    this.setState({ showModal: !this.state.showModal });
-  }
-
-  handleReservation() {
-    // console.log(JSON.stringify(this.state));
-    this.toggleModal();
-  }
-
   handleDelete(eId) {
     this.props.deleteTimestamps(eId);
-  }
-
-  msToTime(s) {
-    // Pad to 2 or 3 digits, default is 2
-    function pad(n, z) {
-      z = z || 2;
-      return ("00" + n).slice(-z);
-    }
-
-    var ms = s % 1000;
-    s = (s - ms) / 1000;
-    var secs = s % 60;
-    s = (s - secs) / 60;
-    var mins = s % 60;
-    var hrs = (s - mins) / 60;
-
-    return pad(hrs) + ":" + pad(mins);
   }
 
   resetForm() {
@@ -167,15 +127,22 @@ class Requirements extends React.Component {
   }
 
   markStarted(eId) {
-    // this.setState({
-    //   stopwatchStart: !this.state.stopwatchStart,
-    // });
     this.props.postTimestamp(eId);
   }
 
   markStopped(eId) {
     this.props.updateTimestamp(eId);
-    // this.setState({ stopwatchStart: !this.state.stopwatchStart });
+  }
+
+  markSelected(uri) {
+    let newSelection = [...this.state.selection];
+    if (newSelection.includes(uri)) {
+     newSelection= newSelection.filter((URI) => URI != uri);
+    } else {
+      newSelection.push(uri);
+    }
+    this.setState({ selection: newSelection });
+    console.log("this.state.selection");
   }
 
   render() {
@@ -186,11 +153,14 @@ class Requirements extends React.Component {
     let { video } = this.state;
     const { eId } = this.props.route.params;
     const timestamp = this.props.timestamps.find((item) => item.id === eId);
+    const imageSet = this.props.selectedImages?.find((item) => item.id === eId);
+    const images = imageSet?.images;
+
     var dur = 0;
     return (
       <ScrollView style={{ backgroundColor: "white" }}>
         <TouchableOpacity style={styles.status}>
-          <Text style={{color:"white"}}>In Progress</Text>
+          <Text style={{ color: "white" }}>In Progress</Text>
         </TouchableOpacity>
 
         <View style={styles.formRow}>
@@ -217,50 +187,135 @@ class Requirements extends React.Component {
             onChangeText={(itemValue) => this.setState({ postread: itemValue })}
           />
         </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            paddingTop: 35,
-            paddingBottom: 35,
-            borderTopColor: "lightgray",
-            borderTopWidth: 1,
-            borderBottomColor: "lightgray",
-            borderBottomWidth: 1,
-            margin: 15,
-          }}
-        >
-          <TouchableOpacity
-            onPress={this._pickImage}
-            style={styles.mediaButton}
+        <View style={{}}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              margin: 15,
+              borderTopColor: "lightgray",
+              borderTopWidth: 1,
+              paddingTop: 35,
+              paddingBottom: 5,
+            }}
           >
-            <Icon
-              type="FontAwesome"
-              name="picture-o"
-              style={{ fontSize: 20, color: "gray" }}
-            />
-            <Text style={styles.mediaButtonText}>Choose Photo</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                this.props.navigation.navigate("Images", { eId: eId })
+              }
+              style={styles.mediaButton}
+            >
+              <AntDesign name="picture" size={20} color="black" />
+              <Text style={styles.mediaButtonText}>Choose Photo</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={this._pickVideo}
-            style={styles.mediaButton}
-          >
-            <Icon
-              type="FontAwesome"
-              name="picture-o"
-              style={{ fontSize: 20, color: "gray" }}
-            />
-            <Text style={styles.mediaButtonText}>Choose Video</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={this._pickVideo}
+              style={styles.mediaButton}
+            >
+              <Feather name="video" size={20} color="black" />
+              <Text style={styles.mediaButtonText}>Choose Video</Text>
+            </TouchableOpacity>
+          </View>
+          {images?.length > 0 && (
+            <View style={{ marginLeft: 20 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  // justifyContent: "space-around",
+                  // paddingTop: 35,
+                  // marginLeft: 15,
+                  // marginRight: 15,
+                  // paddingBottom: 5,
+                }}
+              >
+                {images.map((obj) => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.markSelected(obj.uri);
+                    }}
+                    style={{
+                      // flex:1,
+                      margin: 2,
+                    }}
+                  >
+                    {this.state.selection.includes(obj.uri) && (
+                      <AntDesign
+                        name="checkcircle"
+                        size={24}
+                        color="black"
+                        style={{
+                          fontSize: 15,
+
+                          position: "absolute",
+                          top: 2,
+                          right: 2,
+                          zIndex: 2,
+                        }}
+                      />
+                    )}
+                    <Image
+                      source={{ uri: obj.uri }}
+                      style={{ width: 75, height: 75 }}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  paddingTop: 35,
+                  paddingBottom: 5,
+                  marginRight:20
+                }}
+              >
+                <TouchableOpacity
+                  style={[
+                    styles.mediaButton,
+                    {
+                      borderColor: "#DADADA",
+                      borderWidth: 1,
+                      backgroundColor: "none",
+                    },
+                  ]}
+                  onPress={() =>
+                    this.props.navigation.navigate("AddCaptions", { images: this.state.selection })
+                  }
+                >
+                  <Text style={styles.mediaButtonText}>Select Items</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.mediaButton,
+                    {
+                      borderColor: "#DADADA",
+                      borderWidth: 1,
+                      backgroundColor: "none",
+                    },
+                  ]}
+                  onPress={() => {
+                    this.props.deleteImages(eId, this.state.selection);
+                    this.setState({ selection: [] });
+                  }}
+                >
+                  <Text style={styles.mediaButtonText}>Delete Items</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
+
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
-            // paddingTop: 35,
+            paddingTop: 35,
             // paddingBottom: 35,
+            borderTopColor: "lightgray",
+            borderTopWidth: 1,
             margin: 15,
             alignItems: "center",
           }}
@@ -270,7 +325,10 @@ class Requirements extends React.Component {
           </Text>
 
           <TouchableOpacity
-            style={[styles.mediaButton, { marginRight: 8,    backgroundColor: "black", }]}
+            style={[
+              styles.mediaButton,
+              { marginRight: 8, backgroundColor: "black" },
+            ]}
             onPress={() =>
               !timestamp?.isStarted
                 ? this.markStarted(eId)
@@ -283,7 +341,7 @@ class Requirements extends React.Component {
               style={{ fontSize: 20, color: "white" }}
             />
 
-            <Text style={[styles.mediaButtonText,{color:"white"}]}>
+            <Text style={[styles.mediaButtonText, { color: "white" }]}>
               {timestamp
                 ? !timestamp.isStarted
                   ? "Start Tracking"
@@ -341,7 +399,9 @@ class Requirements extends React.Component {
               alignItems: "center",
             }}
           >
-            <Text style={[styles.formLabelText, { width: 90 }]}>
+            <Text
+              style={[styles.formLabelText, { width: 90, fontWeight: "bold" }]}
+            >
               Total time
             </Text>
 
@@ -381,7 +441,6 @@ class Requirements extends React.Component {
             <>
               <Text
                 style={{
-                  padding: 5,
                   fontWeight: "bold",
                 }}
               >
@@ -389,13 +448,8 @@ class Requirements extends React.Component {
               </Text>
               {/* <Text>{obj.date}</Text> */}
             </>
-            <Icon
-              type="FontAwesome"
-              name="check"
-              style={{ fontSize: 20, color: "gray", marginRight: 10 }}
-            />
           </View>
-          <Text style={{ marginTop: 20 }}>
+          <Text style={{ marginTop: 20, color: "#616161" }}>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste nihil
             sunt incidunt laudantium, ad animi consequatur omnis itaque enim
             odit illum asperiores amet atque quidem dicta obcaecati! Culpa ipsam
@@ -443,71 +497,129 @@ class Requirements extends React.Component {
                     </Text>
                     <Text style={{ color: "gray" }}>03:15 PM</Text>
                   </View>
-                  <TouchableOpacity>
-                    <Icon
-                      type="FontAwesome"
-                      name="trash"
-                      style={{ fontSize: 20, color: "#0074B1", marginRight: 10 }}
-                      onPress={() => {
-                        this.props.deleteNote(obj.id);
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      width: 85,
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={{
+                        padding: 7,
+                        borderRadius: 24,
+                        backgroundColor: "#F4F4F4",
                       }}
-                    />
-                  </TouchableOpacity>
+                    >
+                      {/* <FontAwesome5 name="pen-o" size={22} color="#0074B1" /> */}
+                      <SimpleLineIcons name="pencil" size={20} color="#0074B1" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        padding: 7,
+                        borderRadius: 24,
+                        backgroundColor: "#F4F4F4",
+                      }}
+                    >
+                      <Feather
+                        name="trash-2"
+                        size={22}
+                        color="#0074B1"
+                        onPress={() => {
+                          Alert.alert(
+                            "Delete Note?",
+                            "Are you sure you want to delete this note?",
+                            [
+                              {
+                                text: "Cancel",
+                                onPress: () => console.log("Not Deleted"),
+                                style: " cancel",
+                              },
+                              {
+                                text: "OK",
+                                onPress: () => this.props.deleteNote(obj.id),
+                              },
+                            ],
+                            { cancelable: false }
+                          );
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <Text style={{ marginTop: 20, color: "gray" }}>{obj.note}</Text>
               </View>
             )
         )}
 
-        <TextInput
-          onChangeText={(note) => this.setState({ note: note })}
-          style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-          value={this.state.note}
-          placeholder="Textarea"
-        />
-        <TouchableOpacity
-          onPress={() => {
-            Alert.prompt(
-              "Enter here",
-              "Enter your note",
-              [
-                {
-                  text: "Cancel",
-                  onPress: () => console.log("Cancel Pressed"),
-                  style: "cancel",
-                },
-                {
-                  text: "OK",
-                  onPress: () =>
-                    this.props.postNote(
-                      this.props.route.params.id,
-                      this.state.note
-                    ),
-                },
-              ],
-              "secure-text"
-            );
-          }}
-          style={{
-            alignSelf: "center",
+        {this.state.toggleInput && (
+          <Form>
+            <Textarea
+              onChangeText={(note) => this.setState({ note })}
+              rowSpan={4}
+              value={this.state.note}
+              bordered
+              placeholder="Add note"
+              style={{
+                width: 300,
+                borderWidth: 2,
+                borderColor: "#0074B1",
+                alignSelf: "center",
+                borderRadius: 4,
+                marginBottom: 15,
+              }}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                this.props.postNote(
+                  this.props.route.params.id,
+                  this.state.note
+                );
+                this.setState({ toggleInput: false });
+              }}
+              style={{
+                alignSelf: "center",
                 padding: 8,
                 backgroundColor: "black",
                 borderRadius: 3,
                 flexDirection: "row",
                 alignItems: "center",
-                width:180,
-                justifyContent:"center"
-          }}
-        >
-          <Icon
-            type="FontAwesome"
-            name="plus-circle"
-            style={{ fontSize: 20, color: "white", marginRight: 10 }}
-          />
-          <Text style={{ fontSize: 20, fontWeight: "200", color: "white" }}>
-            Add note
-          </Text>
-        </TouchableOpacity>
+                width: 180,
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "200", color: "white" }}>
+                Submit
+              </Text>
+            </TouchableOpacity>
+          </Form>
+        )}
+        {!this.state.toggleInput && (
+          <TouchableOpacity
+            onPress={() => {
+              this.setState({ toggleInput: true });
+            }}
+            style={{
+              alignSelf: "center",
+              padding: 8,
+              backgroundColor: "black",
+              borderRadius: 3,
+              flexDirection: "row",
+              alignItems: "center",
+              width: 180,
+              justifyContent: "center",
+            }}
+          >
+            <Icon
+              type="FontAwesome"
+              name="plus-circle"
+              style={{ fontSize: 20, color: "white", marginRight: 10 }}
+            />
+            <Text style={{ fontSize: 20, fontWeight: "200", color: "white" }}>
+              Add Note
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {/* <Button onPress={() => this.handleDelete(eId)}>
           <Text>Delete</Text>
@@ -526,14 +638,16 @@ class Requirements extends React.Component {
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
+              marginTop: 80,
             }}
           >
-            <Icon
-              type="FontAwesome"
-              name="check"
-              style={{ fontSize: 20, color: "#fff", marginRight: 10 }}
+            <Feather
+              name="check-square"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 10 }}
             />
-            <Text style={{color:"white"}}>
+            <Text style={{ color: "white", fontWeight: "400", fontSize: 16 }}>
               {this.props.completed.some((el) => el === eId)
                 ? "Mark as not Done?"
                 : "Mark as Done"}
@@ -572,7 +686,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     flexDirection: "row",
-    margin: 20,
+    margin: 15,
     marginRight: 40,
   },
   formLabel: {
@@ -626,13 +740,12 @@ const styles = StyleSheet.create({
   mediaButton: {
     padding: 10,
     flexDirection: "row",
-    backgroundColor: "lightgray",
-    borderRadius: 5,
+    backgroundColor: "#F4F4F4",
+    borderRadius: 3,
     justifyContent: "space-around",
     width: 150,
   },
   mediaButtonText: {
-    fontWeight: "bold",
     fontSize: 15,
   },
   timestampContainer: {

@@ -1,8 +1,8 @@
 {
-    "identityPoolName": "bbatechnicianappe7759570_identitypool_e7759570",
+    "identityPoolName": "bbawebapp6fcbc956_identitypool_6fcbc956",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "bbatece7759570",
-    "userPoolName": "bbatechnicianappe7759570_userpool_e7759570",
+    "resourceNameTruncated": "bbaweb6fcbc956",
+    "userPoolName": "bbawebapp6fcbc956_userpool_6fcbc956",
     "autoVerifiedAttributes": [
         "email"
     ],
@@ -28,10 +28,10 @@
     "userpoolClientReadAttributes": [
         "email"
     ],
-    "userpoolClientLambdaRole": "bbatece7759570_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "bbaweb6fcbc956_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "e7759570",
-    "resourceName": "bbatechnicianappe7759570",
+    "sharedId": "6fcbc956",
+    "resourceName": "bbawebapp6fcbc956",
     "authSelections": "identityPoolAndUserPool",
     "authRoleArn": {
         "Fn::GetAtt": [
@@ -46,9 +46,6 @@
         ]
     },
     "useDefault": "default",
-    "usernameAttributes": [
-        "email"
-    ],
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "dependsOn": []

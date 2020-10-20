@@ -100,7 +100,7 @@ export const postTimestamp = (eId) => (dispatch) => {
   };
   const date=new Date().toLocaleTimeString();
   newTimestamp.initial = date;
-  newTimestamp.starting = new Date();
+  newTimestamp.starting = new Date().getTime();
   newTimestamp.stopping = "Stop tracking";
   newTimestamp.duration = 0;
   setTimeout(() => {
@@ -121,6 +121,35 @@ export const updateTimestamp = (eId) => ({
 export const deleteTimestamps = (id) => ({
   type: ActionTypes.DELETE_TIMESTAMP,
   payload: id,
+});
+
+export const postImages = (eId,images) => (dispatch) => {
+  const newImageSet = {
+    id: eId,
+    images:images,
+  };
+  // const date=new Date().toLocaleTimeString();
+  // newTimestamp.initial = date;
+  // newTimestamp.starting = new Date();
+  // newTimestamp.stopping = "Stop tracking";
+  // newTimestamp.duration = 0;
+  setTimeout(() => {
+    dispatch(addImages(newImageSet));
+  }, 2000);
+};
+
+export const addImages = (newImageSet) => ({
+  type: ActionTypes.ADD_IMAGES,
+  payload: newImageSet,
+});
+
+
+
+
+export const deleteImages = (eId,images) => ({
+  type: ActionTypes.DELETE_IMAGES,
+  id:eId,
+  payload: images,
 });
 
 export const postNote = (projId, note) => (dispatch) => {

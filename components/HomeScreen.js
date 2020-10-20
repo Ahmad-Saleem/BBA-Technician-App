@@ -5,8 +5,10 @@ import { Icon } from "native-base";
 import { ScrollView } from "react-native-gesture-handler";
 import ProjectCard from "./ProjectCard";
 import { connect } from "react-redux";
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { baseUrl } from "../shared/baseUrl";
 import { Loading } from "./LoadingComponent";
+
 
 const mapStateToProps = (state) => {
   return {
@@ -22,7 +24,7 @@ class HomeScreen extends React.Component {
       <TouchableOpacity
         key={project.id}
         onPress={() =>
-          this.props.navigation.navigate("ProjectScreen", {
+          this.props.navigation.navigate("Project", {
             id: project.id,
           })
         }
@@ -43,11 +45,15 @@ class HomeScreen extends React.Component {
     } else {
       return (
         <ScrollView style={{backgroundColor:"#fff"}}>
+          <StatusBar style="light" />
           <View style={styles.pcontact}>
+            <View>
             <Text style={{ fontSize: 25 }}>Hello, John Doe</Text>
-            <Text style={{ fontSize: 10, fontWeight: "bold" }}>
+            <Text style={{ fontSize: 18, color:"#616161" }}>
               Check the projects here
             </Text>
+            </View>
+            <MaterialCommunityIcons name="tooltip-text-outline" size={24} color="#0074B1" />
           </View>
           <View
             style={{
@@ -56,11 +62,11 @@ class HomeScreen extends React.Component {
               margin: 20,
             }}
           >
-            <Text style={{ fontSize: 25, fontWeight: "200" }}>Projects</Text>
+            <Text style={{ fontSize: 23, fontWeight: "500" }}>Projects</Text>
 
             <View
               style={{
-                borderWidth: 1,
+                backgroundColor:"#F4F4F4",
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -68,12 +74,13 @@ class HomeScreen extends React.Component {
                 borderRadius: 4,
               }}
             >
-              <Icon
+              <MaterialCommunityIcons name="check-all" size={20} color="#0074B1" style={{ marginRight: 10 }} />
+              {/* <Icon
                 type="FontAwesome"
                 name="check"
-                style={{ fontSize: 20, color: "gray", marginRight: 10 }}
-              />
-              <Text>1/9</Text>
+                style={{ fontSize: 20, color: "#0074B1", marginRight: 10 }}
+              /> */}
+              <Text>1/{this.props.projects.projects.length}</Text>
             </View>
           </View>
 
@@ -100,11 +107,13 @@ const styles = StyleSheet.create({
   },
   pcontact: {
     height: 100,
-    justifyContent: "center",
-    paddingLeft: 20,
+    justifyContent: "space-between",
+    alignItems:"center",
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
-    margin: 10,
+    flexDirection:"row",
+    paddingLeft:20,
+    paddingRight:20,
   },
 });
 

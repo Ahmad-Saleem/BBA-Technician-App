@@ -42,15 +42,15 @@ class ProjectCard extends React.Component {
           <Text style={{ fontSize: 20, fontWeight: "400" }}>
             {project.name}
           </Text>
-          {completed.length == equipments.length && completed.includes(false) ? (
-            <View style={[styles.mediaButton, { marginRight: 8, width: 100 }]}>
+          {completed.length == equipments.length && !completed.includes(false) && (
+            <View style={[styles.mediaButton, { marginRight: 8, width: 100, alignItems:"center" }]}>
               <Icon
                 type="FontAwesome"
                 name="clock-o"
-                style={{ fontSize: 20, color: "#0074B1" }}
+                style={{ fontSize: 17, color: "#0074B1" }}
               />
 
-              <Text style={{ color: "#0074B1", marginLeft: 5 }}>
+              <Text style={{ color: "#0074B1", marginLeft: 5,  fontSize:17 }}>
                 {("0" + Math.floor(totalDuration / (1000 * 60 * 60))).slice(
                   -2
                 ) +
@@ -60,7 +60,8 @@ class ProjectCard extends React.Component {
                   ("0" + Math.floor(totalDuration / 1000)).slice(-2)}
               </Text>
             </View>
-          ) : (
+          ) }
+          {/* : (
             <View style={[styles.mediaButton, { marginRight: 8, width: 100 }]}>
               <Icon
                 type="FontAwesome"
@@ -70,7 +71,7 @@ class ProjectCard extends React.Component {
 
               <Text style={{ color: "#0074B1", marginLeft: 5 }}>Start</Text>
             </View>
-          )}
+          )} */}
         </View>
         <View style={{ flexDirection: "row", marginBottom: 10 }}>
           <Text style={{ paddingRight: 3, fontWeight: "bold" }}>
@@ -114,7 +115,7 @@ class ProjectCard extends React.Component {
 
             <Text style={{ color: "black" }}>{project.stdate}</Text>
           </View>
-          {completed.length == equipments.length && completed.includes(false) ? (
+          {completed.length == equipments.length && !completed.includes(false) ? (
             <View
               style={[
                 styles.mediaButton,
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
   mediaButton: {
     padding: 10,
     flexDirection: "row",
-    backgroundColor: "lightgray",
+    backgroundColor:"#F4F4F4",
     borderRadius: 5,
     justifyContent: "center",
   },

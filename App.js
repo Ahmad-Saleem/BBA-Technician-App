@@ -36,13 +36,7 @@ const AppNavigator = (props) => {
   return (
     <Provider store={store}>
       <PersistGate loading={<Loading />} persistor={persistor}>
-        <AppStack.Navigator>
-          <AppStack.Screen name="Home">
-            {(screenProps) => (
-              <Main {...screenProps} updateAuthState={props.updateAuthState} />
-            )}
-          </AppStack.Screen>
-        </AppStack.Navigator>
+        <Main updateAuthState={props.updateAuthState} />
       </PersistGate>
     </Provider>
   );

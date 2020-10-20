@@ -74,7 +74,7 @@ export default class LoginScreen extends React.Component {
                 BBA Technician App
               </Text>
             </View>
-            <View style={styles.contentContainer}>
+            {/* <View style={styles.contentContainer}>
               <Text
                 style={{
                   color: "#fff",
@@ -86,7 +86,7 @@ export default class LoginScreen extends React.Component {
               >
                 Donec tristique nibh at sapien accumsan condimentum
               </Text>
-            </View>
+            </View> */}
 
             <Form style={styles.form}>
               <View

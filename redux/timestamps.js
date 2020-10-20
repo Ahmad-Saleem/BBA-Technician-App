@@ -16,13 +16,8 @@ export const timestamps = (state = [], action) => {
             }
           : obj
       );
-        // .map((obj, i) =>
-        //   i === index ? { ...obj, starting: timestamp.starting } : obj
-        // );
-      }
 
-      //       index = timestamps.findIndex(x => x.eid ===timestamp.eid);
-      //       return { ...state, timestamps: timestamps[index].concat(timestamp) };
+      }
 
       return state.concat(timestamp);
 
