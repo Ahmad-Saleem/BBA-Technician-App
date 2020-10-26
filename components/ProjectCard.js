@@ -7,7 +7,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 
 const mapStateToProps = (state) => {
   return {
-    equipments: state.equipments,
+    // equipments: state.equipments,
     projects: state.projects.projects,
     completed: state.completed,
     timestamps: state.timestamps,
@@ -19,16 +19,30 @@ class ProjectCard extends React.Component {
     const project = this.props.projects.find(
       (item) => item.id === this.props.projId
     );
-    const equipments = this.props.equipments.equipments.filter(
-      (item) => item.projId === project.id
-    );
-    const completed = equipments.map((obj) =>
-      this.props.completed.includes(obj.id) && obj.id
+    const equipments = project.equipments
+    const completed = equipments.map(
+      (obj) => this.props.completed.includes(obj.id) && obj.id
     );
     const totalDuration = this.props.timestamps
       .map((obj) => (completed.includes(obj.id) ? obj.duration : 0))
       .reduce((a, b) => a + b, 0);
 
+    var month = new Array();
+    month[0] = "Jan";
+    month[1] = "Feb";
+    month[2] = "Mar";
+    month[3] = "Apr";
+    month[4] = "May";
+    month[5] = "Jun";
+    month[6] = "Jul";
+    month[7] = "Aug";
+    month[8] = "Sep";
+    month[9] = "Oct";
+    month[10] = "Nov";
+    month[11] = "Dec";
+    var s=new Date(project.start_date)
+    var c=new Date(project.close_date)
+    var d = month[s.getMonth()] +" "+ s.getDay() + " - " + month[c.getMonth()] + " " + c.getDay()+"/"+c.getFullYear();
     return (
       <View style={styles.cardstyle}>
         <View
@@ -40,17 +54,22 @@ class ProjectCard extends React.Component {
           }}
         >
           <Text style={{ fontSize: 20, fontWeight: "400" }}>
-            {project.name}
+            {project.project_name}
           </Text>
           {completed.length == equipments.length && !completed.includes(false) && (
-            <View style={[styles.mediaButton, { marginRight: 8, width: 100, alignItems:"center" }]}>
+            <View
+              style={[
+                styles.mediaButton,
+                { marginRight: 8, width: 100, alignItems: "center" },
+              ]}
+            >
               <Icon
                 type="FontAwesome"
                 name="clock-o"
                 style={{ fontSize: 17, color: "#0074B1" }}
               />
 
-              <Text style={{ color: "#0074B1", marginLeft: 5,  fontSize:17 }}>
+              <Text style={{ color: "#0074B1", marginLeft: 5, fontSize: 17 }}>
                 {("0" + Math.floor(totalDuration / (1000 * 60 * 60))).slice(
                   -2
                 ) +
@@ -60,7 +79,7 @@ class ProjectCard extends React.Component {
                   ("0" + Math.floor(totalDuration / 1000)).slice(-2)}
               </Text>
             </View>
-          ) }
+          )}
           {/* : (
             <View style={[styles.mediaButton, { marginRight: 8, width: 100 }]}>
               <Icon
@@ -75,7 +94,7 @@ class ProjectCard extends React.Component {
         </View>
         <View style={{ flexDirection: "row", marginBottom: 10 }}>
           <Text style={{ paddingRight: 3, fontWeight: "bold" }}>
-            {project.pcontact}
+            Jim Brewin
           </Text>
           <Text
             style={{
@@ -83,14 +102,14 @@ class ProjectCard extends React.Component {
               borderRightColor: "lightgray",
               borderLeftWidth: 1,
               borderRightWidth: 1,
-              paddingLeft: 3,
-              paddingRight: 3,
+              paddingLeft: 6,
+              paddingRight: 6,
             }}
           >
             AHU
           </Text>
           <Text style={{ paddingLeft: 3, borderLeftColor: "lightgray" }}>
-            {project.stdate}
+            08202020
           </Text>
         </View>
         <Text style={{ color: "gray", marginBottom: 10 }}>
@@ -106,20 +125,21 @@ class ProjectCard extends React.Component {
             alignItems: "center",
           }}
         >
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", width: 163 }}>
             <Icon
               type="FontAwesome"
               name="calendar"
               style={{ fontSize: 20, color: "black", marginRight: 10 }}
             />
 
-            <Text style={{ color: "black" }}>{project.stdate}</Text>
+            <Text style={{ color: "black" }}>{d}</Text>
           </View>
-          {completed.length == equipments.length && !completed.includes(false) ? (
+          {completed.length == equipments.length &&
+          !completed.includes(false) ? (
             <View
               style={[
                 styles.mediaButton,
-                { marginRight: 8, backgroundColor: "#0074B1", width: 150 },
+                { marginRight: 8, backgroundColor: "#0074B1", width: 120 },
               ]}
             >
               <Icon
@@ -134,7 +154,7 @@ class ProjectCard extends React.Component {
             <View
               style={[
                 styles.mediaButton,
-                { marginRight: 8, backgroundColor: "black", width: 150 },
+                { marginRight: 8, backgroundColor: "black", width: 120 },
               ]}
             >
               <Icon
@@ -153,7 +173,7 @@ class ProjectCard extends React.Component {
 }
 const styles = StyleSheet.create({
   cardstyle: {
-    width: 323,
+    width: 343,
     height: 220,
     alignSelf: "center",
     borderRadius: 3,
@@ -169,7 +189,7 @@ const styles = StyleSheet.create({
   mediaButton: {
     padding: 10,
     flexDirection: "row",
-    backgroundColor:"#F4F4F4",
+    backgroundColor: "#F4F4F4",
     borderRadius: 5,
     justifyContent: "center",
   },

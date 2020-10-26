@@ -1,64 +1,158 @@
 import * as ActionTypes from "./ActionTypes";
+// import { setContext } from "apollo-link-context";
+import { setContext } from "@apollo/client/link/context";
 import { baseUrl } from "../shared/baseUrl";
+import {
+  ApolloClient,
+  InMemoryCache,
+  gql,
+  createHttpLink,
+} from "@apollo/client";
+import { Auth } from "aws-amplify";
 
-export const fetchEquipments = () => (dispatch) => {
-  return fetch(baseUrl + "equipments")
-    .then(
-      (response) => {
-        if (response.ok) {
-          return response;
-        } else {
-          var error = new Error(
-            "Error " + response.status + ": " + response.statusText
-          );
-          error.response = response;
-          throw error;
-        }
-      },
-      (error) => {
-        var errmess = new Error(error.message);
-        throw errmess;
-      }
-    )
-    .then((response) => response.json())
-    .then((equipments) => dispatch(addEquipments(equipments)))
-    .catch((error) => dispatch(equipmentsFailed(error.message)));
-};
-
-export const equipmentsFailed = (errmess) => ({
-  type: ActionTypes.EQUIPMENTS_FAILED,
-  payload: errmess,
+const httpLink = createHttpLink({
+  uri: "https://bba-server.herokuapp.com/graphql",
 });
 
-export const addEquipments = (equipments) => ({
-  type: ActionTypes.ADD_EQUIPMENTS,
-  payload: equipments,
+const authLink = setContext(async (_, { headers }) => {
+  const user = await Auth.currentAuthenticatedUser();
+
+  const { signInUserSession } = user;
+  const { jwtToken } = signInUserSession.accessToken;
+
+  return {
+    headers: {
+      ...headers,
+      authorization: jwtToken || "",
+    },
+  };
 });
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache(),
+  onError: ({ networkError, graphQLError }) => {
+    console.log("graphQLErrors", graphQLError);
+    console.log("networkErrors", networkError);
+  },
+});
+
+// export const fetchEquipments = () => (dispatch) => {
+//   return fetch(baseUrl + "equipments")
+//     .then(
+//       (response) => {
+//         if (response.ok) {
+//           return response;
+//         } else {
+//           var error = new Error(
+//             "Error " + response.status + ": " + response.statusText
+//           );
+//           error.response = response;
+//           throw error;
+//         }
+//       },
+//       (error) => {
+//         var errmess = new Error(error.message);
+//         throw errmess;
+//       }
+//     )
+//     .then((response) => response.json())
+//     .then((equipments) => dispatch(addEquipments(equipments)))
+//     .catch((error) => dispatch(equipmentsFailed(error.message)));
+// };
+
+// export const equipmentsFailed = (errmess) => ({
+//   type: ActionTypes.EQUIPMENTS_FAILED,
+//   payload: errmess,
+// });
+
+// export const addEquipments = (equipments) => ({
+//   type: ActionTypes.ADD_EQUIPMENTS,
+//   payload: equipments,
+// });
+
+// export const fetchProjects = () => (dispatch) => {
+//   dispatch(projectsLoading());
+
+//   return fetch(baseUrl + "projects")
+//     .then(
+//       (response) => {
+//         if (response.ok) {
+//           return response;
+//         } else {
+//           var error = new Error(
+//             "Error " + response.status + ": " + response.statusText
+//           );
+//           error.response = response;
+//           throw error;
+//         }
+//       },
+//       (error) => {
+//         var errmess = new Error(error.message);
+//         throw errmess;
+//       }
+//     )
+//     .then((response) => response.json())
+//     .then((projects) => dispatch(addProjects(projects)))
+//     .catch((error) => dispatch(projectsFailed(error.message)));
+// };
 
 export const fetchProjects = () => (dispatch) => {
   dispatch(projectsLoading());
-
-  return fetch(baseUrl + "projects")
-    .then(
-      (response) => {
-        if (response.ok) {
-          return response;
-        } else {
-          var error = new Error(
-            "Error " + response.status + ": " + response.statusText
-          );
-          error.response = response;
-          throw error;
-        }
-      },
-      (error) => {
-        var errmess = new Error(error.message);
-        throw errmess;
-      }
-    )
-    .then((response) => response.json())
-    .then((projects) => dispatch(addProjects(projects)))
-    .catch((error) => dispatch(projectsFailed(error.message)));
+ 
+  return (
+    client
+      .query({
+        query: gql`
+          query {
+            projects {
+              id
+              project_name
+              start_date
+              close_date
+              notes {
+                id
+                message
+                created_by {
+                  first_name
+                }
+                created_at
+              }
+              location {
+                address
+                location_name
+                city
+                state
+              }
+              equipments {
+                id
+                building
+              }
+            }
+          }
+        `,
+      })
+      // .then(
+      //   (response) => {
+      //     if (response.ok) {
+      //       return response;
+      //     } else {
+      //       var error = new Error(
+      //         "Error " + response.status + ": " + response.statusText
+      //       );
+      //       error.response = response;
+      //       throw error;
+      //     }
+      //   },
+      //   (error) => {
+      //     var errmess = new Error(error.message);
+      //     throw errmess;
+      //   }
+      // )
+      // .then((response) => response.json())
+      .then(({ data }) => dispatch(addProjects(data.projects)))
+      .catch((error) => dispatch(projectsFailed(error.message)))
+  );
 };
 
 export const projectsLoading = () => ({
@@ -74,8 +168,6 @@ export const addProjects = (projects) => ({
   type: ActionTypes.ADD_PROJECTS,
   payload: projects,
 });
-
-
 
 export const postCompleted = (eId) => (dispatch) => {
   setTimeout(() => {
@@ -96,9 +188,9 @@ export const deleteCompleted = (eId) => ({
 export const postTimestamp = (eId) => (dispatch) => {
   const newTimestamp = {
     id: eId,
-    isStarted:true,
+    isStarted: true,
   };
-  const date=new Date().toLocaleTimeString();
+  const date = new Date().toLocaleTimeString();
   newTimestamp.initial = date;
   newTimestamp.starting = new Date().getTime();
   newTimestamp.stopping = "Stop tracking";
@@ -123,10 +215,14 @@ export const deleteTimestamps = (id) => ({
   payload: id,
 });
 
-export const postImages = (eId,images) => (dispatch) => {
+export const postImages = (eId, images) => (dispatch) => {
+  let newImages=[...images]
+  for(let i=0;i<newImages.length;i++){
+    newImages[i].caption=""
+  }
   const newImageSet = {
     id: eId,
-    images:images,
+    images: newImages,
   };
   // const date=new Date().toLocaleTimeString();
   // newTimestamp.initial = date;
@@ -143,12 +239,9 @@ export const addImages = (newImageSet) => ({
   payload: newImageSet,
 });
 
-
-
-
-export const deleteImages = (eId,images) => ({
+export const deleteImages = (eId, images) => ({
   type: ActionTypes.DELETE_IMAGES,
-  id:eId,
+  id: eId,
   payload: images,
 });
 
@@ -206,4 +299,21 @@ export const addNotes = (notes) => ({
 export const deleteNote = (id) => ({
   type: ActionTypes.DELETE_NOTE,
   payload: id,
+});
+
+export const postCaption = (eId, caption, id) => (dispatch) => {
+  const newCaption = {
+    eId: eId,
+    id:id,
+    caption: caption,
+  };
+  setTimeout(() => {
+    dispatch(addCaption(newCaption));
+  }, 2000);
+};
+
+export const addCaption = (newCaption) => ({
+  type: ActionTypes.ADD_CAPTION,
+  id:newCaption.eId,
+  payload: {...newCaption},
 });

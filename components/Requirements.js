@@ -9,7 +9,6 @@ import {
   TextInput,
   Alert,
   Image,
-  
 } from "react-native";
 import { connect } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
@@ -33,12 +32,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { FontAwesome5 } from '@expo/vector-icons'; 
 import { SimpleLineIcons } from '@expo/vector-icons'; 
+import Amplify, { Auth } from "aws-amplify";
 
 const mapStateToProps = (state) => {
   return {
-    equipments: state.equipments,
+    // equipments: state.equipments,
     timestamps: state.timestamps,
-    notes: state.notes.notes,
+    // notes: state.notes.notes,
     projects: state.projects.projects,
     completed: state.completed,
     selectedImages: state.selectedImages,
@@ -72,7 +72,7 @@ class Requirements extends React.Component {
       selection: [],
     };
   }
-
+  
   componentDidMount() {
     this.getPermissionAsync();
   }
@@ -108,9 +108,7 @@ class Requirements extends React.Component {
     }
   };
 
-  static navigationOptions = {
-    title: "Requirements",
-  };
+
 
   handleDelete(eId) {
     this.props.deleteTimestamps(eId);
@@ -149,13 +147,39 @@ class Requirements extends React.Component {
     const project = this.props.projects.find(
       (item) => item.id === this.props.route.params.id
     );
-    let { image } = this.state;
-    let { video } = this.state;
     const { eId } = this.props.route.params;
     const timestamp = this.props.timestamps.find((item) => item.id === eId);
     const imageSet = this.props.selectedImages?.find((item) => item.id === eId);
     const images = imageSet?.images;
-
+    this.props.navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => alert("This is a button!")}
+          style={{
+            width: 140,
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+            borderColor: "#fff",
+            borderWidth: 1,
+            padding: 5,
+            borderRadius: 5,
+            marginRight: 20,
+          }}
+        >
+          <Icon
+            type="FontAwesome"
+            name="check"
+            style={{ fontSize: 15, color: "white", marginRight: 7 }}
+          />
+          <Text
+            style={{ color: "#fff", fontWeight: "bold", fontSize: 15, paddingTop:3,paddingBottom:3 }}
+          >
+            Update
+          </Text>
+        </TouchableOpacity>
+      ),
+    })
     var dur = 0;
     return (
       <ScrollView style={{ backgroundColor: "white" }}>
@@ -201,7 +225,7 @@ class Requirements extends React.Component {
           >
             <TouchableOpacity
               onPress={() =>
-                this.props.navigation.navigate("Images", { eId: eId })
+                this.props.navigation.navigate("Images", { eId: eId, type: "photo" })
               }
               style={styles.mediaButton}
             >
@@ -210,7 +234,9 @@ class Requirements extends React.Component {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={this._pickVideo}
+               onPress={() =>
+                this.props.navigation.navigate("Images", { eId: eId, type: "video" })
+              }
               style={styles.mediaButton}
             >
               <Feather name="video" size={20} color="black" />
@@ -233,14 +259,18 @@ class Requirements extends React.Component {
                 {images.map((obj) => (
                   <TouchableOpacity
                     onPress={() => {
-                      this.markSelected(obj.uri);
+                      Auth.currentAuthenticatedUser({
+                        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+                    }).then(user => console.log(user))
+                    .catch(err => console.log(err));
+                      this.markSelected(obj);
                     }}
                     style={{
                       // flex:1,
                       margin: 2,
                     }}
                   >
-                    {this.state.selection.includes(obj.uri) && (
+                    {this.state.selection.includes(obj) && (
                       <AntDesign
                         name="checkcircle"
                         size={24}
@@ -281,10 +311,10 @@ class Requirements extends React.Component {
                     },
                   ]}
                   onPress={() =>
-                    this.props.navigation.navigate("AddCaptions", { images: this.state.selection })
+                    this.props.navigation.navigate("AddCaptions", { images: this.state.selection, eId:eId })
                   }
                 >
-                  <Text style={styles.mediaButtonText}>Select Items</Text>
+                  <Text style={styles.mediaButtonText}>Edit Items</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -430,7 +460,7 @@ class Requirements extends React.Component {
           </View>
         </View>
 
-        <View style={{ margin: 20 }}>
+        {/* <View style={{ margin: 20 }}>
           <View
             style={{
               flexDirection: "row",
@@ -446,7 +476,7 @@ class Requirements extends React.Component {
               >
                 Notes from BBA
               </Text>
-              {/* <Text>{obj.date}</Text> */}
+               <Text>{obj.date}</Text> 
             </>
           </View>
           <Text style={{ marginTop: 20, color: "#616161" }}>
@@ -457,7 +487,7 @@ class Requirements extends React.Component {
             dolores. Perspiciatis harum itaque aperiam ipsum quisquam
             consectetur laborum veritatis, impedit reprehenderit.
           </Text>
-        </View>
+        </View> */}
 
         {this.props.notes?.map(
           (obj) =>
@@ -506,13 +536,13 @@ class Requirements extends React.Component {
                   >
                     <TouchableOpacity
                       style={{
-                        padding: 7,
+                        padding: 9,
                         borderRadius: 24,
                         backgroundColor: "#F4F4F4",
                       }}
                     >
                       {/* <FontAwesome5 name="pen-o" size={22} color="#0074B1" /> */}
-                      <SimpleLineIcons name="pencil" size={20} color="#0074B1" />
+                      <SimpleLineIcons name="pencil" size={18} color="#0074B1" />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={{
@@ -565,7 +595,7 @@ class Requirements extends React.Component {
                 borderWidth: 2,
                 borderColor: "#0074B1",
                 alignSelf: "center",
-                borderRadius: 4,
+                borderRadius: 5,
                 marginBottom: 15,
               }}
             />
@@ -581,7 +611,7 @@ class Requirements extends React.Component {
                 alignSelf: "center",
                 padding: 8,
                 backgroundColor: "black",
-                borderRadius: 3,
+                borderRadius: 5,
                 flexDirection: "row",
                 alignItems: "center",
                 width: 180,
@@ -603,7 +633,7 @@ class Requirements extends React.Component {
               alignSelf: "center",
               padding: 8,
               backgroundColor: "black",
-              borderRadius: 3,
+              borderRadius: 5,
               flexDirection: "row",
               alignItems: "center",
               width: 180,
@@ -706,7 +736,7 @@ const styles = StyleSheet.create({
     flex: 2,
     padding: 5,
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 5,
     borderColor: "lightgray",
     width: 100,
     alignSelf: "flex-start",
@@ -726,14 +756,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     margin: 10,
   },
-  button: {
-    marginTop: 20,
-    width: 200,
-    borderRadius: 10,
-    backgroundColor: "purple",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
+  // button: {
+  //   marginTop: 20,
+  //   width: 200,
+  //   borderRadius: 10,
+  //   backgroundColor: "purple",
+  //   justifyContent: "center",
+  //   alignSelf: "center",
+  // },
   buttonText: {
     color: "#fff",
   },
@@ -741,7 +771,7 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "row",
     backgroundColor: "#F4F4F4",
-    borderRadius: 3,
+    borderRadius: 5,
     justifyContent: "space-around",
     width: 150,
   },

@@ -1,80 +1,155 @@
 import React, { Component } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { connect } from "react-redux";
 import { Icon, Textarea } from "native-base";
+import { postCaption } from "../redux/ActionCreators";
+
+const mapStateToProps = (state) => {
+  return {
+    selectedImages: state.selectedImages,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  postCaption: (eId, caption, id) => dispatch(postCaption(eId, caption, id)),
+  deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
+});
 
 class AddCaptions extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showInput: false,
+      caption: "",
+    };
+  }
+
+  toggleInput() {
+    this.setState({
+      showInput: !this.state.showInput,
+    });
+  }
   render() {
     return (
-      <ScrollView style={{ backgroundColor:"#fff"}}>
-        {this.props.route.params.images.map((uri,i) => (
-          <View key={i} style={{ margin: 10, alignSelf: "center",marginBottom: 30}}>
-            <Image source={{ uri: uri }} style={{ width: 330, height: 260 }} />
-            <Textarea
-              //   onChangeText={(note) => this.setState({ note })}
-              rowSpan={4}
-              //   value={this.state.note}
-              bordered
-              placeholder="Add note"
-              style={{
-                width: 330,
-                borderWidth: 2,
-                borderColor: "#DADADA",
-                alignSelf: "center",
-                borderRadius: 4,
-                marginTop: 25,
-              }}
+      <ScrollView style={{ backgroundColor: "#fff" }}>
+        {this.props.route.params.images.map((obj, i) => (
+          <View
+            key={i}
+            style={{ margin: 10, alignSelf: "center", marginBottom: 30 }}
+          >
+            <Image
+              source={{ uri: obj.uri }}
+              style={{ width: 330, height: 260 }}
             />
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                paddingTop: 25,
-                paddingBottom: 5,
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  padding: 8,
-                  backgroundColor: "black",
-                  borderRadius: 3,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  width: 150,
-                  justifyContent: "center",
-                }}
-              >
-                <Icon
-                  type="FontAwesome"
-                  name="plus-circle"
-                  style={{ fontSize: 17, color: "white", marginRight: 10 }}
+            {obj.caption != "" && <Text>{obj.caption}</Text>}
+            {this.state.showInput && (
+              <View>
+                <Textarea
+                  onChangeText={(caption) => this.setState({ caption })}
+                  rowSpan={4}
+                  //   value={this.state.note}
+                  bordered
+                  placeholder="Add caption"
+                  style={{
+                    width: 330,
+                    borderWidth: 2,
+                    borderColor: "#DADADA",
+                    alignSelf: "center",
+                    borderRadius: 5,
+                    marginTop: 25,
+                    paddingLeft: 25,
+                    paddingTop: 15,
+                  }}
                 />
-                <Text
-                  style={{ fontSize: 17, fontWeight: "200", color: "white" }}
+                <TouchableOpacity
+                  style={{
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    // alignItems: "center",
+                    alignSelf: "center",
+                    width: 100,
+                    marginTop: 10,
+                    justifyContent: "center",
+                  }}
+                  onPress={() => {
+                    this.toggleInput();
+                    this.props.postCaption(
+                      this.props.route.params.eId,
+                      this.state.caption,
+                      obj.id
+                    );
+                  }}
                 >
-                  Add Caption
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
+                  <Text
+                    style={{ fontSize: 17, fontWeight: "200", color: "white" }}
+                  >
+                    Save
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {!this.state.showInput && (
+              <View
                 style={{
-                  padding: 8,
-                  borderRadius: 3,
                   flexDirection: "row",
-                  alignItems: "center",
-                  width: 150,
-                  justifyContent: "center",
-                  borderWidth: 2,
-                  borderColor: "#DADADA",
+                  justifyContent: "space-between",
+                  paddingTop: 25,
+                  paddingBottom: 5,
                 }}
               >
-                <Text
-                  style={{ fontSize: 17, fontWeight: "200", color: "black" }}
+                <TouchableOpacity
+                  style={{
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 150,
+                    justifyContent: "center",
+                  }}
+                  onPress={() => this.toggleInput()}
                 >
-                  Delete Item
-                </Text>
-              </TouchableOpacity>
-            </View>
+                  <Icon
+                    type="FontAwesome"
+                    name="plus-circle"
+                    style={{ fontSize: 17, color: "white", marginRight: 10 }}
+                  />
+                  <Text
+                    style={{ fontSize: 17, fontWeight: "200", color: "white" }}
+                  >
+                    Add Caption
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    padding: 8,
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 150,
+                    justifyContent: "center",
+                    borderWidth: 2,
+                    borderColor: "#DADADA",
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 17, fontWeight: "200", color: "black" }}
+                  >
+                    Delete Item
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
@@ -87,7 +162,7 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "row",
     backgroundColor: "#F4F4F4",
-    borderRadius: 3,
+    borderRadius: 5,
     justifyContent: "space-around",
     width: 150,
   },
@@ -96,8 +171,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = (state) => ({});
 
-const mapDispatchToProps = {};
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddCaptions);

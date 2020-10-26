@@ -26,7 +26,7 @@ export const selectedImages = (state = [], action) => {
       index = state.findIndex((x) => x.id === action.id);
       let images = state[index].images;
       let newImages = images.filter(
-        (image) => !action.payload.includes(image.uri)
+        (image) => !action.payload.includes(image)
       );
       return state.map((obj, i) =>
         i === index
@@ -36,6 +36,21 @@ export const selectedImages = (state = [], action) => {
             }
           : obj
       );
+
+    case ActionTypes.ADD_CAPTION:
+      index = state.findIndex((x) => x.id === action.id);
+      let Images = state[index].images;
+      let i = Images.findIndex((x) => x.id === action.payload.id);
+      // console.log(i);
+      Images[i].caption=action.payload.caption
+      return state.map((obj, i) =>
+      i === index
+        ? {
+            ...obj,
+            images: Images,
+          }
+        : obj
+    );
 
     default:
       return state;

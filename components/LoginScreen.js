@@ -45,6 +45,7 @@ export default class LoginScreen extends React.Component {
         await Auth.signIn(email, password);
         console.log(" Success");
         updateAuthState("loggedIn");
+        console.log(Auth.currentUserInfo());
       } catch (error) {
         console.log(" Error signing in...", error);
       }
@@ -141,6 +142,7 @@ export default class LoginScreen extends React.Component {
                   flexDirection: "row",
                   alignItems: "center",
                   marginTop: 20,
+
                 }}
               >
                 <CheckBox
@@ -151,6 +153,7 @@ export default class LoginScreen extends React.Component {
                     backgroundColor: "#fff",
                     marginRight: 20,
                     borderRadius: 4,
+                    marginLeft: -12,
                   }}
                 />
                 <Text
@@ -207,13 +210,13 @@ const styles = StyleSheet.create({
   logoContainer: {
     // alignItems: "center",
     marginTop: 139,
-    marginLeft: 43,
+    marginLeft: 30,
     marginBottom: 29,
   },
   nameContainer: {
     width: 220,
     height: 150,
-    marginLeft: 43,
+    marginLeft: 30,
   },
   contentContainer: {
     width: 300,
@@ -225,6 +228,7 @@ const styles = StyleSheet.create({
   },
   form: {
     margin: 30,
+    // marginLeft: 30,
     marginBottom: 30,
   },
   check: {

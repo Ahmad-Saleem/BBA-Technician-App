@@ -15,3 +15,4 @@ export const NOTES_FAILED = 'NOTES_FAILED';
 export const ADD_IMAGES = "ADD_IMAGES";
 export const UPDATE_IMAGES = "UPDATE_IMAGES";
 export const DELETE_IMAGES = "DELETE_IMAGES";
+export const ADD_CAPTION = "ADD_CAPTION";

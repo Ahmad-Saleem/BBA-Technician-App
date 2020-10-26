@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Linking } from "react-native";
 import { Icon } from "native-base";
 import { ScrollView } from "react-native-gesture-handler";
 import ProjectCard from "./ProjectCard";
@@ -53,13 +53,21 @@ class HomeScreen extends React.Component {
               Check the projects here
             </Text>
             </View>
-            <MaterialCommunityIcons name="tooltip-text-outline" size={24} color="#0074B1" />
+            <TouchableOpacity onPress={() => Linking.openURL(`sms:8094050767`)}>
+              <MaterialCommunityIcons
+                name="tooltip-text-outline"
+                size={28}
+                color="#0074B1"
+              />
+            </TouchableOpacity>
           </View>
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              margin: 20,
+              margin: 10,
+              marginTop: 20,
+              marginBottom: 20,
             }}
           >
             <Text style={{ fontSize: 23, fontWeight: "500" }}>Projects</Text>
@@ -68,10 +76,12 @@ class HomeScreen extends React.Component {
               style={{
                 backgroundColor:"#F4F4F4",
                 flexDirection: "row",
-                justifyContent: "space-between",
+                justifyContent: "center",
                 alignItems: "center",
-                padding: 6,
-                borderRadius: 4,
+                paddingTop: 6,
+                paddingBottom: 6,
+                borderRadius: 5,
+                width:96
               }}
             >
               <MaterialCommunityIcons name="check-all" size={20} color="#0074B1" style={{ marginRight: 10 }} />
@@ -80,7 +90,8 @@ class HomeScreen extends React.Component {
                 name="check"
                 style={{ fontSize: 20, color: "#0074B1", marginRight: 10 }}
               /> */}
-              <Text>1/{this.props.projects.projects.length}</Text>
+              <Text>0
+                /{this.props.projects.projects.length}</Text>
             </View>
           </View>
 
@@ -112,8 +123,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
     flexDirection:"row",
-    paddingLeft:20,
-    paddingRight:20,
+    paddingLeft:10,
+    paddingRight:10,
   },
 });
 

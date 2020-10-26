@@ -23,24 +23,24 @@ import {
 const mapStateToProps = (state) => {
   return {
     projects: state.projects,
-    equipments: state.equipments,
-    notes: state.notes,
+    // equipments: state.equipments,
+    // notes: state.notes,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
   fetchProjects: () => dispatch(fetchProjects()),
-  fetchEquipments: () => dispatch(fetchEquipments()),
-  fetchNotes: () => dispatch(fetchNotes()),
+  // fetchEquipments: () => dispatch(fetchEquipments()),
+  // fetchNotes: () => dispatch(fetchNotes()),
 });
 
 const Stack = createStackNavigator();
 
 class Main extends React.Component {
   componentDidMount() {
-    this.props.fetchEquipments();
+    // this.props.fetchEquipments();
     this.props.fetchProjects();
-    this.props.fetchNotes();
+    // this.props.fetchNotes();
   }
 
   async signOut() {
