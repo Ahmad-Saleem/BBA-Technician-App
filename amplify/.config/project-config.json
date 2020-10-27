@@ -1,14 +1,14 @@
 {
-  "projectName": "bbawebapp",
+  "projectName": "bba",
   "version": "3.0",
   "frontend": "javascript",
   "javascript": {
-    "framework": "react-native",
+    "framework": "react",
     "config": {
-      "SourceDir": "/",
-      "DistributionDir": "/",
-      "BuildCommand": "npm build",
-      "StartCommand": "npm start"
+      "SourceDir": "src",
+      "DistributionDir": "build",
+      "BuildCommand": "npm run-script build",
+      "StartCommand": "npm run-script start"
     }
   },
   "providers": [

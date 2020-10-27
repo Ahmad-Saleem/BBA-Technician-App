@@ -1,8 +1,8 @@
 {
-    "identityPoolName": "bbawebapp6fcbc956_identitypool_6fcbc956",
+    "identityPoolName": "bba1e41bd50_identitypool_1e41bd50",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "bbaweb6fcbc956",
-    "userPoolName": "bbawebapp6fcbc956_userpool_6fcbc956",
+    "resourceNameTruncated": "bba1e41bd50",
+    "userPoolName": "bba1e41bd50_userpool_1e41bd50",
     "autoVerifiedAttributes": [
         "email"
     ],
@@ -28,10 +28,10 @@
     "userpoolClientReadAttributes": [
         "email"
     ],
-    "userpoolClientLambdaRole": "bbaweb6fcbc956_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "bba1e41e41bd50_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "6fcbc956",
-    "resourceName": "bbawebapp6fcbc956",
+    "sharedId": "1e41bd50",
+    "resourceName": "bba1e41bd50",
     "authSelections": "identityPoolAndUserPool",
     "authRoleArn": {
         "Fn::GetAtt": [

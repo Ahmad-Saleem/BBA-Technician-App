@@ -1,20 +1,26 @@
 {
-  "dev": {
-    "awscloudformation": {
-      "AuthRoleName": "amplify-bbawebapp-dev-00748-authRole",
-      "UnauthRoleArn": "arn:aws:iam::207094538669:role/amplify-bbawebapp-dev-00748-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::207094538669:role/amplify-bbawebapp-dev-00748-authRole",
-      "Region": "us-east-2",
-      "DeploymentBucketName": "amplify-bbawebapp-dev-00748-deployment",
-      "UnauthRoleName": "amplify-bbawebapp-dev-00748-unauthRole",
-      "StackName": "amplify-bbawebapp-dev-00748",
-      "StackId": "arn:aws:cloudformation:us-east-2:207094538669:stack/amplify-bbawebapp-dev-00748/34bda8e0-123a-11eb-a4eb-0656208217bc",
-      "AmplifyAppId": "dmpky9ywgh7vt"
-    },
-    "categories": {
-      "auth": {
-        "bbawebapp6fcbc956": {}
-      }
+    "staging": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-bba-staging-202549-authRole",
+            "UnauthRoleArn": "arn:aws:iam::207094538669:role/amplify-bba-staging-202549-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::207094538669:role/amplify-bba-staging-202549-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-bba-staging-202549-deployment",
+            "UnauthRoleName": "amplify-bba-staging-202549-unauthRole",
+            "StackName": "amplify-bba-staging-202549",
+            "StackId": "arn:aws:cloudformation:us-east-2:207094538669:stack/amplify-bba-staging-202549/714143a0-17c9-11eb-9c85-0a90e79d42e4",
+            "AmplifyAppId": "dmo9kqk19pmlm"
+        },
+        "categories": {
+            "auth": {
+                "bba1e41bd50": {}
+            },
+            "hosting": {
+                "amplifyhosting": {
+                    "appId": "dmo9kqk19pmlm",
+                    "type": "manual"
+                }
+            }
+        }
     }
-  }
 }
