@@ -11,6 +11,10 @@
     "bba": {
       "service": "S3",
       "providerPlugin": "awscloudformation"
+    },
+    "techdata": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation"
     }
   },
   "hosting": {

@@ -1,26 +1,30 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Linking } from "react-native";
-import { Icon } from "native-base";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import ProjectCard from "./ProjectCard";
 import { connect } from "react-redux";
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { baseUrl } from "../shared/baseUrl";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Loading } from "./LoadingComponent";
-
 
 const mapStateToProps = (state) => {
   return {
-    projects: state.projects,
+    user: state.user,
   };
 };
 
 class HomeScreen extends React.Component {
   render() {
-    let projects = this.props.projects.projects;
+    let projects = this.props.user.user.assigned_projects_as_technician;
     let projectlist = [];
-    projectlist = projects.map((project) => (
+
+    projectlist = projects?.map((project) => (
       <TouchableOpacity
         key={project.id}
         onPress={() =>
@@ -29,29 +33,28 @@ class HomeScreen extends React.Component {
           })
         }
       >
-        <ProjectCard
-          projId={project.id}
-        />
+        <ProjectCard projId={project.id} />
       </TouchableOpacity>
     ));
-    if (this.props.projects.isLoading) {
+
+    if (this.props.user.isLoading) {
       return <Loading />;
-    } else if (this.props.projects.errMess) {
+    } else if (this.props.user.errMess) {
       return (
         <View>
-          <Text>{this.props.projects.errMess}</Text>
+          <Text>{this.props.user.errMess}</Text>
         </View>
       );
     } else {
       return (
-        <ScrollView style={{backgroundColor:"#fff"}}>
+        <ScrollView style={{ backgroundColor: "#fff" }}>
           <StatusBar style="light" />
           <View style={styles.pcontact}>
             <View>
-            <Text style={{ fontSize: 25 }}>Hello, John Doe</Text>
-            <Text style={{ fontSize: 18, color:"#616161" }}>
-              Check the projects here
-            </Text>
+              <Text style={{ fontSize: 25 }}>Hello, {this.props.user.user.first_name+" "+this.props.user.user.last_name}</Text>
+              <Text style={{ fontSize: 18, color: "#616161" }}>
+                Check the projects here
+              </Text>
             </View>
             <TouchableOpacity onPress={() => Linking.openURL(`sms:8094050767`)}>
               <MaterialCommunityIcons
@@ -74,28 +77,31 @@ class HomeScreen extends React.Component {
 
             <View
               style={{
-                backgroundColor:"#F4F4F4",
+                backgroundColor: "#F4F4F4",
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
                 paddingTop: 6,
                 paddingBottom: 6,
                 borderRadius: 5,
-                width:96
+                width: 96,
               }}
             >
-              <MaterialCommunityIcons name="check-all" size={20} color="#0074B1" style={{ marginRight: 10 }} />
+              <MaterialCommunityIcons
+                name="check-all"
+                size={20}
+                color="#0074B1"
+                style={{ marginRight: 10 }}
+              />
               {/* <Icon
                 type="FontAwesome"
                 name="check"
                 style={{ fontSize: 20, color: "#0074B1", marginRight: 10 }}
               /> */}
-              <Text>0
-                /{this.props.projects.projects.length}</Text>
+              <Text>0/{projects.length}</Text>
             </View>
           </View>
 
-          
           {projectlist}
         </ScrollView>
       );
@@ -119,12 +125,12 @@ const styles = StyleSheet.create({
   pcontact: {
     height: 100,
     justifyContent: "space-between",
-    alignItems:"center",
+    alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
-    flexDirection:"row",
-    paddingLeft:10,
-    paddingRight:10,
+    flexDirection: "row",
+    paddingLeft: 10,
+    paddingRight: 10,
   },
 });
 

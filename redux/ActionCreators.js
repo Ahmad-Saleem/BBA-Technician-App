@@ -1,7 +1,6 @@
 import * as ActionTypes from "./ActionTypes";
 // import { setContext } from "apollo-link-context";
 import { setContext } from "@apollo/client/link/context";
-import { baseUrl } from "../shared/baseUrl";
 import {
   ApolloClient,
   InMemoryCache,
@@ -9,6 +8,7 @@ import {
   createHttpLink,
 } from "@apollo/client";
 import { Auth } from "aws-amplify";
+import { executeSync } from "graphql";
 
 const httpLink = createHttpLink({
   uri: "https://bba-server.herokuapp.com/graphql",
@@ -37,96 +37,59 @@ const client = new ApolloClient({
   },
 });
 
-// export const fetchEquipments = () => (dispatch) => {
-//   return fetch(baseUrl + "equipments")
-//     .then(
-//       (response) => {
-//         if (response.ok) {
-//           return response;
-//         } else {
-//           var error = new Error(
-//             "Error " + response.status + ": " + response.statusText
-//           );
-//           error.response = response;
-//           throw error;
-//         }
-//       },
-//       (error) => {
-//         var errmess = new Error(error.message);
-//         throw errmess;
-//       }
-//     )
-//     .then((response) => response.json())
-//     .then((equipments) => dispatch(addEquipments(equipments)))
-//     .catch((error) => dispatch(equipmentsFailed(error.message)));
-// };
+export const fetchUser = () => async (dispatch) => {
+  dispatch(userLoading());
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  // const myId = user.attributes["custom:userId"]
 
-// export const equipmentsFailed = (errmess) => ({
-//   type: ActionTypes.EQUIPMENTS_FAILED,
-//   payload: errmess,
-// });
-
-// export const addEquipments = (equipments) => ({
-//   type: ActionTypes.ADD_EQUIPMENTS,
-//   payload: equipments,
-// });
-
-// export const fetchProjects = () => (dispatch) => {
-//   dispatch(projectsLoading());
-
-//   return fetch(baseUrl + "projects")
-//     .then(
-//       (response) => {
-//         if (response.ok) {
-//           return response;
-//         } else {
-//           var error = new Error(
-//             "Error " + response.status + ": " + response.statusText
-//           );
-//           error.response = response;
-//           throw error;
-//         }
-//       },
-//       (error) => {
-//         var errmess = new Error(error.message);
-//         throw errmess;
-//       }
-//     )
-//     .then((response) => response.json())
-//     .then((projects) => dispatch(addProjects(projects)))
-//     .catch((error) => dispatch(projectsFailed(error.message)));
-// };
-
-export const fetchProjects = () => (dispatch) => {
-  dispatch(projectsLoading());
- 
   return (
     client
       .query({
         query: gql`
           query {
-            projects {
+            user(id: ${myId}){
               id
-              project_name
-              start_date
-              close_date
-              notes {
+              first_name
+              last_name
+              assigned_projects_as_technician {
                 id
-                message
-                created_by {
-                  first_name
+                project_name
+                start_date
+                close_date
+                notes {
+                  id
+                  message
+                  created_by {
+                    id
+                    first_name
+                    last_name
+                  }
+                  created_at
                 }
-                created_at
-              }
-              location {
-                address
-                location_name
-                city
-                state
-              }
-              equipments {
-                id
-                building
+                location {
+                  address
+                  location_name
+                  city
+                  state
+                }
+                equipments {
+                  id
+                  building
+                  notes {
+                    id
+                    message
+                    created_by {
+                      id
+                      first_name
+                      last_name
+                    }
+                    created_at
+                  }
+                }
               }
             }
           }
@@ -150,23 +113,23 @@ export const fetchProjects = () => (dispatch) => {
       //   }
       // )
       // .then((response) => response.json())
-      .then(({ data }) => dispatch(addProjects(data.projects)))
-      .catch((error) => dispatch(projectsFailed(error.message)))
+      .then(({ data }) => dispatch(addUser(data.user)))
+      .catch((error) => dispatch(userFailed(error.message)))
   );
 };
 
-export const projectsLoading = () => ({
-  type: ActionTypes.PROJECTS_LOADING,
+export const userLoading = () => ({
+  type: ActionTypes.USER_LOADING,
 });
 
-export const projectsFailed = (errmess) => ({
-  type: ActionTypes.PROJECTS_FAILED,
+export const userFailed = (errmess) => ({
+  type: ActionTypes.USER_FAILED,
   payload: errmess,
 });
 
-export const addProjects = (projects) => ({
-  type: ActionTypes.ADD_PROJECTS,
-  payload: projects,
+export const addUser = (user) => ({
+  type: ActionTypes.ADD_USER,
+  payload: user,
 });
 
 export const postCompleted = (eId) => (dispatch) => {
@@ -216,9 +179,9 @@ export const deleteTimestamps = (id) => ({
 });
 
 export const postImages = (eId, images) => (dispatch) => {
-  let newImages=[...images]
-  for(let i=0;i<newImages.length;i++){
-    newImages[i].caption=""
+  let newImages = [...images];
+  for (let i = 0; i < newImages.length; i++) {
+    newImages[i].caption = "";
   }
   const newImageSet = {
     id: eId,
@@ -245,16 +208,73 @@ export const deleteImages = (eId, images) => ({
   payload: images,
 });
 
-export const postNote = (projId, note) => (dispatch) => {
-  const newNote = {
-    projId: projId,
-    // author: author,
-    note: note,
-  };
-  newNote.date = new Date().toISOString();
-  setTimeout(() => {
-    dispatch(addNote(newNote));
-  }, 2000);
+export const postNote = (projId, note) => async (dispatch) => {
+  // const newNote = {
+  //   projId: projId,
+  //   // author: author,
+  //   note: note,
+  // };
+  // newNote.date = new Date().toISOString();
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  const request = '"' + note + '"';
+
+  client.mutate({
+    mutation: gql`
+    mutation {
+      createNote(input: {
+        project_id:${projId}
+        created_by:${myId},
+        message:${request},
+      })
+      {
+        id
+      }
+    }
+  `,
+  });
+  // setTimeout(() => {
+  //   dispatch(addNote(newNote));
+  // }, 2000);
+};
+
+export const postEquipNote = (projId, eId, note) => async (dispatch) => {
+  // const newNote = {
+  //   projId: projId,
+  //   // author: author,
+  //   note: note,
+  // };
+  // newNote.date = new Date().toISOString();
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  const request = '"' + note + '"';
+
+  client
+    .mutate({
+      mutation: gql`
+    mutation {
+      createNote(input: {
+        project_id:${projId},
+        created_by:${myId},
+        message:${request},
+        equipment:${eId}
+      })
+      {
+        id
+      }
+    }
+  `,
+    })
+    .then(({ result }) => console.log(result));
+  // setTimeout(() => {
+  //   dispatch(addNote(newNote));
+  // }, 2000);
 };
 
 export const addNote = (newNote) => ({
@@ -262,49 +282,50 @@ export const addNote = (newNote) => ({
   payload: newNote,
 });
 
-export const fetchNotes = () => (dispatch) => {
-  return fetch(baseUrl + "notes")
-    .then(
-      (response) => {
-        if (response.ok) {
-          return response;
-        } else {
-          var error = new Error(
-            "Error " + response.status + ": " + response.statusText
-          );
-          error.response = response;
-          throw error;
-        }
-      },
-      (error) => {
-        var errmess = new Error(error.message);
-        throw errmess;
+export const postRequest = async (projId, note) => {
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  const request = '"' + note + '"';
+
+  client.mutate({
+    mutation: gql`
+    mutation {
+      createNote(input: {
+        project_id:${projId}
+        created_by:${myId},
+        message:${request},
+        labels: [CHANGE_REQUEST]
+      })
+      {
+        id
       }
-    )
-    .then((response) => response.json())
-    .then((notes) => dispatch(addNotes(notes)))
-    .catch((error) => dispatch(notesFailed(error.message)));
+    }
+  `,
+  });
 };
 
-export const notesFailed = (errmess) => ({
-  type: ActionTypes.COMMENTS_FAILED,
-  payload: errmess,
-});
-
-export const addNotes = (notes) => ({
-  type: ActionTypes.ADD_NOTES,
-  payload: notes,
-});
-
-export const deleteNote = (id) => ({
-  type: ActionTypes.DELETE_NOTE,
-  payload: id,
-});
+export const deleteNote = (id) => {
+  client
+    .mutate({
+      mutation: gql`
+    mutation{
+      deleteNote(where:{id:${id}}){
+        id
+      }
+    }
+  `,
+    })
+    .then(({ result }) => console.log(result.deleteNote));
+  console.log("note deleted");
+};
 
 export const postCaption = (eId, caption, id) => (dispatch) => {
   const newCaption = {
     eId: eId,
-    id:id,
+    id: id,
     caption: caption,
   };
   setTimeout(() => {
@@ -314,6 +335,121 @@ export const postCaption = (eId, caption, id) => (dispatch) => {
 
 export const addCaption = (newCaption) => ({
   type: ActionTypes.ADD_CAPTION,
-  id:newCaption.eId,
-  payload: {...newCaption},
+  id: newCaption.eId,
+  payload: { ...newCaption },
 });
+
+export const uploadToStorage = (preread, postread, eId, images) => (
+  dispatch
+) => {
+  console.log(images);
+  for (let index = 0; index < images.length; index++) {
+    const { obj } = images[index];
+    async () => {
+      try {
+        const response = await fetch(obj.uri);
+
+        const blob = await response.blob();
+
+        Storage.put(obj.filename, blob, {
+          contentType: "image/jpeg",
+        }).then((result) => console.log(result));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+  }
+
+  setTimeout(() => {
+    console.log("storage done");
+    dispatch(uploadData(preread, postread, eId, images));
+  }, 2000);
+};
+export const uploadData = (preread, postread, eId, images) => async (
+  dispatch
+) => {
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  const dataId = await client
+    .mutate({
+      mutation: gql`
+        mutation {
+          createData(
+            input: {
+              created_by: ${myId}
+              notes: "hey"
+              pre_read: ${preread}
+              post_read: ${postread}
+            }
+          ) {
+            id
+            pre_read
+            post_read
+          }
+        }
+      `,
+    })
+    .then(({ data }) => {
+      console.log(data.createData.id);
+      return data.createData.id;
+    });
+
+  setTimeout(() => {
+    console.log("data creation done");
+    dispatch(uploadImages(eId, myId, dataId, images));
+  }, 6000);
+};
+export const uploadImages = (eId, myId, dataId, images) => (dispatch) => {
+  console.log(eId, myId, dataId, images);
+  for (let index = 0; index < images.length; index++) {
+    const { caption, filename, uri } = images[index];
+    const name = '"' + filename + '"';
+    const urii = '"' + uri + '"';
+    const captionn = '"' + caption + '"';
+    console.log(name);
+    client.mutate({
+      mutation: gql`
+          mutation {
+            createFile(
+              input: {
+                notes: ${captionn},
+                created_by : ${myId},
+                name:${name},
+                data : ${dataId}, 
+                path : ${urii}
+              }
+              ) {
+              id
+            }
+          }
+        `,
+    });
+  }
+
+  setTimeout(() => {
+    dispatch(updateEquipment(eId, dataId));
+  }, 2000);
+};
+
+export const updateEquipment = (eId, dataId) => {
+  console.log(eId, dataId);
+  client
+    .mutate({
+      mutation: gql`
+    mutation {
+      updateEquipment(
+        where: {id:${eId}}
+        data: {data: ${dataId}}
+      ) {
+        id
+        }
+      }
+  `,
+    })
+    .then(({ data }) => {
+      console.log(data.updateEquipment.id);
+    });
+};

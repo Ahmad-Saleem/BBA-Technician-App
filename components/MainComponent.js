@@ -1,11 +1,8 @@
 import { StatusBar } from "expo-status-bar";
-
 import React from "react";
 import { Auth } from "aws-amplify";
 import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./LoginScreen";
 import HomeScreen from "./HomeScreen";
 import ProjectScreen from "./ProjectScreen";
 import SelectImages from "./SelectImages";
@@ -13,23 +10,18 @@ import Requirements from "./Requirements";
 import AddCaptions from "./AddCaptions";
 import { connect } from "react-redux";
 import { Icon } from "native-base";
-import {
-  fetchProjects,
-  fetchEquipments,
-  fetchNotes,
-} from "../redux/ActionCreators";
-
+import { fetchUser } from "../redux/ActionCreators";
 
 const mapStateToProps = (state) => {
   return {
-    projects: state.projects,
+    user: state.user,
     // equipments: state.equipments,
     // notes: state.notes,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  fetchProjects: () => dispatch(fetchProjects()),
+  fetchUser: () => dispatch(fetchUser()),
   // fetchEquipments: () => dispatch(fetchEquipments()),
   // fetchNotes: () => dispatch(fetchNotes()),
 });
@@ -39,7 +31,7 @@ const Stack = createStackNavigator();
 class Main extends React.Component {
   componentDidMount() {
     // this.props.fetchEquipments();
-    this.props.fetchProjects();
+    this.props.fetchUser();
     // this.props.fetchNotes();
   }
 
@@ -70,7 +62,6 @@ class Main extends React.Component {
             headerStyle: { backgroundColor: "#000" },
             headerTintColor: "#fff",
             headerTitleStyle: { color: "#fff" },
-            
           }}
         />
         <Stack.Screen
@@ -78,7 +69,7 @@ class Main extends React.Component {
           component={Requirements}
           options={{
             headerStyle: { backgroundColor: "#000" },
-            headerTitleContainerStyle: { marginLeft:-25 },
+            headerTitleContainerStyle: { marginLeft: -25 },
             headerTintColor: "#fff",
             headerTitleStyle: { color: "#fff" },
             headerRight: () => (
@@ -102,7 +93,13 @@ class Main extends React.Component {
                   style={{ fontSize: 15, color: "white", marginRight: 7 }}
                 />
                 <Text
-                  style={{ color: "#fff", fontWeight: "bold", fontSize: 15, paddingTop:3,paddingBottom:3 }}
+                  style={{
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: 15,
+                    paddingTop: 3,
+                    paddingBottom: 3,
+                  }}
                 >
                   Update
                 </Text>
@@ -117,7 +114,6 @@ class Main extends React.Component {
             headerStyle: { backgroundColor: "#000" },
             headerTintColor: "#fff",
             headerTitleStyle: { color: "#fff" },
-            
           }}
         />
         <Stack.Screen
@@ -148,7 +144,13 @@ class Main extends React.Component {
                   style={{ fontSize: 20, color: "white", marginRight: 10 }}
                 />
                 <Text
-                  style={{ color: "#fff", fontWeight: "bold", fontSize: 15, paddingTop:3,paddingBottom:3 }}
+                  style={{
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: 15,
+                    paddingTop: 3,
+                    paddingBottom: 3,
+                  }}
                 >
                   Update
                 </Text>

@@ -3,20 +3,20 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Icon } from "native-base";
 import { connect } from "react-redux";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
 const mapStateToProps = (state) => {
   return {
     // equipments: state.equipments,
-    projects: state.projects.projects,
+    projects: state.user.user.assigned_projects_as_technician,
     completed: state.completed,
     timestamps: state.timestamps,
   };
 };
 
 class ProjectCard extends React.Component {
+
   render() {
-    const project = this.props.projects.find(
+    const project = this.props.projects?.find(
       (item) => item.id === this.props.projId
     );
     const equipments = project.equipments

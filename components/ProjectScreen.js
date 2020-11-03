@@ -14,18 +14,20 @@ import { BaseRouter } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { connect } from "react-redux";
-import { Form, Textarea, Button, Icon } from "native-base";
-import { postNote, deleteNote } from "../redux/ActionCreators";
+import { Form, Textarea, Icon } from "native-base";
+import { postNote, deleteNote, postRequest, fetchUser } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import { Auth } from "aws-amplify";
 
 const mapStateToProps = (state) => {
   return {
     // equipments: state.equipments,
     // notes: state.notes.notes,
-    projects: state.projects.projects,
+    user: state.user.user,
+    projects: state.user.user.assigned_projects_as_technician,
     completed: state.completed,
     timestamps: state.timestamps,
     selectedImages: state.selectedImages,
@@ -33,8 +35,10 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  postNote: (projId, note) => dispatch(postNote(projId, note)),
+  postNote: (projId, note, author) => dispatch(postNote(projId, note, author)),
+  postRequest: (projId, note) => dispatch(postRequest(projId, note)),
   deleteNote: (id) => dispatch(deleteNote(id)),
+  fetchUser: () => dispatch(fetchUser()),
 });
 
 class ProjectScreen extends React.Component {
@@ -43,11 +47,12 @@ class ProjectScreen extends React.Component {
     this.state = {
       note: "",
       toggleInput: false,
+      toggleChange: false,
     };
   }
 
   render() {
-    const project = this.props.projects.find(
+    const project = this.props.projects?.find(
       (item) => item.id === this.props.route.params.id
     );
     // const equipments = this.props.equipments.equipments.filter(
@@ -133,7 +138,10 @@ class ProjectScreen extends React.Component {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.mediaButton, { padding: 10, fontSize: 14 }]}
+              style={[
+                styles.mediaButton,
+                { padding: 10, fontSize: 14, backgroundColor: "#f4f4f4" },
+              ]}
             >
               <Icon
                 type="FontAwesome"
@@ -187,7 +195,7 @@ class ProjectScreen extends React.Component {
                 color="black"
                 style={{ marginRight: 10 }}
               />
-              <Text style={{ fontSize: 14 }}>6 notes</Text>
+              <Text style={{ fontSize: 14 }}>{item.notes.length} notes</Text>
             </View>
           </View>
 
@@ -227,8 +235,13 @@ class ProjectScreen extends React.Component {
         Linking.openURL(`http://maps.google.com/?daddr=${daddr}`);
       }
     };
+
     return (
-      <ScrollView pagingEnabled={true}>
+      <ScrollView
+        style={{
+          backgroundColor: "#fff",
+        }}
+      >
         <View
           style={[
             styles.pcontact,
@@ -322,9 +335,8 @@ class ProjectScreen extends React.Component {
             style={{
               margin: 20,
               marginTop: 28,
-              borderBottomWidth: 1,
-              borderBottomColor: "lightgray",
-              paddingBottom: 30,
+
+              paddingBottom: 17,
             }}
           >
             <Text
@@ -345,6 +357,81 @@ class ProjectScreen extends React.Component {
               consectetur laborum veritatis, impedit reprehenderit.
             </Text>
           </View>
+          {this.state.toggleChange && (
+            <Form style={{ marginBottom: 10 }}>
+              <Textarea
+                onChangeText={(note) => this.setState({ note })}
+                rowSpan={4}
+                value={this.state.note}
+                bordered
+                placeholder="Add request"
+                style={{
+                  width: 300,
+                  borderWidth: 2,
+                  borderColor: "#0074B1",
+                  alignSelf: "center",
+                  borderRadius: 4,
+                  marginBottom: 15,
+                  paddingLeft: 25,
+                  paddingTop: 15,
+                }}
+              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.postRequest(
+                      this.props.route.params.id,
+                      this.state.note
+                    );
+                    this.setState({ toggleChange: false, note: "" });
+                  }}
+                  style={{
+                    alignSelf: "center",
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 100,
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 20, fontWeight: "200", color: "white" }}
+                  >
+                    Submit
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setState({ toggleChange: false, note: "" });
+                  }}
+                  style={{
+                    padding: 8,
+                    backgroundColor: "gray",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 100,
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 20, fontWeight: "200", color: "white" }}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Form>
+          )}
 
           {this.state.toggleInput && (
             <Form style={{ marginBottom: 10 }}>
@@ -377,8 +464,14 @@ class ProjectScreen extends React.Component {
                     this.props.postNote(
                       this.props.route.params.id,
                       this.state.note
+                      // this.props.user.user.first_name
                     );
-                    this.setState({ toggleInput: false });
+                    this.setState({ toggleInput: false, note: "" });
+                    // this.props.fetchUser()
+                    // setTimeout(() => {
+                    //   // console.log("storage done");
+                    //   this.props.fetchUser()
+                    // }, 3000);
                   }}
                   style={{
                     alignSelf: "center",
@@ -400,7 +493,7 @@ class ProjectScreen extends React.Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    this.setState({ toggleInput: false });
+                    this.setState({ toggleInput: false, note: "" });
                   }}
                   style={{
                     padding: 8,
@@ -421,34 +514,82 @@ class ProjectScreen extends React.Component {
               </View>
             </Form>
           )}
-          {!this.state.toggleInput && (
-            <TouchableOpacity
-              onPress={() => {
-                this.setState({ toggleInput: true });
-              }}
-              style={{
-                alignSelf: "center",
-                padding: 8,
-                backgroundColor: "black",
-                borderRadius: 5,
-                flexDirection: "row",
-                alignItems: "center",
-                width: 180,
-                justifyContent: "center",
-                marginBottom: 30,
-                marginTop: 30,
-              }}
-            >
-              <Icon
-                type="FontAwesome"
-                name="plus-circle"
-                style={{ fontSize: 20, color: "white", marginRight: 10 }}
-              />
-              <Text style={{ fontSize: 20, fontWeight: "200", color: "white" }}>
-                Add Note
-              </Text>
-            </TouchableOpacity>
-          )}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          >
+            {!this.state.toggleInput && (
+              <TouchableOpacity
+                onPress={() => {
+                  this.setState({ toggleInput: true });
+                }}
+                style={{
+                  alignSelf: "center",
+                  padding: 8,
+                  backgroundColor: "black",
+                  borderRadius: 5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  width: 150,
+                  justifyContent: "center",
+                  marginBottom: 5,
+                  // marginTop: 30,
+                }}
+              >
+                <Icon
+                  type="FontAwesome"
+                  name="plus-circle"
+                  style={{ fontSize: 15, color: "white", marginRight: 10 }}
+                />
+                <Text
+                  style={{ fontSize: 15, fontWeight: "200", color: "white" }}
+                >
+                  Add Note
+                </Text>
+              </TouchableOpacity>
+            )}
+            {!this.state.toggleInput && (
+              <TouchableOpacity
+                onPress={() => {
+                  this.setState({ toggleInput: true });
+                }}
+                style={{
+                  alignSelf: "center",
+                  padding: 8,
+                  backgroundColor: "black",
+                  borderRadius: 5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  width: 150,
+                  justifyContent: "center",
+                  marginBottom: 5,
+                  // marginTop: 30,
+                }}
+              >
+                {/* <Icon
+                  type="FontAwesome"
+                  name="plus-circle"
+                  style={{ fontSize: 15, color: "white", marginRight: 10 }}
+                /> */}
+                <Feather
+                  name="clipboard"
+                  size={16}
+                  color="white"
+                  style={{ marginRight: 6 }}
+                />
+                <Text
+                  style={{ fontSize: 15, fontWeight: "200", color: "white" }}
+                >
+                  Change Request
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           {project.notes.map((obj) => (
             <View
@@ -486,54 +627,63 @@ class ProjectScreen extends React.Component {
                   </Text>
                   <Text style={{ color: "gray" }}>03:15 PM</Text>
                 </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    width: 85,
-                  }}
-                >
-                  <TouchableOpacity
+                {this.props.user.id === obj.created_by.id && (
+                  <View
                     style={{
-                      padding: 9,
-                      borderRadius: 24,
-                      backgroundColor: "#F4F4F4",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      width: 85,
                     }}
                   >
-                    <SimpleLineIcons name="pencil" size={18} color="#0074B1" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      padding: 7,
-                      borderRadius: 24,
-                      backgroundColor: "#F4F4F4",
-                    }}
-                  >
-                    <Feather
-                      name="trash-2"
-                      size={22}
-                      color="#0074B1"
-                      onPress={() => {
-                        Alert.alert(
-                          "Delete Note?",
-                          "Are you sure you want to delete this note?",
-                          [
-                            {
-                              text: "Cancel",
-                              onPress: () => console.log("Not Deleted"),
-                              style: " cancel",
-                            },
-                            {
-                              text: "OK",
-                              onPress: () => this.props.deleteNote(obj.id),
-                            },
-                          ],
-                          { cancelable: false }
-                        );
+                    <TouchableOpacity
+                      style={{
+                        padding: 9,
+                        borderRadius: 24,
+                        backgroundColor: "#F4F4F4",
                       }}
-                    />
-                  </TouchableOpacity>
-                </View>
+                    >
+                      <SimpleLineIcons
+                        name="pencil"
+                        size={18}
+                        color="#0074B1"
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        padding: 7,
+                        borderRadius: 24,
+                        backgroundColor: "#F4F4F4",
+                      }}
+                    >
+                      <Feather
+                        name="trash-2"
+                        size={22}
+                        color="#0074B1"
+                        onPress={() => {
+                          Alert.alert(
+                            "Delete Note?",
+                            "Are you sure you want to delete this note?",
+                            [
+                              {
+                                text: "Cancel",
+                                onPress: () => console.log("Not Deleted"),
+                                style: " cancel",
+                              },
+                              {
+                                text: "OK",
+                                onPress: () => {
+                                  console.log(obj.id);
+                                  this.props.deleteNote(obj.id);
+                                },
+                              },
+                            ],
+                            { cancelable: false }
+                          );
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
               <Text style={{ marginTop: 20, color: "gray" }}>
                 {obj.message}
@@ -552,7 +702,7 @@ class ProjectScreen extends React.Component {
 
           <View
             style={{
-              backgroundColor: "#F4F4F4",
+              backgroundColor: "#f4f4f4",
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
@@ -627,7 +777,7 @@ const styles = StyleSheet.create({
   mediaButton: {
     padding: 10,
     flexDirection: "row",
-    backgroundColor: "#F4F4F4",
+
     borderRadius: 5,
     alignItems: "center",
     justifyContent: "center",

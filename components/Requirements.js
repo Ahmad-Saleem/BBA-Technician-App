@@ -13,8 +13,7 @@ import {
 import { connect } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
 import * as Permissions from "expo-permissions";
-import { Button, Icon, Form, Textarea } from "native-base";
-import { Video } from "expo-av";
+import { Icon, Form, Textarea } from "native-base";
 import {
   postTimestamp,
   postCompleted,
@@ -24,22 +23,21 @@ import {
   postNote,
   deleteNote,
   deleteImages,
+  uploadToStorage,
+  postEquipNote
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { AssetsSelector } from "expo-images-picker";
-import { Ionicons } from "@expo/vector-icons";
-import { MaterialIcons } from '@expo/vector-icons'; 
-import { FontAwesome5 } from '@expo/vector-icons'; 
 import { SimpleLineIcons } from '@expo/vector-icons'; 
-import Amplify, { Auth } from "aws-amplify";
-
+// import Amplify, { Auth } from "aws-amplify";
+import { Storage, StorageProvider } from 'aws-amplify';
 const mapStateToProps = (state) => {
   return {
     // equipments: state.equipments,
     timestamps: state.timestamps,
     // notes: state.notes.notes,
-    projects: state.projects.projects,
+    user:state.user.user,
+    projects: state.user.user.assigned_projects_as_technician,
     completed: state.completed,
     selectedImages: state.selectedImages,
   };
@@ -54,6 +52,8 @@ const mapDispatchToProps = (dispatch) => ({
   postCompleted: (eId) => dispatch(postCompleted(eId)),
   deleteCompleted: (eId) => dispatch(deleteCompleted(eId)),
   deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
+  postEquipNote: (projId,eId, note) => dispatch(postEquipNote(projId,eId, note)),
+  uploadToStorage: (preread,postread,eId, images) => dispatch(uploadToStorage(preread,postread,eId, images)),
 
   // postComment: (dishId, rating, author, comment) =>
   //   dispatch(postComment(dishId, rating, author, comment)),
@@ -64,8 +64,8 @@ class Requirements extends React.Component {
     super(props);
 
     this.state = {
-      preread: 1,
-      postread: 1,
+      preread: 0,
+      postread: 0,
       duration: 0,
       note: "",
       toggleInput: false,
@@ -144,17 +144,21 @@ class Requirements extends React.Component {
   }
 
   render() {
-    const project = this.props.projects.find(
+    const project = this.props.projects?.find(
       (item) => item.id === this.props.route.params.id
     );
+    
     const { eId } = this.props.route.params;
+    const equipment = project.equipments?.find(
+      (item) => item.id === eId
+    );
     const timestamp = this.props.timestamps.find((item) => item.id === eId);
     const imageSet = this.props.selectedImages?.find((item) => item.id === eId);
     const images = imageSet?.images;
     this.props.navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
-          onPress={() => alert("This is a button!")}
+          onPress={() => this.props.uploadToStorage(this.state.preread , this.state.postread , eId , images)}
           style={{
             width: 140,
             alignItems: "center",
@@ -194,7 +198,7 @@ class Requirements extends React.Component {
           <TextInput
             style={styles.formItem}
             selectedValue={this.state.preread}
-            placeholder=""
+            placeholder="0"
             defaultValue=""
             onChangeText={(itemValue) => this.setState({ preread: itemValue })}
           />
@@ -206,7 +210,7 @@ class Requirements extends React.Component {
           <TextInput
             selectedValue={this.state.preread}
             style={styles.formItem}
-            placeholder=""
+            placeholder="0"
             defaultValue=""
             onChangeText={(itemValue) => this.setState({ postread: itemValue })}
           />
@@ -258,11 +262,22 @@ class Requirements extends React.Component {
               >
                 {images.map((obj) => (
                   <TouchableOpacity
-                    onPress={() => {
-                      Auth.currentAuthenticatedUser({
-                        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-                    }).then(user => console.log(user))
-                    .catch(err => console.log(err));
+                    onPress={async () => {
+                        
+                        try {
+                          const response = await fetch(obj.uri)
+                      
+                          const blob = await response.blob()
+                      
+                          Storage.put(obj.filename, blob, {
+                            contentType: 'image/jpeg',
+                          }).then (result => console.log(result))
+
+                        } catch (err) {
+                          console.log(err)
+                        }
+                      
+                     console.log(obj);
                       this.markSelected(obj);
                     }}
                     style={{
@@ -489,98 +504,7 @@ class Requirements extends React.Component {
           </Text>
         </View> */}
 
-        {this.props.notes?.map(
-          (obj) =>
-            obj.projId === project.id && (
-              <View
-                style={{
-                  margin: 20,
-                  paddingTop: 40,
-                  borderTopWidth: 1,
-                  borderTopColor: "lightgray",
-                }}
-                key={obj.id}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        paddingRight: 5,
-                        marginRight: 5,
-                        fontWeight: "bold",
-                        borderRightWidth: 1,
-                        borderRightColor: "gray",
-                      }}
-                    >
-                      {obj.author}
-                    </Text>
-                    <Text style={{ color: "gray" }}>03:15 PM</Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      width: 85,
-                    }}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        padding: 9,
-                        borderRadius: 24,
-                        backgroundColor: "#F4F4F4",
-                      }}
-                    >
-                      {/* <FontAwesome5 name="pen-o" size={22} color="#0074B1" /> */}
-                      <SimpleLineIcons name="pencil" size={18} color="#0074B1" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{
-                        padding: 7,
-                        borderRadius: 24,
-                        backgroundColor: "#F4F4F4",
-                      }}
-                    >
-                      <Feather
-                        name="trash-2"
-                        size={22}
-                        color="#0074B1"
-                        onPress={() => {
-                          Alert.alert(
-                            "Delete Note?",
-                            "Are you sure you want to delete this note?",
-                            [
-                              {
-                                text: "Cancel",
-                                onPress: () => console.log("Not Deleted"),
-                                style: " cancel",
-                              },
-                              {
-                                text: "OK",
-                                onPress: () => this.props.deleteNote(obj.id),
-                              },
-                            ],
-                            { cancelable: false }
-                          );
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <Text style={{ marginTop: 20, color: "gray" }}>{obj.note}</Text>
-              </View>
-            )
-        )}
+        
 
         {this.state.toggleInput && (
           <Form>
@@ -601,10 +525,12 @@ class Requirements extends React.Component {
             />
             <TouchableOpacity
               onPress={() => {
-                this.props.postNote(
-                  this.props.route.params.id,
+                this.props.postEquipNote(
+                  project.id,
+                  eId,
                   this.state.note
                 );
+                console.log(project.id, eId,this.state.note);
                 this.setState({ toggleInput: false });
               }}
               style={{
@@ -649,6 +575,103 @@ class Requirements extends React.Component {
               Add Note
             </Text>
           </TouchableOpacity>
+        )}
+        {equipment.notes.map(
+          (obj) =>
+             (
+              <View
+                style={{
+                  margin: 20,
+                  paddingTop: 40,
+                  borderTopWidth: 1,
+                  borderTopColor: "lightgray",
+                }}
+                key={obj.id}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        paddingRight: 5,
+                        marginRight: 5,
+                        fontWeight: "bold",
+                        borderRightWidth: 1,
+                        borderRightColor: "gray",
+                      }}
+                    >
+                      {obj.created_by.first_name}
+                    </Text>
+                    <Text style={{ color: "gray" }}>03:15 PM</Text>
+                  </View>
+                  {this.props.user.id === obj.created_by.id && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      width: 85,
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={{
+                        padding: 9,
+                        borderRadius: 24,
+                        backgroundColor: "#F4F4F4",
+                      }}
+                    >
+                      <SimpleLineIcons
+                        name="pencil"
+                        size={18}
+                        color="#0074B1"
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        padding: 7,
+                        borderRadius: 24,
+                        backgroundColor: "#F4F4F4",
+                      }}
+                    >
+                      <Feather
+                        name="trash-2"
+                        size={22}
+                        color="#0074B1"
+                        onPress={() => {
+                          Alert.alert(
+                            "Delete Note?",
+                            "Are you sure you want to delete this note?",
+                            [
+                              {
+                                text: "Cancel",
+                                onPress: () => console.log("Not Deleted"),
+                                style: " cancel",
+                              },
+                              {
+                                text: "OK",
+                                onPress: () => this.props.deleteNote(obj.id),
+                              },
+                            ],
+                            { cancelable: false }
+                          );
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                </View>
+                <Text style={{ marginTop: 20, color: "gray" }}>{obj.note}</Text>
+              </View>
+            )
         )}
 
         {/* <Button onPress={() => this.handleDelete(eId)}>

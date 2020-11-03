@@ -3,7 +3,7 @@ import { createStore, applyMiddleware } from "redux";
 import { persistStore, persistCombineReducers } from "redux-persist";
 import thunk from "redux-thunk";
 import logger from "redux-logger";
-import { projects } from "./projects";
+import { user } from "./user";
 import { equipments } from "./equipments";
 import { completed } from "./completed";
 import { timestamps } from "./timestamps";
@@ -20,7 +20,7 @@ const config = {
 export const ConfigureStore = () => {
   const store = createStore(
     persistCombineReducers(config, {
-      projects,
+      user,
       equipments,
       timestamps,
       completed,

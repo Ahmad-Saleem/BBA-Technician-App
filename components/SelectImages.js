@@ -122,7 +122,7 @@ const type=this.props.route.params.type
           noAssets: {
             Component: () => (
               <View>
-                <Text>Hey</Text>
+               
               </View>
             ),
           },
