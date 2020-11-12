@@ -5,7 +5,7 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Linking,
+  Dimensions
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import ProjectCard from "./ProjectCard";
@@ -19,9 +19,11 @@ const mapStateToProps = (state) => {
   };
 };
 
+let width = Dimensions.get('window').width
+
 class HomeScreen extends React.Component {
   render() {
-    let projects = this.props.user.user.assigned_projects_as_technician;
+    let projects = this.props.user?.user.assigned_projects_as_technician;
     let projectlist = [];
 
     projectlist = projects?.map((project) => (
@@ -51,18 +53,18 @@ class HomeScreen extends React.Component {
           <StatusBar style="light" />
           <View style={styles.pcontact}>
             <View>
-              <Text style={{ fontSize: 25 }}>Hello, {this.props.user.user.first_name+" "+this.props.user.user.last_name}</Text>
-              <Text style={{ fontSize: 18, color: "#616161" }}>
+              <Text style={{ fontSize: width/15 }}>Hello, {this.props.user.user.first_name+" "+this.props.user.user.last_name}</Text>
+              <Text style={{ fontSize: width/20, color: "#616161" }}>
                 Check the projects here
               </Text>
             </View>
-            <TouchableOpacity onPress={() => Linking.openURL(`sms:8094050767`)}>
+            {/* <TouchableOpacity onPress={() => Linking.openURL(`sms:8094050767`)}>
               <MaterialCommunityIcons
                 name="tooltip-text-outline"
-                size={28}
+                size={width/12}
                 color="#0074B1"
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <View
             style={{
@@ -73,7 +75,7 @@ class HomeScreen extends React.Component {
               marginBottom: 20,
             }}
           >
-            <Text style={{ fontSize: 23, fontWeight: "500" }}>Projects</Text>
+            <Text style={{ fontSize: width/15, fontWeight: "500" }}>Projects</Text>
 
             <View
               style={{
@@ -89,7 +91,7 @@ class HomeScreen extends React.Component {
             >
               <MaterialCommunityIcons
                 name="check-all"
-                size={20}
+                size={width/18}
                 color="#0074B1"
                 style={{ marginRight: 10 }}
               />

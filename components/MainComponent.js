@@ -11,28 +11,29 @@ import AddCaptions from "./AddCaptions";
 import { connect } from "react-redux";
 import { Icon } from "native-base";
 import { fetchUser } from "../redux/ActionCreators";
+import NetInfo from '@react-native-community/netinfo';
 
 const mapStateToProps = (state) => {
   return {
     user: state.user,
-    // equipments: state.equipments,
-    // notes: state.notes,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
   fetchUser: () => dispatch(fetchUser()),
-  // fetchEquipments: () => dispatch(fetchEquipments()),
-  // fetchNotes: () => dispatch(fetchNotes()),
 });
 
 const Stack = createStackNavigator();
 
 class Main extends React.Component {
   componentDidMount() {
-    // this.props.fetchEquipments();
-    this.props.fetchUser();
-    // this.props.fetchNotes();
+    NetInfo.fetch().then(state => {
+      console.log('Connection type', state.type);
+      console.log('Is connected?', state.isConnected);
+      if(state.isConnected){
+        this.props.fetchUser();
+      }
+    });
   }
 
   async signOut() {

@@ -69,6 +69,7 @@ export const fetchUser = () => async (dispatch) => {
                     last_name
                   }
                   created_at
+                  labels
                 }
                 location {
                   address
@@ -88,6 +89,7 @@ export const fetchUser = () => async (dispatch) => {
                       last_name
                     }
                     created_at
+                    labels
                   }
                 }
               }
@@ -146,6 +148,22 @@ export const addCompleted = (eId) => ({
 export const deleteCompleted = (eId) => ({
   type: ActionTypes.DELETE_COMPLETE,
   payload: eId,
+});
+
+export const postDataRead = (eId, prereads, postreads) => (dispatch) => {
+  const newDataRead = {
+    id: eId,
+    prereads:prereads,
+    postreads:postreads
+  };
+  setTimeout(() => {
+    dispatch(addDataRead(newDataRead));
+  }, 2000);
+};
+
+export const addDataRead = (newDataRead) => ({
+  type: ActionTypes.ADD_DATAREAD,
+  payload: newDataRead,
 });
 
 export const postTimestamp = (eId) => (dispatch) => {
@@ -208,7 +226,7 @@ export const deleteImages = (eId, images) => ({
   payload: images,
 });
 
-export const postNote = (projId, note) => async (dispatch) => {
+export const postNote = (projId, note, author) => async (dispatch) => {
   // const newNote = {
   //   projId: projId,
   //   // author: author,
@@ -221,9 +239,10 @@ export const postNote = (projId, note) => async (dispatch) => {
     })
     .catch((err) => console.log(err));
   const request = '"' + note + '"';
-
-  client.mutate({
-    mutation: gql`
+  var notee = {};
+  await client
+    .mutate({
+      mutation: gql`
     mutation {
       createNote(input: {
         project_id:${projId}
@@ -232,14 +251,40 @@ export const postNote = (projId, note) => async (dispatch) => {
       })
       {
         id
+        created_by{
+          id
+          first_name
+          last_name
+        }
+        created_at
       }
     }
   `,
-  });
+    })
+    .then(({ data }) => {
+      notee.id = data.createNote.id;
+      notee.created_by = data.createNote.created_by;
+      notee.created_at = data.createNote.created_at;
+    });
+  return notee;
   // setTimeout(() => {
   //   dispatch(addNote(newNote));
   // }, 2000);
 };
+
+// Object {
+//   "__typename": "Note",
+//   "created_at": "2020-11-05T19:03:40.396Z",
+//   "created_by": Object {
+//     "__typename": "User",
+//     "first_name": "tech",
+//     "id": "94",
+//     "last_name": "tech ",
+//   },
+//   "id": "159",
+//   "labels": Array [],
+//   "message": "Hey",
+// }
 
 export const postEquipNote = (projId, eId, note) => async (dispatch) => {
   // const newNote = {
@@ -254,8 +299,8 @@ export const postEquipNote = (projId, eId, note) => async (dispatch) => {
     })
     .catch((err) => console.log(err));
   const request = '"' + note + '"';
-
-  client
+  var notee = {};
+  await client
     .mutate({
       mutation: gql`
     mutation {
@@ -267,22 +312,25 @@ export const postEquipNote = (projId, eId, note) => async (dispatch) => {
       })
       {
         id
+        created_by{
+          id
+          first_name
+          last_name
+        }
+        created_at
       }
     }
   `,
     })
-    .then(({ result }) => console.log(result));
-  // setTimeout(() => {
-  //   dispatch(addNote(newNote));
-  // }, 2000);
+    .then(({ data }) => {
+      notee.id = data.createNote.id;
+      notee.created_by = data.createNote.created_by;
+      notee.created_at = data.createNote.created_at;
+    });
+  return notee;
 };
 
-export const addNote = (newNote) => ({
-  type: ActionTypes.ADD_NOTE,
-  payload: newNote,
-});
-
-export const postRequest = async (projId, note) => {
+export const postRequest = (projId, note) => async (dispatch) => {
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -307,19 +355,30 @@ export const postRequest = async (projId, note) => {
   });
 };
 
-export const deleteNote = (id) => {
-  client
-    .mutate({
-      mutation: gql`
+export const deleteNote = (id) => async (dispatch) => {
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  client.mutate({
+    mutation: gql`
     mutation{
       deleteNote(where:{id:${id}}){
         id
       }
     }
   `,
-    })
-    .then(({ result }) => console.log(result.deleteNote));
-  console.log("note deleted");
+  });
+  setTimeout(() => {
+    dispatch(reload());
+  }, 1000);
+};
+
+export const reload = () => (dispatch) => {
+  setTimeout(() => {
+    console.log("hey");
+  }, 500);
 };
 
 export const postCaption = (eId, caption, id) => (dispatch) => {
@@ -343,7 +402,7 @@ export const uploadToStorage = (preread, postread, eId, images) => (
   dispatch
 ) => {
   console.log(images);
-  for (let index = 0; index < images.length; index++) {
+  for (let index = 0; index < images?.length; index++) {
     const { obj } = images[index];
     async () => {
       try {
@@ -362,12 +421,76 @@ export const uploadToStorage = (preread, postread, eId, images) => (
 
   setTimeout(() => {
     console.log("storage done");
-    dispatch(uploadData(preread, postread, eId, images));
+    dispatch(uploadDataReads(preread, postread, eId, images));
   }, 2000);
 };
-export const uploadData = (preread, postread, eId, images) => async (
+
+export const uploadDataReads = (preread, postread, eId, images) => async (
   dispatch
 ) => {
+  const preId = await client
+    .mutate({
+      mutation: gql`
+        mutation {
+          createDataReads(
+            input: {
+              coil_differential_pressure_with_filter: ${preread.coil_differential_pressure_with_filter}
+              coil_differential_pressure_without_filter: ${preread.coil_differential_pressure_without_filter}
+              fan_speed: ${preread.fan_speed}
+              outside_air_temperature: ${preread.outside_air_temperature}
+              outside_air_damper_position: ${preread.outside_air_damper_position}
+              air_temp_reading: ${preread.air_temp_reading}
+              coil_Infrared_image_coil: ${preread.coil_Infrared_image_coil}
+              is_terminal: ${preread.is_terminal}
+              velocity: ${preread.velocity}
+              supply_air_temperature: ${preread.supply_air_temperature}
+            }
+          ) {
+            id
+          }
+        }
+      `,
+    })
+    .then(({ data }) => {
+      console.log("preread creation done" + data.createDataReads.id);
+      return data.createDataReads.id;
+    });
+
+  const postId = await client
+    .mutate({
+      mutation: gql`
+        mutation {
+          createDataReads(
+            input: {
+              coil_differential_pressure_with_filter: ${postread.coil_differential_pressure_with_filter}
+              coil_differential_pressure_without_filter: ${postread.coil_differential_pressure_without_filter}
+              fan_speed: ${postread.fan_speed}
+              outside_air_temperature: ${postread.outside_air_temperature}
+              outside_air_damper_position: ${postread.outside_air_damper_position}
+              air_temp_reading: ${postread.air_temp_reading}
+              coil_Infrared_image_coil: ${postread.coil_Infrared_image_coil}
+              is_terminal: ${postread.is_terminal}
+              velocity: ${postread.velocity}
+              supply_air_temperature: ${postread.supply_air_temperature}
+            }
+          ) {
+            id
+          }
+        }
+      `,
+    })
+    .then(({ data }) => {
+      console.log("postread creation done" + data.createDataReads.id);
+      return data.createDataReads.id;
+    });
+
+  setTimeout(() => {
+    console.log("data creation done");
+    dispatch(uploadData(preId, postId, eId, images));
+  }, 4000);
+};
+
+export const uploadData = (preId, postId, eId, images) => async (dispatch) => {
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -381,13 +504,11 @@ export const uploadData = (preread, postread, eId, images) => async (
             input: {
               created_by: ${myId}
               notes: "hey"
-              pre_read: ${preread}
-              post_read: ${postread}
+              pre_reads:${preId}
+              post_reads:${postId}
             }
           ) {
             id
-            pre_read
-            post_read
           }
         }
       `,
@@ -404,14 +525,15 @@ export const uploadData = (preread, postread, eId, images) => async (
 };
 export const uploadImages = (eId, myId, dataId, images) => (dispatch) => {
   console.log(eId, myId, dataId, images);
-  for (let index = 0; index < images.length; index++) {
-    const { caption, filename, uri } = images[index];
-    const name = '"' + filename + '"';
-    const urii = '"' + uri + '"';
-    const captionn = '"' + caption + '"';
-    console.log(name);
-    client.mutate({
-      mutation: gql`
+  if (images?.length > 0) {
+    for (let index = 0; index < images?.length; index++) {
+      const { caption, filename, uri } = images[index];
+      const name = '"' + filename + '"';
+      const urii = '"' + uri + '"';
+      const captionn = '"' + caption + '"';
+      console.log(name);
+      client.mutate({
+        mutation: gql`
           mutation {
             createFile(
               input: {
@@ -426,7 +548,8 @@ export const uploadImages = (eId, myId, dataId, images) => (dispatch) => {
             }
           }
         `,
-    });
+      });
+    }
   }
 
   setTimeout(() => {
@@ -434,7 +557,7 @@ export const uploadImages = (eId, myId, dataId, images) => (dispatch) => {
   }, 2000);
 };
 
-export const updateEquipment = (eId, dataId) => {
+export const updateEquipment = (eId, dataId) => (dispatch) => {
   console.log(eId, dataId);
   client
     .mutate({
@@ -452,4 +575,53 @@ export const updateEquipment = (eId, dataId) => {
     .then(({ data }) => {
       console.log(data.updateEquipment.id);
     });
+
+  setTimeout(() => {
+    dispatch(fetchUser());
+  }, 2000);
 };
+
+export const postLocalProjectNote = (projId, note, author) => async (
+  dispatch
+) => {
+  const newNote = {
+    projId: projId,
+    author: author,
+    note: note,
+  };
+  setTimeout(() => {
+    dispatch(addProjectNote(newNote));
+  }, 2000);
+};
+
+export const addProjectNote = (newNote) => ({
+  type: ActionTypes.ADD_PROJECTNOTE,
+  payload: newNote,
+});
+
+export const deleteProjectNote = (id) => ({
+  type: ActionTypes.DELETE_PROJECTNOTE,
+  id: id,
+});
+
+export const postLocalEquipNote = (projId, eId, author,note) =>async (dispatch) => {
+  const newNote = {
+    projId: projId,
+    eId: eId,
+    author: author,
+    note: note,
+  };
+  setTimeout(() => {
+    dispatch(addEquipNote(newNote));
+  }, 2000);
+};
+
+export const addEquipNote = (newNote) => ({
+  type: ActionTypes.ADD_EQUIPNOTE,
+  payload: newNote,
+});
+
+export const deleteEquipNote = (id) => ({
+  type: ActionTypes.DELETE_EQUIPNOTE,
+  id: id,
+});

@@ -9,9 +9,9 @@ import {
   TextInput,
   Alert,
   Image,
+  Dimensions,
 } from "react-native";
 import { connect } from "react-redux";
-import * as ImagePicker from "expo-image-picker";
 import * as Permissions from "expo-permissions";
 import { Icon, Form, Textarea } from "native-base";
 import {
@@ -24,22 +24,28 @@ import {
   deleteNote,
   deleteImages,
   uploadToStorage,
-  postEquipNote
+  postEquipNote,
+  postLocalEquipNote,
+  deleteEquipNote,
+  postDataRead
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { SimpleLineIcons } from '@expo/vector-icons'; 
+import { SimpleLineIcons } from "@expo/vector-icons";
 // import Amplify, { Auth } from "aws-amplify";
-import { Storage, StorageProvider } from 'aws-amplify';
+import { Storage, StorageProvider } from "aws-amplify";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import NetInfo from "@react-native-community/netinfo";
+
 const mapStateToProps = (state) => {
   return {
-    // equipments: state.equipments,
     timestamps: state.timestamps,
-    // notes: state.notes.notes,
-    user:state.user.user,
+    user: state.user.user,
     projects: state.user.user.assigned_projects_as_technician,
     completed: state.completed,
     selectedImages: state.selectedImages,
+    localEquipNotes: state.localEquipNotes,
+    dataReads:state.dataReads
   };
 };
 
@@ -52,29 +58,114 @@ const mapDispatchToProps = (dispatch) => ({
   postCompleted: (eId) => dispatch(postCompleted(eId)),
   deleteCompleted: (eId) => dispatch(deleteCompleted(eId)),
   deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
-  postEquipNote: (projId,eId, note) => dispatch(postEquipNote(projId,eId, note)),
-  uploadToStorage: (preread,postread,eId, images) => dispatch(uploadToStorage(preread,postread,eId, images)),
-
+  postEquipNote: (projId, eId, note) =>
+    dispatch(postEquipNote(projId, eId, note)),
+  uploadToStorage: (preread, postread, eId, images) =>
+    dispatch(uploadToStorage(preread, postread, eId, images)),
+  postLocalEquipNote: (projId, eId, author,note) =>
+    dispatch(postLocalEquipNote(projId, eId, author, note)),
+  deleteEquipNote: (id) => dispatch(deleteEquipNote(id)),
+  postDataRead:(id,prereads,postreads)=> dispatch(postDataRead(id, prereads, postreads))
   // postComment: (dishId, rating, author, comment) =>
   //   dispatch(postComment(dishId, rating, author, comment)),
 });
+
+let width = Dimensions.get("window").width;
 
 class Requirements extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      preread: 0,
-      postread: 0,
+      preread: {
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        coil_differential_pressure_with_filter: 0.0,
+        coil_differential_pressure_without_filter: 0.0,
+        fan_speed: 0.0,
+        outside_air_temperature: 0.0,
+        outside_air_damper_position: 0.0,
+        air_temp_reading: 0.0,
+        coil_Infrared_image_coil: 0.0,
+        is_terminal: false,
+        velocity: 0.0,
+        supply_air_temperature: 0.0,
+      },
+      postread: {
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        coil_differential_pressure_with_filter: 0.0,
+        coil_differential_pressure_without_filter: 0.0,
+        fan_speed: 0.0,
+        outside_air_temperature: 0.0,
+        outside_air_damper_position: 0.0,
+        air_temp_reading: 0.0,
+        coil_Infrared_image_coil: 0.0,
+        is_terminal: false,
+        velocity: 0.0,
+        supply_air_temperature: 0.0,
+      },
       duration: 0,
       note: "",
+      notes: this.props.projects
+        ?.find((item) => item.id === this.props.route.params.id)
+        .equipments.find((item) => item.id === this.props.route.params.eId)
+        .notes,
       toggleInput: false,
       selection: [],
+      showPreDate: false,
+      showPreTime: false,
+      showPostDate: false,
+      showPostTime: false,
+      // equipment:project?.equipments?.find((item) => item.id === eId),
+      user: this.props.user,
+      editId:undefined,
+      toggleEdit:false
     };
   }
-  
+
   componentDidMount() {
     this.getPermissionAsync();
+    NetInfo.fetch().then(async (state) => {
+      const localEquipNotes = this.props.localEquipNotes.filter(
+        (obj) => obj.eId === this.props.route.params.eId
+      );
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+      console.log(this.props.user.first_name);
+      if (state.isConnected) {
+        for (let i = 0; i < localEquipNotes.length; i++) {
+          var data = await this.props.postEquipNote(
+            this.props.route.params.id,
+            this.props.route.params.eId,
+            localEquipNotes[i].note
+            // this.props.user.user.first_name
+          );
+          console.log(data.id);
+          let newNotes = [...this.state.notes];
+          console.log(newNotes);
+          newNotes.push({
+            created_at: data.created_at,
+            created_by: {
+              first_name: data.created_by.first_name,
+              id: data.created_by.id,
+              last_name: data.created_by.last_name,
+            },
+            id: data.id,
+            labels: [],
+            message: localEquipNotes[i].note,
+            project: { id: this.props.route.params.id },
+            equipment: { id: this.props.route.params.id },
+          });
+          this.setState({
+            toggleInput: false,
+            note: "",
+            notes: newNotes,
+          });
+          this.props.deleteEquipNote(localEquipNotes[i].id);
+        }
+      }
+    });
   }
 
   getFormattedTime(time) {
@@ -90,37 +181,19 @@ class Requirements extends React.Component {
     }
   };
 
-  _pickVideo = async () => {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-      if (!result.cancelled) {
-        this.setState({ video: result.uri });
-      }
-
-      // console.log(result);
-    } catch (E) {
-      console.log(E);
-    }
-  };
-
-
-
   handleDelete(eId) {
     this.props.deleteTimestamps(eId);
   }
 
   resetForm() {
     this.setState({
-      preread: 1,
-      postread: 1,
+      preread: {},
+      postread: {},
       showModal: false,
       image: null,
       video: null,
+      date: new Date(),
+      mode: "date",
     });
   }
 
@@ -135,7 +208,7 @@ class Requirements extends React.Component {
   markSelected(uri) {
     let newSelection = [...this.state.selection];
     if (newSelection.includes(uri)) {
-     newSelection= newSelection.filter((URI) => URI != uri);
+      newSelection = newSelection.filter((URI) => URI != uri);
     } else {
       newSelection.push(uri);
     }
@@ -144,21 +217,97 @@ class Requirements extends React.Component {
   }
 
   render() {
-    const project = this.props.projects?.find(
+    const project = this.state.user.assigned_projects_as_technician?.find(
       (item) => item.id === this.props.route.params.id
     );
-    
+    const onChangePreDate = (event, selectedDate) => {
+      const currentDate = selectedDate || this.state.preread.date;
+      this.setState({ showPreDate: Platform.OS === "ios" });
+      this.setState({
+        preread: {
+          ...this.state.preread,
+          date: currentDate.toLocaleDateString(),
+        },
+      });
+      console.log(this.state.preread.date);
+    };
+    const onChangePreTime = (event, selectedDate) => {
+      const currentDate = selectedDate || this.state.preread.time;
+      this.setState({ showPreTime: Platform.OS === "ios" });
+      this.setState({
+        preread: {
+          ...this.state.preread,
+          time: currentDate.toLocaleTimeString(),
+        },
+      });
+      console.log(this.state.preread.time);
+    };
+    const onChangePostDate = (event, selectedDate) => {
+      const currentDate = selectedDate || this.state.postread.date;
+      this.setState({ showPostDate: Platform.OS === "ios" });
+      this.setState({
+        postread: {
+          ...this.state.postread,
+          date: currentDate.toLocaleDateString(),
+        },
+      });
+      console.log(this.state.postread.date);
+    };
+    const onChangePostTime = (event, selectedDate) => {
+      const currentDate = selectedDate || this.state.postread.time;
+      this.setState({ showPostTime: Platform.OS === "ios" });
+      this.setState({
+        postread: {
+          ...this.state.postread,
+          time: currentDate.toLocaleTimeString(),
+        },
+      });
+      console.log(this.state.postread.time);
+    };
+
+    const showModePreDate = () => {
+      this.setState({ showPreDate: true });
+      this.setState({ mode: "date" });
+    };
+
+    const showModePreTime = () => {
+      this.setState({ showPreTime: true });
+      this.setState({ mode: "time" });
+    };
+
+    const showModePostDate = () => {
+      this.setState({ showPostDate: true });
+      this.setState({ mode: "date" });
+    };
+
+    const showModePostTime = () => {
+      this.setState({ showPostTime: true });
+      this.setState({ mode: "time" });
+    };
+
     const { eId } = this.props.route.params;
-    const equipment = project.equipments?.find(
-      (item) => item.id === eId
+    const equipment = project?.equipments?.find((item) => item.id === eId);
+    const localEquipNotes = this.props.localEquipNotes.filter(
+      (obj) => obj.eId === eId
     );
+    const dataread = this.props.dataReads?.find((item) => item.id === eId);
+    const prereads= dataread?.prereads
+    const postreads = dataread?.postreads
     const timestamp = this.props.timestamps.find((item) => item.id === eId);
     const imageSet = this.props.selectedImages?.find((item) => item.id === eId);
     const images = imageSet?.images;
     this.props.navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
-          onPress={() => this.props.uploadToStorage(this.state.preread , this.state.postread , eId , images)}
+          onPress={() =>
+            {this.props.uploadToStorage(
+              this.state.preread,
+              this.state.postread,
+              eId,
+              images
+            );
+          this.props.postDataRead(eId, this.state.preread, this.state.postread)}
+          }
           style={{
             width: 140,
             alignItems: "center",
@@ -174,47 +323,497 @@ class Requirements extends React.Component {
           <Icon
             type="FontAwesome"
             name="check"
-            style={{ fontSize: 15, color: "white", marginRight: 7 }}
+            style={{ fontSize: width / 20, color: "white", marginRight: 7 }}
           />
           <Text
-            style={{ color: "#fff", fontWeight: "bold", fontSize: 15, paddingTop:3,paddingBottom:3 }}
+            style={{
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: width / 20,
+              paddingTop: 3,
+              paddingBottom: 3,
+            }}
           >
             Update
           </Text>
         </TouchableOpacity>
       ),
-    })
+    });
     var dur = 0;
     return (
       <ScrollView style={{ backgroundColor: "white" }}>
         <TouchableOpacity style={styles.status}>
           <Text style={{ color: "white" }}>In Progress</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity style={{ marginLeft: 15 }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>Pre-reads</Text>
+        </TouchableOpacity>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
-            <Text style={styles.formLabelText}>Pre-read</Text>
+            <Text style={{ textAlign: "right" }}>Date</Text>
           </View>
           <TextInput
             style={styles.formItem}
-            selectedValue={this.state.preread}
-            placeholder="0"
-            defaultValue=""
-            onChangeText={(itemValue) => this.setState({ preread: itemValue })}
+            selectedValue={prereads?.date}
+            placeholder={this.state.preread.date}
+            defaultValue={prereads?.date}
+            // onPress={showDatepicker}
+            onTouchStart={showModePreDate}
           />
         </View>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
-            <Text style={styles.formLabelText}>Post-read</Text>
+            <Text style={{ textAlign: "right" }}>Time</Text>
           </View>
           <TextInput
-            selectedValue={this.state.preread}
+            selectedValue={prereads?.time}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.preread.time}
+            defaultValue={prereads?.time}
+            onTouchStart={showModePreTime}
             onChangeText={(itemValue) => this.setState({ postread: itemValue })}
           />
         </View>
+        {this.state.showPreDate && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={new Date()}
+            mode={this.state.mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChangePreDate}
+          />
+        )}
+        {this.state.showPreTime && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={new Date()}
+            mode={this.state.mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChangePreTime}
+          />
+        )}
+        {this.state.showPostDate && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={new Date()}
+            mode={this.state.mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChangePostDate}
+          />
+        )}
+        {this.state.showPostTime && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={new Date()}
+            mode={this.state.mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChangePostTime}
+          />
+        )}
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>
+              Coil differential pressure with filter
+            </Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.coil_differential_pressure_with_filter}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.coil_differential_pressure_with_filter}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.preread,
+                  coil_differential_pressure_with_filter: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>
+              Coil differential pressure without filter
+            </Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.coil_differential_pressure_without_filter}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.coil_differential_pressure_without_filter}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.preread,
+                  coil_differential_pressure_without_filter: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Fan speed</Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.fan_speed}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.fan_speed}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: { ...this.state.preread, fan_speed: itemValue },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Outside air temperature</Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.outside_air_temperature}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.outside_air_temperature}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.preread,
+                  outside_air_temperature: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>
+              Outside air damper position
+            </Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.outside_air_damper_position}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.outside_air_damper_position}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.preread,
+                  outside_air_damper_position: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Air temp reading</Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.air_temp_reading}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.air_temp_reading}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: { ...this.state.preread, air_temp_reading: itemValue },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Coil Infrared image coil</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.preread}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.preread,
+                  coil_Infrared_image_coil: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        {/* <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={styles.formLabelText}>is_terminal</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.preread}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) => this.setState({ preread: {...this.state.preread, is_terminal : itemValue} })}
+          />
+        </View> */}
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Velocity</Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.velocity}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.air_temp_reading}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: { ...this.state.preread, velocity: itemValue },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Supply air temperature</Text>
+          </View>
+          <TextInput
+            selectedValue={prereads?.supply_air_temperature}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue={prereads?.supply_air_temperature}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.preread,
+                  supply_air_temperature: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        {/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/}
+
+        <TouchableOpacity style={{ marginLeft: 15 }}>
+          <Text style={{ fontSize: width / 18, fontWeight: "bold" }}>
+            Post-reads
+          </Text>
+        </TouchableOpacity>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Date</Text>
+          </View>
+          <TextInput
+            style={styles.formItem}
+            selectedValue={this.state.postread.date}
+            placeholder={this.state.postread.date}
+            defaultValue={this.state.postread.date}
+            onTouchStart={showModePostDate}
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Time</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.time}
+            style={styles.formItem}
+            placeholder={this.state.postread.time}
+            defaultValue={this.state.postread.date}
+            onTouchStart={showModePostTime}
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>
+              Coil differential pressure without filter
+            </Text>
+          </View>
+          <TextInput
+            selectedValue={
+              this.state.postread.coil_differential_pressure_with_filter
+            }
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.postread,
+                  coil_differential_pressure_with_filter: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>
+              Coil differential pressure without filter
+            </Text>
+          </View>
+          <TextInput
+            selectedValue={
+              this.state.postread.coil_differential_pressure_without_filter
+            }
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.postread,
+                  coil_differential_pressure_without_filter: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Fan speed</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.fan_speed}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: { ...this.state.postread, fan_speed: itemValue },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Outside air temperature</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.outside_air_temperature}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: {
+                  ...this.state.postread,
+                  outside_air_temperature: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>
+              Outside air damper position
+            </Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.outside_air_damper_position}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                postread: {
+                  ...this.state.postread,
+                  outside_air_damper_position: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Air temp reading</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.air_temp_reading}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                postread: {
+                  ...this.state.postread,
+                  air_temp_reading: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Coil Infrared image coil</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.coil_Infrared_image_coil}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                postread: {
+                  ...this.state.postread,
+                  coil_Infrared_image_coil: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+        {/* <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={styles.formLabelText}>is_terminal</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.is_terminal}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) => this.setState({ postread: {...this.state.postread, is_terminal : itemValue} })}
+          />
+        </View> */}
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Velocity</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.velocity}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                postread: { ...this.state.postread, velocity: itemValue },
+              })
+            }
+          />
+        </View>
+
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Supply air temperature</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.postread.supply_air_temperature}
+            style={styles.formItem}
+            placeholder="0"
+            defaultValue=""
+            onChangeText={(itemValue) =>
+              this.setState({
+                postread: {
+                  ...this.state.postread,
+                  supply_air_temperature: itemValue,
+                },
+              })
+            }
+          />
+        </View>
+
         <View style={{}}>
           <View
             style={{
@@ -229,21 +828,27 @@ class Requirements extends React.Component {
           >
             <TouchableOpacity
               onPress={() =>
-                this.props.navigation.navigate("Images", { eId: eId, type: "photo" })
+                this.props.navigation.navigate("Images", {
+                  eId: eId,
+                  type: "photo",
+                })
               }
               style={styles.mediaButton}
             >
-              <AntDesign name="picture" size={20} color="black" />
+              <AntDesign name="picture" size={width / 18} color="black" />
               <Text style={styles.mediaButtonText}>Choose Photo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-               onPress={() =>
-                this.props.navigation.navigate("Images", { eId: eId, type: "video" })
+              onPress={() =>
+                this.props.navigation.navigate("Images", {
+                  eId: eId,
+                  type: "video",
+                })
               }
               style={styles.mediaButton}
             >
-              <Feather name="video" size={20} color="black" />
+              <Feather name="video" size={width / 18} color="black" />
               <Text style={styles.mediaButtonText}>Choose Video</Text>
             </TouchableOpacity>
           </View>
@@ -262,22 +867,19 @@ class Requirements extends React.Component {
               >
                 {images.map((obj) => (
                   <TouchableOpacity
-                    onPress={async () => {
-                        
-                        try {
-                          const response = await fetch(obj.uri)
-                      
-                          const blob = await response.blob()
-                      
-                          Storage.put(obj.filename, blob, {
-                            contentType: 'image/jpeg',
-                          }).then (result => console.log(result))
+                    onPress={() => {
+                      // try {
+                      //   const response = await fetch(obj.uri);
 
-                        } catch (err) {
-                          console.log(err)
-                        }
-                      
-                     console.log(obj);
+                      //   const blob = await response.blob();
+
+                      //   Storage.put(obj.filename, blob, {
+                      //     contentType: "image/jpeg",
+                      //   }).then((result) => console.log(result));
+                      // } catch (err) {
+                      //   console.log(err);
+                      // }
+                      console.log(this.props.user.first_name);
                       this.markSelected(obj);
                     }}
                     style={{
@@ -291,7 +893,7 @@ class Requirements extends React.Component {
                         size={24}
                         color="black"
                         style={{
-                          fontSize: 15,
+                          fontSize: width / 24,
 
                           position: "absolute",
                           top: 2,
@@ -313,7 +915,7 @@ class Requirements extends React.Component {
                   justifyContent: "space-between",
                   paddingTop: 35,
                   paddingBottom: 5,
-                  marginRight:20
+                  marginRight: 20,
                 }}
               >
                 <TouchableOpacity
@@ -326,7 +928,9 @@ class Requirements extends React.Component {
                     },
                   ]}
                   onPress={() =>
-                    this.props.navigation.navigate("AddCaptions", { images: this.state.selection, eId:eId })
+                    this.props.navigation.navigate("AddCaptions", {
+                      eId: eId,
+                    })
                   }
                 >
                   <Text style={styles.mediaButtonText}>Edit Items</Text>
@@ -365,7 +969,13 @@ class Requirements extends React.Component {
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: "bold", color: "#282828" }}>
+          <Text
+            style={{
+              fontSize: width / 18,
+              fontWeight: "bold",
+              color: "#282828",
+            }}
+          >
             Time tracking
           </Text>
 
@@ -383,7 +993,7 @@ class Requirements extends React.Component {
             <Icon
               type="FontAwesome"
               name="clock-o"
-              style={{ fontSize: 20, color: "white" }}
+              style={{ fontSize: width / 18, color: "white" }}
             />
 
             <Text style={[styles.mediaButtonText, { color: "white" }]}>
@@ -503,8 +1113,95 @@ class Requirements extends React.Component {
             consectetur laborum veritatis, impedit reprehenderit.
           </Text>
         </View> */}
-
-        
+        {this.state.toggleEdit && (
+          <Form>
+            <Textarea
+              onChangeText={(note) => this.setState({ note })}
+              rowSpan={4}
+              value={this.state.note}
+              bordered
+              placeholder="Add note"
+              style={{
+                width: 300,
+                borderWidth: 2,
+                borderColor: "#0074B1",
+                alignSelf: "center",
+                borderRadius: 5,
+                marginBottom: 15,
+              }}
+            />
+            <TouchableOpacity
+              onPress={async () => {
+                NetInfo.fetch().then(async (state) => {
+                  console.log("Connection type", state.type);
+                  console.log("Is connected?", state.isConnected);
+                  if (state.isConnected) {
+                    var data = await this.props.postEquipNote(
+                      project?.id,
+                      eId,
+                      this.state.note
+                    );
+                    console.log(data.id);
+                    let newNotes = [...this.state.notes];
+                    console.log(newNotes);
+                    newNotes.push({
+                      created_at: data.created_at,
+                      created_by: {
+                        first_name: data.created_by.first_name,
+                        id: data.created_by.id,
+                        last_name: data.created_by.last_name,
+                      },
+                      id: data.id,
+                      labels: [],
+                      message: this.state.note,
+                      project: { id: this.props.route.params.id },
+                      equipment: { id: this.props.route.params.eId },
+                    });
+                    this.setState({
+                      toggleEdit: false,
+                      note: "",
+                      notes: newNotes,
+                    });
+                    this.props.deleteNote(this.state.editId);
+                    this.setState({
+                      notes: this.state.notes.filter(
+                        (e) => e.id != this.state.editId
+                      ),
+                      editId:undefined
+                    });
+                  } else {
+                    console.log(this.props.user.first_name);
+                    this.props.postLocalEquipNote(
+                      this.props.route.params.id,
+                      eId,
+                      this.props.user.first_name,
+                      this.state.note,
+                      
+                    );
+                    this.setState({
+                      toggleInput: false,
+                      note: "",
+                    });
+                  }
+                });
+              }}
+              style={{
+                alignSelf: "center",
+                padding: 8,
+                backgroundColor: "black",
+                borderRadius: 5,
+                flexDirection: "row",
+                alignItems: "center",
+                width: 180,
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "200", color: "white" }}>
+                Submit
+              </Text>
+            </TouchableOpacity>
+          </Form>
+        )}
 
         {this.state.toggleInput && (
           <Form>
@@ -524,14 +1221,54 @@ class Requirements extends React.Component {
               }}
             />
             <TouchableOpacity
-              onPress={() => {
-                this.props.postEquipNote(
-                  project.id,
-                  eId,
-                  this.state.note
-                );
-                console.log(project.id, eId,this.state.note);
-                this.setState({ toggleInput: false });
+              onPress={async () => {
+                NetInfo.fetch().then(async (state) => {
+                  console.log("Connection type", state.type);
+                  console.log("Is connected?", state.isConnected);
+                  if (state.isConnected) {
+                    var data = await this.props.postEquipNote(
+                      project?.id,
+                      eId,
+                      this.state.note
+                    );
+                    console.log(data.id);
+                    let newNotes = [...this.state.notes];
+                    console.log(newNotes);
+                    newNotes.push({
+                      created_at: data.created_at,
+                      created_by: {
+                        first_name: data.created_by.first_name,
+                        id: data.created_by.id,
+                        last_name: data.created_by.last_name,
+                      },
+                      id: data.id,
+                      labels: [],
+                      message: this.state.note,
+                      project: { id: this.props.route.params.id },
+                      equipment: { id: this.props.route.params.eId },
+                    });
+                    this.setState({
+                      toggleInput: false,
+                      note: "",
+                      notes: newNotes,
+                    });
+
+
+                  } else {
+                    console.log(this.props.user.first_name);
+                    this.props.postLocalEquipNote(
+                      this.props.route.params.id,
+                      eId,
+                      this.props.user.first_name,
+                      this.state.note,
+                      
+                    );
+                    this.setState({
+                      toggleInput: false,
+                      note: "",
+                    });
+                  }
+                });
               }}
               style={{
                 alignSelf: "center",
@@ -550,7 +1287,7 @@ class Requirements extends React.Component {
             </TouchableOpacity>
           </Form>
         )}
-        {!this.state.toggleInput && (
+        {!this.state.toggleInput && !this.state.toggleEdit && (
           <TouchableOpacity
             onPress={() => {
               this.setState({ toggleInput: true });
@@ -569,16 +1306,22 @@ class Requirements extends React.Component {
             <Icon
               type="FontAwesome"
               name="plus-circle"
-              style={{ fontSize: 20, color: "white", marginRight: 10 }}
+              style={{ fontSize: width / 18, color: "white", marginRight: 10 }}
             />
-            <Text style={{ fontSize: 20, fontWeight: "200", color: "white" }}>
+            <Text
+              style={{
+                fontSize: width / 18,
+                fontWeight: "200",
+                color: "white",
+              }}
+            >
               Add Note
             </Text>
           </TouchableOpacity>
         )}
-        {equipment.notes.map(
+        {this.state.notes.map(
           (obj) =>
-             (
+            obj.labels != "CHANGE_REQUEST" && (
               <View
                 style={{
                   margin: 20,
@@ -615,71 +1358,190 @@ class Requirements extends React.Component {
                     <Text style={{ color: "gray" }}>03:15 PM</Text>
                   </View>
                   {this.props.user.id === obj.created_by.id && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      width: 85,
-                    }}
-                  >
-                    <TouchableOpacity
+                    <View
                       style={{
-                        padding: 9,
-                        borderRadius: 24,
-                        backgroundColor: "#F4F4F4",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        width: 85,
                       }}
                     >
-                      <SimpleLineIcons
-                        name="pencil"
-                        size={18}
-                        color="#0074B1"
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{
-                        padding: 7,
-                        borderRadius: 24,
-                        backgroundColor: "#F4F4F4",
-                      }}
-                    >
-                      <Feather
-                        name="trash-2"
-                        size={22}
-                        color="#0074B1"
-                        onPress={() => {
-                          Alert.alert(
-                            "Delete Note?",
-                            "Are you sure you want to delete this note?",
-                            [
-                              {
-                                text: "Cancel",
-                                onPress: () => console.log("Not Deleted"),
-                                style: " cancel",
-                              },
-                              {
-                                text: "OK",
-                                onPress: () => this.props.deleteNote(obj.id),
-                              },
-                            ],
-                            { cancelable: false }
-                          );
+                      <TouchableOpacity
+                        style={{
+                          padding: 9,
+                          borderRadius: 24,
+                          backgroundColor: "#F4F4F4",
                         }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
+                        onPress={() => {
+                          this.setState({
+                            editId: obj.id,
+                            toggleEdit: true,
+                          });
+                        }}
+                      >
+                        <SimpleLineIcons
+                          name="pencil"
+                          size={width / 20}
+                          color="#0074B1"
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          padding: 7,
+                          borderRadius: 24,
+                          backgroundColor: "#F4F4F4",
+                        }}
+                      >
+                        <Feather
+                          name="trash-2"
+                          size={width / 17}
+                          color="#0074B1"
+                          onPress={() => {
+                            Alert.alert(
+                              "Delete Note?",
+                              "Are you sure you want to delete this note?",
+                              [
+                                {
+                                  text: "Cancel",
+                                  onPress: () => console.log("Not Deleted"),
+                                  style: " cancel",
+                                },
+                                {
+                                  text: "OK",
+                                  onPress: () => {
+                                    this.props.deleteNote(obj.id);
+                                    this.setState({
+                                      notes: this.state.notes.filter(
+                                        (e) => e.id != obj.id
+                                      ),
+                                    });
+                                  },
+                                },
+                              ],
+                              { cancelable: false }
+                            );
+                          }}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
-                <Text style={{ marginTop: 20, color: "gray" }}>{obj.note}</Text>
+                <Text style={{ marginTop: 20, color: "gray" }}>{obj.message}</Text>
               </View>
             )
         )}
+
+        {localEquipNotes.map((obj) => (
+          <View
+            style={{
+              margin: 20,
+              paddingTop: 20,
+              borderTopWidth: 1,
+              borderTopColor: "lightgray",
+            }}
+            key={obj.id}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    paddingRight: 5,
+                    marginRight: 5,
+                    fontWeight: "bold",
+                    borderRightWidth: 1,
+                    borderRightColor: "gray",
+                  }}
+                >
+                  {obj.author} {obj.id} {obj.note} {obj.projId} 
+                </Text>
+                <Text style={{ color: "gray" }}>(will be uploaded)</Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: 85,
+                }}
+              >
+                {/* <TouchableOpacity
+                  style={{
+                    padding: 9,
+                    borderRadius: 24,
+                    backgroundColor: "#F4F4F4",
+                  }}
+                  // onPress={() => {
+                  //   this.setState({
+                  //     project: this.props.user.assigned_projects_as_technician?.find(
+                  //       (item) => item.id === this.props.route.params.id
+                  //     ),
+                  //   });
+                  //   console.log(
+                  //     this.props.user.assigned_projects_as_technician[0].notes
+                  //   );
+                  // }}
+                >
+                  <SimpleLineIcons
+                    name="pencil"
+                    size={width / 20}
+                    color="#0074B1"
+                  />
+                </TouchableOpacity> */}
+                <TouchableOpacity
+                  style={{
+                    padding: 7,
+                    borderRadius: 24,
+                    backgroundColor: "#F4F4F4",
+                  }}
+                >
+                  <Feather
+                    name="trash-2"
+                    size={width / 16}
+                    color="#0074B1"
+                    onPress={() => {
+                      Alert.alert(
+                        "Delete Note?",
+                        "Are you sure you want to delete this note?",
+                        [
+                          {
+                            text: "Cancel",
+                            onPress: () => console.log("Not Deleted"),
+                            style: " cancel",
+                          },
+                          {
+                            text: "OK",
+                            onPress: () => {
+                              this.props.deleteEquipNote(obj.id);
+                            },
+                          },
+                        ],
+                        { cancelable: false }
+                      );
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <Text style={{ marginTop: 20, color: "gray" }}>{obj.note}</Text>
+          </View>
+        ))}
 
         {/* <Button onPress={() => this.handleDelete(eId)}>
           <Text>Delete</Text>
         </Button> */}
         <TouchableOpacity
           onPress={() => {
-            this.props.completed.some((el) => el === eId)
+            this.props.completed?.some((el) => el === eId)
               ? this.props.deleteCompleted(eId)
               : this.props.postCompleted(eId);
           }}
@@ -696,12 +1558,18 @@ class Requirements extends React.Component {
           >
             <Feather
               name="check-square"
-              size={20}
+              size={width / 18}
               color="#fff"
               style={{ marginRight: 10 }}
             />
-            <Text style={{ color: "white", fontWeight: "400", fontSize: 16 }}>
-              {this.props.completed.some((el) => el === eId)
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "400",
+                fontSize: width / 23,
+              }}
+            >
+              {this.props.completed?.some((el) => el === eId)
                 ? "Mark as not Done?"
                 : "Mark as Done"}
             </Text>
@@ -711,20 +1579,6 @@ class Requirements extends React.Component {
     );
   }
 }
-
-const options = {
-  container: {
-    backgroundColor: "none",
-    padding: 5,
-    borderRadius: 5,
-    width: 220,
-  },
-  text: {
-    fontSize: 30,
-    color: "#000",
-    marginLeft: 7,
-  },
-};
 
 const styles = StyleSheet.create({
   status: {
@@ -747,12 +1601,11 @@ const styles = StyleSheet.create({
     flex: 2,
     marginRight: 20,
     fontWeight: "100",
-    alignItems: "flex-end",
     justifyContent: "flex-end",
   },
   formLabelText: {
-    fontSize: 20,
-    fontWeight: "100",
+    textAlign: "right",
+    fontSize: width / 18,
   },
 
   formItem: {
@@ -769,14 +1622,14 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: width / 15,
     fontWeight: "bold",
     textAlign: "center",
     color: "purple",
     marginBottom: 20,
   },
   modalText: {
-    fontSize: 18,
+    fontSize: width / 20,
     margin: 10,
   },
   // button: {
@@ -799,7 +1652,7 @@ const styles = StyleSheet.create({
     width: 150,
   },
   mediaButtonText: {
-    fontSize: 15,
+    fontSize: width / 24,
   },
   timestampContainer: {
     margin: 20,

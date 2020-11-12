@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { connect } from "react-redux";
 import { Icon, Textarea } from "native-base";
-import { postCaption } from "../redux/ActionCreators";
+import { postCaption, deleteImages } from "../redux/ActionCreators";
 
 const mapStateToProps = (state) => {
   return {
@@ -28,18 +28,22 @@ class AddCaptions extends Component {
     this.state = {
       showInput: false,
       caption: "",
+      imgId:0
     };
   }
 
-  toggleInput() {
+  toggleInput(id) {
     this.setState({
       showInput: !this.state.showInput,
+      imgId:id
     });
   }
   render() {
+    const imageSet = this.props.selectedImages?.find((item) => item.id === this.props.route.params.eId,);
+    const images = imageSet?.images;
     return (
       <ScrollView style={{ backgroundColor: "#fff" }}>
-        {this.props.route.params.images.map((obj, i) => (
+        {images.map((obj, i) => (
           <View
             key={i}
             style={{ margin: 10, alignSelf: "center", marginBottom: 30 }}
@@ -49,7 +53,7 @@ class AddCaptions extends Component {
               style={{ width: 330, height: 260 }}
             />
             {obj.caption != "" && <Text>{obj.caption}</Text>}
-            {this.state.showInput && (
+            {this.state.showInput && this.state.imgId === obj.id && (
               <View>
                 <Textarea
                   onChangeText={(caption) => this.setState({ caption })}
@@ -97,7 +101,7 @@ class AddCaptions extends Component {
                 </TouchableOpacity>
               </View>
             )}
-            {!this.state.showInput && (
+            {(!this.state.showInput || this.state.imgId != obj.id) && (
               <View
                 style={{
                   flexDirection: "row",
@@ -116,7 +120,7 @@ class AddCaptions extends Component {
                     width: 150,
                     justifyContent: "center",
                   }}
-                  onPress={() => this.toggleInput()}
+                  onPress={() => this.toggleInput(obj.id)}
                 >
                   <Icon
                     type="FontAwesome"
@@ -141,6 +145,7 @@ class AddCaptions extends Component {
                     borderWidth: 2,
                     borderColor: "#DADADA",
                   }}
+                  onPress={()=>this.props.deleteImages(this.props.route.params.eId,[obj,])}
                 >
                   <Text
                     style={{ fontSize: 17, fontWeight: "200", color: "black" }}

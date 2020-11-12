@@ -25,6 +25,8 @@ export default class LoginScreen extends React.Component {
       fontsLoaded: false,
       email: "",
       password: "",
+      toggleCheck: false,
+      remcolor: "#fff",
     };
   }
 
@@ -103,7 +105,7 @@ export default class LoginScreen extends React.Component {
                     borderBottomColor: "lightgray",
                     borderBottomWidth: 1,
                   }}
-                  placeholder="Email address"
+                  placeholder="Username"
                   autoCorrect={false}
                   autoCapitalize="none"
                   keyboardType="email-address"
@@ -142,11 +144,41 @@ export default class LoginScreen extends React.Component {
                   flexDirection: "row",
                   alignItems: "center",
                   marginTop: 20,
-
                 }}
               >
-                <CheckBox
+                {this.state.toggleCheck&&<CheckBox
+                  checked={true}
+                  onPress={() => {
+                    this.setState({ toggleCheck: !this.state.toggleCheck });
+                    // if (this.state.remcolor == "#fff") {
+                    //   this.setState({ remcolor: "none" });
+                    // }
+                    // if (this.state.remcolor == "none") {
+                    //   this.setState({ remcolor: "#fff" });
+                    // }
+                  }}
+                  color="#0074B1"
+                  style={{
+                    fontSize: 12,
+                    borderColor: "none",
+                    // backgroundColor: "none",
+                    marginRight: 20,
+                    borderRadius: 4,
+                    marginLeft: -12,
+                  }}
+                />}
+                {!this.state.toggleCheck&&<CheckBox
                   checked={false}
+                  onPress={() => {
+                    this.setState({ toggleCheck: !this.state.toggleCheck });
+                    // if (this.state.remcolor == "#fff") {
+                    //   this.setState({ remcolor: "none" });
+                    // }
+                    // if (this.state.remcolor == "none") {
+                    //   this.setState({ remcolor: "#fff" });
+                    // }
+                  }}
+                  color="#0074B1"
                   style={{
                     fontSize: 12,
                     borderColor: "none",
@@ -155,7 +187,7 @@ export default class LoginScreen extends React.Component {
                     borderRadius: 4,
                     marginLeft: -12,
                   }}
-                />
+                />}
                 <Text
                   style={{
                     fontFamily: "Montserrat-Thin",

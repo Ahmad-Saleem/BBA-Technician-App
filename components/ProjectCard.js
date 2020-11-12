@@ -19,29 +19,31 @@ class ProjectCard extends React.Component {
     const project = this.props.projects?.find(
       (item) => item.id === this.props.projId
     );
-    const equipments = project.equipments
-    const completed = equipments.map(
-      (obj) => this.props.completed.includes(obj.id) && obj.id
+    const equipments = project?.equipments
+    const completed = equipments?.map(
+      (obj) => this.props.completed?.includes(obj.id) && obj.id
     );
     const totalDuration = this.props.timestamps
-      .map((obj) => (completed.includes(obj.id) ? obj.duration : 0))
+      .map((obj) => (completed?.includes(obj.id) ? obj.duration : 0))
       .reduce((a, b) => a + b, 0);
 
     var month = new Array();
-    month[0] = "Jan";
-    month[1] = "Feb";
-    month[2] = "Mar";
-    month[3] = "Apr";
-    month[4] = "May";
-    month[5] = "Jun";
-    month[6] = "Jul";
-    month[7] = "Aug";
-    month[8] = "Sep";
-    month[9] = "Oct";
-    month[10] = "Nov";
-    month[11] = "Dec";
-    var s=new Date(project.start_date)
-    var c=new Date(project.close_date)
+    month[0] = "";
+    month[1] = "Jan";
+    month[2] = "Feb";
+    month[3] = "Mar";
+    month[4] = "Apr";
+    month[5] = "May";
+    month[6] = "Jun";
+    month[7] = "Jul";
+    month[8] = "Aug";
+    month[9] = "Sep";
+    month[10] = "Oct";
+    month[11] = "Nov";
+    month[12] = "Dec";
+    var s=new Date(project?.start_date)
+    var c=new Date(project?.close_date)
+    var e=("0"+s.getMonth()).slice(-2)+"/"+("0"+s.getDay()).slice(-2)+"/"+s.getFullYear()
     var d = month[s.getMonth()] +" "+ s.getDay() + " - " + month[c.getMonth()] + " " + c.getDay()+"/"+c.getFullYear();
     return (
       <View style={styles.cardstyle}>
@@ -54,9 +56,9 @@ class ProjectCard extends React.Component {
           }}
         >
           <Text style={{ fontSize: 20, fontWeight: "400" }}>
-            {project.project_name}
+            {project?.project_name}
           </Text>
-          {completed.length == equipments.length && !completed.includes(false) && (
+          {completed?.length == equipments?.length && !completed?.includes(false) && (
             <View
               style={[
                 styles.mediaButton,
@@ -109,7 +111,7 @@ class ProjectCard extends React.Component {
             AHU
           </Text>
           <Text style={{ paddingLeft: 3, borderLeftColor: "lightgray" }}>
-            08202020
+            {e}
           </Text>
         </View>
         <Text style={{ color: "gray", marginBottom: 10 }}>
@@ -134,8 +136,8 @@ class ProjectCard extends React.Component {
 
             <Text style={{ color: "black" }}>{d}</Text>
           </View>
-          {completed.length == equipments.length &&
-          !completed.includes(false) ? (
+          {completed?.length == equipments?.length &&
+          !completed?.includes(false) ? (
             <View
               style={[
                 styles.mediaButton,
@@ -174,7 +176,7 @@ class ProjectCard extends React.Component {
 const styles = StyleSheet.create({
   cardstyle: {
     width: 343,
-    height: 220,
+    // height: 220,
     alignSelf: "center",
     borderRadius: 3,
     borderWidth: 1,
