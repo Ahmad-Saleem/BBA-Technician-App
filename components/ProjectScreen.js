@@ -264,7 +264,7 @@ class ProjectScreen extends React.Component {
             Equipment {" " + item.id}
           </Text>
           {this.props.completed?.includes(item.id) ? (
-            <TouchableOpacity
+            <View
               style={[
                 styles.mediaButton,
                 { padding: 10, fontSize: width / 24, width: 100 },
@@ -308,9 +308,9 @@ class ProjectScreen extends React.Component {
                     ).slice(-2)
                   : ""}
               </Text>
-            </TouchableOpacity>
+            </View>
           ) : (
-            <TouchableOpacity
+            <View
               style={[
                 styles.mediaButton,
                 {
@@ -326,7 +326,7 @@ class ProjectScreen extends React.Component {
                 style={{ fontSize: width / 24, marginRight: 4 }}
               />
               <Text style={styles.mediaButtonText}>Track time</Text>
-            </TouchableOpacity>
+            </View>
           )}
         </View>
         <View style={{ flexDirection: "row", width: 163, marginTop: 5 }}>

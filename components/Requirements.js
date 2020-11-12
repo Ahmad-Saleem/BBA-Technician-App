@@ -27,7 +27,7 @@ import {
   postEquipNote,
   postLocalEquipNote,
   deleteEquipNote,
-  postDataRead
+  postDataRead,
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -45,7 +45,7 @@ const mapStateToProps = (state) => {
     completed: state.completed,
     selectedImages: state.selectedImages,
     localEquipNotes: state.localEquipNotes,
-    dataReads:state.dataReads
+    dataReads: state.dataReads,
   };
 };
 
@@ -62,10 +62,11 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(postEquipNote(projId, eId, note)),
   uploadToStorage: (preread, postread, eId, images) =>
     dispatch(uploadToStorage(preread, postread, eId, images)),
-  postLocalEquipNote: (projId, eId, author,note) =>
+  postLocalEquipNote: (projId, eId, author, note) =>
     dispatch(postLocalEquipNote(projId, eId, author, note)),
   deleteEquipNote: (id) => dispatch(deleteEquipNote(id)),
-  postDataRead:(id,prereads,postreads)=> dispatch(postDataRead(id, prereads, postreads))
+  postDataRead: (id, prereads, postreads) =>
+    dispatch(postDataRead(id, prereads, postreads)),
   // postComment: (dishId, rating, author, comment) =>
   //   dispatch(postComment(dishId, rating, author, comment)),
 });
@@ -78,32 +79,82 @@ class Requirements extends React.Component {
 
     this.state = {
       preread: {
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
-        coil_differential_pressure_with_filter: 0.0,
-        coil_differential_pressure_without_filter: 0.0,
-        fan_speed: 0.0,
-        outside_air_temperature: 0.0,
-        outside_air_damper_position: 0.0,
-        air_temp_reading: 0.0,
-        coil_Infrared_image_coil: 0.0,
-        is_terminal: false,
-        velocity: 0.0,
-        supply_air_temperature: 0.0,
+        date: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.date,
+        time: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.time,
+        coil_differential_pressure_with_filter: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.coil_differential_pressure_with_filter,
+        coil_differential_pressure_without_filter: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.coil_differential_pressure_without_filter,
+        fan_speed: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.fan_speed,
+        outside_air_temperature: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.outside_air_temperature,
+        outside_air_damper_position: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.outside_air_damper_position,
+        air_temp_reading: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.air_temp_reading,
+        coil_Infrared_image_coil: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.coil_Infrared_image_coil,
+        // is_terminal: this.props.dataReads?.find(
+        //   (item) => item.id === this.props.route.params.eId
+        // )?.prereads?.is_terminal,
+        is_terminal: true,
+        velocity: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.velocity,
+        supply_air_temperature: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.prereads?.supply_air_temperature,
       },
       postread: {
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
-        coil_differential_pressure_with_filter: 0.0,
-        coil_differential_pressure_without_filter: 0.0,
-        fan_speed: 0.0,
-        outside_air_temperature: 0.0,
-        outside_air_damper_position: 0.0,
-        air_temp_reading: 0.0,
-        coil_Infrared_image_coil: 0.0,
-        is_terminal: false,
-        velocity: 0.0,
-        supply_air_temperature: 0.0,
+        date: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.date,
+        time: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.time,
+        coil_differential_pressure_with_filter: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.coil_differential_pressure_with_filter,
+        coil_differential_pressure_without_filter: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.coil_differential_pressure_without_filter,
+        fan_speed: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.fan_speed,
+        outside_air_temperature: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.outside_air_temperature,
+        outside_air_damper_position: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.outside_air_damper_position,
+        air_temp_reading: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.air_temp_reading,
+        coil_Infrared_image_coil: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.coil_Infrared_image_coil,
+        // is_terminal: this.props.dataReads?.find(
+        //   (item) => item.id === this.props.route.params.eId
+        // )?.postreads?.is_terminal,
+        is_terminal: true,
+        velocity: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.velocity,
+        supply_air_temperature: this.props.dataReads?.find(
+          (item) => item.id === this.props.route.params.eId
+        )?.postreads?.supply_air_temperature,
       },
       duration: 0,
       note: "",
@@ -119,8 +170,8 @@ class Requirements extends React.Component {
       showPostTime: false,
       // equipment:project?.equipments?.find((item) => item.id === eId),
       user: this.props.user,
-      editId:undefined,
-      toggleEdit:false
+      editId: undefined,
+      toggleEdit: false,
     };
   }
 
@@ -286,28 +337,37 @@ class Requirements extends React.Component {
     };
 
     const { eId } = this.props.route.params;
-    const equipment = project?.equipments?.find((item) => item.id === eId);
+    // const equipment = project?.equipments?.find((item) => item.id === eId);
     const localEquipNotes = this.props.localEquipNotes.filter(
       (obj) => obj.eId === eId
     );
-    const dataread = this.props.dataReads?.find((item) => item.id === eId);
-    const prereads= dataread?.prereads
-    const postreads = dataread?.postreads
+    // const dataread = this.props.dataReads?.find((item) => item.id === eId);
+    // const prereads = dataread?.prereads;
+    // const postreads = dataread?.postreads;
     const timestamp = this.props.timestamps.find((item) => item.id === eId);
     const imageSet = this.props.selectedImages?.find((item) => item.id === eId);
     const images = imageSet?.images;
     this.props.navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
-          onPress={() =>
-            {this.props.uploadToStorage(
-              this.state.preread,
-              this.state.postread,
+          onPress={async () => {
+            await this.props.postDataRead(
               eId,
-              images
+              this.state.preread,
+              this.state.postread
             );
-          this.props.postDataRead(eId, this.state.preread, this.state.postread)}
-          }
+            NetInfo.fetch().then((state) => {
+              if (state.isConnected) {
+                this.props.uploadToStorage(
+                  this.state.preread,
+                  this.state.postread,
+                  eId,
+                  images
+                );
+              }
+            });
+            console.log(this.state.preread, this.state.postread);
+          }}
           style={{
             width: 140,
             alignItems: "center",
@@ -354,9 +414,9 @@ class Requirements extends React.Component {
           </View>
           <TextInput
             style={styles.formItem}
-            selectedValue={prereads?.date}
+            selectedValue={this.state.preread.date}
             placeholder={this.state.preread.date}
-            defaultValue={prereads?.date}
+            defaultValue={this.state.preread.date}
             // onPress={showDatepicker}
             onTouchStart={showModePreDate}
           />
@@ -366,10 +426,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Time</Text>
           </View>
           <TextInput
-            selectedValue={prereads?.time}
+            selectedValue={this.state.preread.time}
             style={styles.formItem}
             placeholder={this.state.preread.time}
-            defaultValue={prereads?.time}
+            defaultValue={this.state.preread.time}
             onTouchStart={showModePreTime}
             onChangeText={(itemValue) => this.setState({ postread: itemValue })}
           />
@@ -421,10 +481,16 @@ class Requirements extends React.Component {
             </Text>
           </View>
           <TextInput
-            selectedValue={prereads?.coil_differential_pressure_with_filter}
+            selectedValue={
+              this.state.preread?.coil_differential_pressure_with_filter
+            }
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.coil_differential_pressure_with_filter}
+            placeholder={
+              this.state.preread?.coil_differential_pressure_with_filter
+            }
+            defaultValue={
+              this.state.preread?.coil_differential_pressure_with_filter
+            }
             onChangeText={(itemValue) =>
               this.setState({
                 preread: {
@@ -442,10 +508,16 @@ class Requirements extends React.Component {
             </Text>
           </View>
           <TextInput
-            selectedValue={prereads?.coil_differential_pressure_without_filter}
+            selectedValue={
+              this.state.preread?.coil_differential_pressure_without_filter
+            }
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.coil_differential_pressure_without_filter}
+            placeholder={
+              this.state.preread?.coil_differential_pressure_without_filter
+            }
+            defaultValue={
+              this.state.preread?.coil_differential_pressure_without_filter
+            }
             onChangeText={(itemValue) =>
               this.setState({
                 preread: {
@@ -461,10 +533,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Fan speed</Text>
           </View>
           <TextInput
-            selectedValue={prereads?.fan_speed}
+            selectedValue={this.state.preread?.fan_speed}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.fan_speed}
+            placeholder={this.state.preread?.fan_speed}
+            defaultValue={this.state.preread?.fan_speed}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: { ...this.state.preread, fan_speed: itemValue },
@@ -477,10 +549,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Outside air temperature</Text>
           </View>
           <TextInput
-            selectedValue={prereads?.outside_air_temperature}
+            selectedValue={this.state.preread?.outside_air_temperature}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.outside_air_temperature}
+            placeholder={this.state.preread?.outside_air_temperature}
+            defaultValue={this.state.preread?.outside_air_temperature}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: {
@@ -498,10 +570,10 @@ class Requirements extends React.Component {
             </Text>
           </View>
           <TextInput
-            selectedValue={prereads?.outside_air_damper_position}
+            selectedValue={this.state.preread?.outside_air_damper_position}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.outside_air_damper_position}
+            placeholder={this.state.preread?.outside_air_damper_position}
+            defaultValue={this.state.preread?.outside_air_damper_position}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: {
@@ -517,10 +589,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Air temp reading</Text>
           </View>
           <TextInput
-            selectedValue={prereads?.air_temp_reading}
+            selectedValue={this.state.preread?.air_temp_reading}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.air_temp_reading}
+            placeholder={this.state.preread?.air_temp_reading}
+            defaultValue={this.state.preread?.air_temp_reading}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: { ...this.state.preread, air_temp_reading: itemValue },
@@ -533,10 +605,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Coil Infrared image coil</Text>
           </View>
           <TextInput
-            selectedValue={this.state.preread}
+            selectedValue={this.state.preread?.coil_Infrared_image_coil}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.preread?.coil_Infrared_image_coil}
+            defaultValue={this.state.preread?.coil_Infrared_image_coil}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: {
@@ -564,10 +636,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Velocity</Text>
           </View>
           <TextInput
-            selectedValue={prereads?.velocity}
+            selectedValue={this.state.preread?.velocity}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.air_temp_reading}
+            placeholder={this.state.preread?.velocity}
+            defaultValue={this.state.preread?.velocity}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: { ...this.state.preread, velocity: itemValue },
@@ -580,10 +652,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Supply air temperature</Text>
           </View>
           <TextInput
-            selectedValue={prereads?.supply_air_temperature}
+            selectedValue={this.state.preread?.supply_air_temperature}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue={prereads?.supply_air_temperature}
+            placeholder={this.state.preread?.supply_air_temperature}
+            defaultValue={this.state.preread?.supply_air_temperature}
             onChangeText={(itemValue) =>
               this.setState({
                 preread: {
@@ -607,9 +679,9 @@ class Requirements extends React.Component {
           </View>
           <TextInput
             style={styles.formItem}
-            selectedValue={this.state.postread.date}
-            placeholder={this.state.postread.date}
-            defaultValue={this.state.postread.date}
+            selectedValue={this.state.postread?.date}
+            placeholder={this.state.postread?.date}
+            defaultValue={this.state.postread?.date}
             onTouchStart={showModePostDate}
           />
         </View>
@@ -618,29 +690,33 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Time</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.time}
+            selectedValue={this.state.postread?.time}
             style={styles.formItem}
-            placeholder={this.state.postread.time}
-            defaultValue={this.state.postread.date}
+            placeholder={this.state.postread?.time}
+            defaultValue={this.state.postread?.time}
             onTouchStart={showModePostTime}
           />
         </View>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>
-              Coil differential pressure without filter
+              Coil differential pressure with filter
             </Text>
           </View>
           <TextInput
             selectedValue={
-              this.state.postread.coil_differential_pressure_with_filter
+              this.state.postread?.coil_differential_pressure_with_filter
             }
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={
+              this.state.postread?.coil_differential_pressure_with_filter
+            }
+            defaultValue={
+              this.state.postread?.coil_differential_pressure_with_filter
+            }
             onChangeText={(itemValue) =>
               this.setState({
-                preread: {
+                postread: {
                   ...this.state.postread,
                   coil_differential_pressure_with_filter: itemValue,
                 },
@@ -656,14 +732,18 @@ class Requirements extends React.Component {
           </View>
           <TextInput
             selectedValue={
-              this.state.postread.coil_differential_pressure_without_filter
+              this.state.postread?.coil_differential_pressure_without_filter
             }
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={
+              this.state.postread?.coil_differential_pressure_without_filter
+            }
+            defaultValue={
+              this.state.postread?.coil_differential_pressure_without_filter
+            }
             onChangeText={(itemValue) =>
               this.setState({
-                preread: {
+                postread: {
                   ...this.state.postread,
                   coil_differential_pressure_without_filter: itemValue,
                 },
@@ -676,13 +756,13 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Fan speed</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.fan_speed}
+            selectedValue={this.state.postread?.fan_speed}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.fan_speed}
+            defaultValue={this.state.postread?.fan_speed}
             onChangeText={(itemValue) =>
               this.setState({
-                preread: { ...this.state.postread, fan_speed: itemValue },
+                postread: { ...this.state.postread, fan_speed: itemValue },
               })
             }
           />
@@ -692,13 +772,13 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Outside air temperature</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.outside_air_temperature}
+            selectedValue={this.state.postread?.outside_air_temperature}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.outside_air_temperature}
+            defaultValue={this.state.postread?.outside_air_temperature}
             onChangeText={(itemValue) =>
               this.setState({
-                preread: {
+                postread: {
                   ...this.state.postread,
                   outside_air_temperature: itemValue,
                 },
@@ -713,10 +793,10 @@ class Requirements extends React.Component {
             </Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.outside_air_damper_position}
+            selectedValue={this.state.postread?.outside_air_damper_position}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.outside_air_damper_position}
+            defaultValue={this.state.postread?.outside_air_damper_position}
             onChangeText={(itemValue) =>
               this.setState({
                 postread: {
@@ -732,10 +812,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Air temp reading</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.air_temp_reading}
+            selectedValue={this.state.postread?.air_temp_reading}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.air_temp_reading}
+            defaultValue={this.state.postread?.air_temp_reading}
             onChangeText={(itemValue) =>
               this.setState({
                 postread: {
@@ -751,10 +831,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Coil Infrared image coil</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.coil_Infrared_image_coil}
+            selectedValue={this.state.postread?.coil_Infrared_image_coil}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.coil_Infrared_image_coil}
+            defaultValue={this.state.postread?.coil_Infrared_image_coil}
             onChangeText={(itemValue) =>
               this.setState({
                 postread: {
@@ -782,10 +862,10 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Velocity</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.velocity}
+            selectedValue={this.state.postread?.velocity}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.velocity}
+            defaultValue={this.state.postread?.velocity}
             onChangeText={(itemValue) =>
               this.setState({
                 postread: { ...this.state.postread, velocity: itemValue },
@@ -793,16 +873,15 @@ class Requirements extends React.Component {
             }
           />
         </View>
-
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Supply air temperature</Text>
           </View>
           <TextInput
-            selectedValue={this.state.postread.supply_air_temperature}
+            selectedValue={this.state.postread?.supply_air_temperature}
             style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
+            placeholder={this.state.postread?.supply_air_temperature}
+            defaultValue={this.state.postread?.supply_air_temperature}
             onChangeText={(itemValue) =>
               this.setState({
                 postread: {
@@ -1167,7 +1246,7 @@ class Requirements extends React.Component {
                       notes: this.state.notes.filter(
                         (e) => e.id != this.state.editId
                       ),
-                      editId:undefined
+                      editId: undefined,
                     });
                   } else {
                     console.log(this.props.user.first_name);
@@ -1175,8 +1254,7 @@ class Requirements extends React.Component {
                       this.props.route.params.id,
                       eId,
                       this.props.user.first_name,
-                      this.state.note,
-                      
+                      this.state.note
                     );
                     this.setState({
                       toggleInput: false,
@@ -1252,16 +1330,13 @@ class Requirements extends React.Component {
                       note: "",
                       notes: newNotes,
                     });
-
-
                   } else {
                     console.log(this.props.user.first_name);
                     this.props.postLocalEquipNote(
                       this.props.route.params.id,
                       eId,
                       this.props.user.first_name,
-                      this.state.note,
-                      
+                      this.state.note
                     );
                     this.setState({
                       toggleInput: false,
@@ -1425,7 +1500,9 @@ class Requirements extends React.Component {
                     </View>
                   )}
                 </View>
-                <Text style={{ marginTop: 20, color: "gray" }}>{obj.message}</Text>
+                <Text style={{ marginTop: 20, color: "gray" }}>
+                  {obj.message}
+                </Text>
               </View>
             )
         )}
@@ -1462,7 +1539,7 @@ class Requirements extends React.Component {
                     borderRightColor: "gray",
                   }}
                 >
-                  {obj.author} {obj.id} {obj.note} {obj.projId} 
+                  {obj.author} {obj.id} {obj.note} {obj.projId}
                 </Text>
                 <Text style={{ color: "gray" }}>(will be uploaded)</Text>
               </View>
@@ -1605,7 +1682,7 @@ const styles = StyleSheet.create({
   },
   formLabelText: {
     textAlign: "right",
-    fontSize: width / 18,
+    fontSize: width / 20,
   },
 
   formItem: {

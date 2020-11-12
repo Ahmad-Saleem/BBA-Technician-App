@@ -401,7 +401,28 @@ export const addCaption = (newCaption) => ({
 export const uploadToStorage = (preread, postread, eId, images) => (
   dispatch
 ) => {
-  console.log(images);
+  console.log(preread, postread, eId, images);
+  var pre={...preread}
+  var post={...postread}
+  if(!pre.coil_differential_pressure_with_filter){pre.coil_differential_pressure_with_filter=0}
+  if(!pre.coil_differential_pressure_without_filter){pre.coil_differential_pressure_without_filter=0}
+  if(!pre.coil_Infrared_image_coil){pre.coil_Infrared_image_coil=0}
+  if(!pre.air_temp_reading){pre.air_temp_reading=0}
+  if(!pre.fan_speed){pre.fan_speed=0}
+  if(!pre.outside_air_damper_position){pre.outside_air_damper_position=0}
+  if(!pre.outside_air_temperature){pre.outside_air_temperature=0}
+  if(!pre.supply_air_temperature){pre.supply_air_temperature=0}
+  if(!pre.velocity){pre.velocity=0}
+  if(!post.coil_differential_pressure_with_filter){post.coil_differential_pressure_with_filter=0}
+  if(!post.coil_differential_pressure_without_filter){post.coil_differential_pressure_without_filter=0}
+  if(!post.coil_Infrared_image_coil){post.coil_Infrared_image_coil=0}
+  if(!post.air_temp_reading){post.air_temp_reading=0}
+  if(!post.fan_speed){post.fan_speed=0}
+  if(!post.outside_air_damper_position){post.outside_air_damper_position=0}
+  if(!post.outside_air_temperature){post.outside_air_temperature=0}
+  if(!post.supply_air_temperature){post.supply_air_temperature=0}
+  if(!post.velocity){post.velocity=0}
+
   for (let index = 0; index < images?.length; index++) {
     const { obj } = images[index];
     async () => {
@@ -421,7 +442,7 @@ export const uploadToStorage = (preread, postread, eId, images) => (
 
   setTimeout(() => {
     console.log("storage done");
-    dispatch(uploadDataReads(preread, postread, eId, images));
+    dispatch(uploadDataReads(pre, post, eId, images));
   }, 2000);
 };
 

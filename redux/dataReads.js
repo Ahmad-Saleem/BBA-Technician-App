@@ -6,7 +6,7 @@ export const dataReads = (state = [], action) => {
       var dataread = { ...action.payload };
       const found = state.some((el) => el.id === dataread.id);
       if (found) {
-        index = state.findIndex((x) => x.id === timestamp.id);
+        index = state.findIndex((x) => x.id === dataread.id);
         return state.map((obj, i) =>
         i === index
           ? {
