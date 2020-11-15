@@ -72,7 +72,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 let width = Dimensions.get("window").width;
-if(width<335){width=240}
+
 
 class Requirements extends React.Component {
   constructor(props) {
@@ -913,9 +913,9 @@ class Requirements extends React.Component {
                   type: "photo",
                 })
               }
-              style={styles.mediaButton}
+              style={[styles.mediaButton]}
             >
-              <AntDesign name="picture" size={width / 18} color="black" />
+              <AntDesign name="picture" style={{marginRight:15}} size={width / 18} color="black" />
               <Text style={styles.mediaButtonText}>Choose Photo</Text>
             </TouchableOpacity>
 
@@ -928,7 +928,7 @@ class Requirements extends React.Component {
               }
               style={styles.mediaButton}
             >
-              <Feather name="video" size={width / 18} color="black" />
+              <Feather name="video" style={{marginRight:15}} size={width / 18} color="black" />
               <Text style={styles.mediaButtonText}>Choose Video</Text>
             </TouchableOpacity>
           </View>
@@ -1073,7 +1073,7 @@ class Requirements extends React.Component {
             <Icon
               type="FontAwesome"
               name="clock-o"
-              style={{ fontSize: width / 22, color: "white" }}
+              style={{ fontSize: width / 22, color: "white",marginRight:15 }}
             />
 
             <Text style={[styles.mediaButtonText, { color: "white" }]}>

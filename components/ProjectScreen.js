@@ -62,7 +62,7 @@ const wait = (timeout) => {
 };
 
 let width = Dimensions.get("window").width;
-if(width<335){width=240}
+
 
 class ProjectScreen extends React.Component {
   constructor(props) {
@@ -906,7 +906,7 @@ class ProjectScreen extends React.Component {
                   borderRadius: 5,
                   flexDirection: "row",
                   alignItems: "center",
-                  width: 150,
+                  width: 130,
                   justifyContent: "center",
                   marginBottom: 5,
                   // marginTop: 30,
@@ -944,7 +944,7 @@ class ProjectScreen extends React.Component {
                   borderRadius: 5,
                   flexDirection: "row",
                   alignItems: "center",
-                  width: 150,
+                  width: 170,
                   justifyContent: "center",
                   marginBottom: 5,
                   // marginTop: 30,
