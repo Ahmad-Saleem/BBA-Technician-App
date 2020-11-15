@@ -72,6 +72,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 let width = Dimensions.get("window").width;
+if(width<300){width=240}
 
 class Requirements extends React.Component {
   constructor(props) {

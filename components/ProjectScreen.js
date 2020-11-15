@@ -62,6 +62,7 @@ const wait = (timeout) => {
 };
 
 let width = Dimensions.get("window").width;
+if(width<300){width=240}
 
 class ProjectScreen extends React.Component {
   constructor(props) {
@@ -962,7 +963,7 @@ class ProjectScreen extends React.Component {
                 />
                 <Text
                   style={{
-                    fontSize: width / 26,
+                    fontSize: width / 24,
                     fontWeight: "200",
                     color: "white",
                   }}
