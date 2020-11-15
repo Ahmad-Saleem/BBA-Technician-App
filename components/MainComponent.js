@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Auth } from "aws-amplify";
-import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, Button, TouchableOpacity , Dimensions} from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./HomeScreen";
 import ProjectScreen from "./ProjectScreen";
@@ -12,6 +12,8 @@ import { connect } from "react-redux";
 import { Icon } from "native-base";
 import { fetchUser } from "../redux/ActionCreators";
 import NetInfo from '@react-native-community/netinfo';
+
+let width = Dimensions.get("window").width;
 
 const mapStateToProps = (state) => {
   return {
@@ -72,40 +74,40 @@ class Main extends React.Component {
             headerStyle: { backgroundColor: "#000" },
             headerTitleContainerStyle: { marginLeft: -25 },
             headerTintColor: "#fff",
-            headerTitleStyle: { color: "#fff" },
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => alert("This is a button!")}
-                style={{
-                  width: 140,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "row",
-                  borderColor: "#fff",
-                  borderWidth: 1,
-                  padding: 5,
-                  borderRadius: 5,
-                  marginRight: 20,
-                }}
-              >
-                <Icon
-                  type="FontAwesome"
-                  name="check"
-                  style={{ fontSize: 15, color: "white", marginRight: 7 }}
-                />
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontWeight: "bold",
-                    fontSize: 15,
-                    paddingTop: 3,
-                    paddingBottom: 3,
-                  }}
-                >
-                  Update
-                </Text>
-              </TouchableOpacity>
-            ),
+            headerTitleStyle: { color: "#fff", fontSize:width/20 },
+            // headerRight: () => (
+            //   <TouchableOpacity
+            //     onPress={() => alert("This is a button!")}
+            //     style={{
+            //       width: 140,
+            //       alignItems: "center",
+            //       justifyContent: "center",
+            //       flexDirection: "row",
+            //       borderColor: "#fff",
+            //       borderWidth: 1,
+            //       padding: 5,
+            //       borderRadius: 5,
+            //       marginRight: 20,
+            //     }}
+            //   >
+            //     <Icon
+            //       type="FontAwesome"
+            //       name="check"
+            //       style={{ fontSize: 15, color: "white", marginRight: 7 }}
+            //     />
+            //     <Text
+            //       style={{
+            //         color: "#fff",
+            //         fontWeight: "bold",
+            //         fontSize: 15,
+            //         paddingTop: 3,
+            //         paddingBottom: 3,
+            //       }}
+            //     >
+            //       Update
+            //     </Text>
+            //   </TouchableOpacity>
+            // ),
           }}
         />
         <Stack.Screen

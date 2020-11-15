@@ -260,7 +260,7 @@ class ProjectScreen extends React.Component {
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: width / 18, fontWeight: "400" }}>
+          <Text style={{ fontSize: width / 22, fontWeight: "400" }}>
             Equipment {" " + item.id}
           </Text>
           {this.props.completed?.includes(item.id) ? (
@@ -329,7 +329,7 @@ class ProjectScreen extends React.Component {
             </View>
           )}
         </View>
-        <View style={{ flexDirection: "row", width: 163, marginTop: 5 }}>
+        <View style={{ flexDirection: "row",  marginTop: 5 }}>
           <Icon
             type="FontAwesome"
             name="calendar"
@@ -365,7 +365,7 @@ class ProjectScreen extends React.Component {
                 }
               </Text>
             </View>
-            <View style={{ flexDirection: "row", width: 50, marginTop: 5 }}>
+            <View style={{ flexDirection: "row",  marginTop: 5 }}>
               <AntDesign
                 name="message1"
                 size={width / 18}
@@ -956,13 +956,13 @@ class ProjectScreen extends React.Component {
                 /> */}
                 <Feather
                   name="clipboard"
-                  size={width / 23}
+                  size={width / 24}
                   color="white"
                   style={{ marginRight: 6 }}
                 />
                 <Text
                   style={{
-                    fontSize: width / 24,
+                    fontSize: width / 26,
                     fontWeight: "200",
                     color: "white",
                   }}

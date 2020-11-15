@@ -369,13 +369,13 @@ class Requirements extends React.Component {
             console.log(this.state.preread, this.state.postread);
           }}
           style={{
-            width: 140,
+            width: width / 3,
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "row",
             borderColor: "#fff",
             borderWidth: 1,
-            padding: 5,
+            // padding: 5,
             borderRadius: 5,
             marginRight: 20,
           }}
@@ -390,8 +390,8 @@ class Requirements extends React.Component {
               color: "#fff",
               fontWeight: "bold",
               fontSize: width / 20,
-              paddingTop: 3,
-              paddingBottom: 3,
+              paddingTop: 5,
+              paddingBottom: 5,
             }}
           >
             Update
@@ -1072,7 +1072,7 @@ class Requirements extends React.Component {
             <Icon
               type="FontAwesome"
               name="clock-o"
-              style={{ fontSize: width / 18, color: "white" }}
+              style={{ fontSize: width / 22, color: "white" }}
             />
 
             <Text style={[styles.mediaButtonText, { color: "white" }]}>
@@ -1092,7 +1092,7 @@ class Requirements extends React.Component {
               alignItems: "center",
             }}
           >
-            <Text style={styles.formLabelText}>Start time</Text>
+            <Text style={[styles.formLabelText,{alignSelf:"flex-start"}]}>Start time</Text>
 
             <View
               style={{
@@ -1111,7 +1111,7 @@ class Requirements extends React.Component {
             }}
           >
             <Text
-              style={[styles.formLabelText, { width: 90, textAlign: "right" }]}
+              style={styles.formLabelText}
             >
               End time
             </Text>
@@ -1134,7 +1134,7 @@ class Requirements extends React.Component {
             }}
           >
             <Text
-              style={[styles.formLabelText, { width: 90, fontWeight: "bold" }]}
+              style={styles.formLabelText}
             >
               Total time
             </Text>
@@ -1539,7 +1539,7 @@ class Requirements extends React.Component {
                     borderRightColor: "gray",
                   }}
                 >
-                  {obj.author} {obj.id} {obj.note} {obj.projId}
+                  {obj.author} 
                 </Text>
                 <Text style={{ color: "gray" }}>(will be uploaded)</Text>
               </View>
@@ -1547,7 +1547,7 @@ class Requirements extends React.Component {
               <View
                 style={{
                   flexDirection: "row",
-                  justifyContent: "space-between",
+                  justifyContent: "flex-end",
                   width: 85,
                 }}
               >
@@ -1726,6 +1726,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F4F4F4",
     borderRadius: 5,
     justifyContent: "space-around",
+    alignItems:"center",
     width: 150,
   },
   mediaButtonText: {
