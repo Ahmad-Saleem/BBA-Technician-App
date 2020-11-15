@@ -62,7 +62,7 @@ const wait = (timeout) => {
 };
 
 let width = Dimensions.get("window").width;
-if(width<300){width=240}
+if(width<335){width=240}
 
 class ProjectScreen extends React.Component {
   constructor(props) {
