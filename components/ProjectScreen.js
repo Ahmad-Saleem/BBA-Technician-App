@@ -936,7 +936,7 @@ class ProjectScreen extends React.Component {
                   <Text
                     style={{
                       fontSize: width / 24,
-                      fontWeight: "200",
+                      // fontWeight: "200",
                       color: "white",
                     }}
                   >

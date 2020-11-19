@@ -1392,7 +1392,7 @@ class Requirements extends React.Component {
             <Text
               style={{
                 fontSize: width / 18,
-                fontWeight: "200",
+                // fontWeight: "200",
                 color: "white",
               }}
             >
