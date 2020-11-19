@@ -43,8 +43,8 @@ class ProjectCard extends React.Component {
     month[12] = "Dec";
     var s=new Date(project?.start_date)
     var c=new Date(project?.close_date)
-    var e=("0"+s.getMonth()).slice(-2)+"/"+("0"+s.getDay()).slice(-2)+"/"+s.getFullYear()
-    var d = month[s.getMonth()] +" "+ s.getDay() + " - " + month[c.getMonth()] + " " + c.getDay()+"/"+c.getFullYear();
+    var e=("0"+s.getMonth()).slice(-2)+"/"+("0"+s.getDate()).slice(-2)+"/"+s.getFullYear()
+    var d = month[s.getMonth()] +" "+ s.getDate() + " - " + month[c.getMonth()] + " " + c.getDate()+"/"+c.getFullYear();
     return (
       <View style={styles.cardstyle}>
         <View

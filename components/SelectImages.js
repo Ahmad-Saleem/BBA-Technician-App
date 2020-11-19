@@ -79,7 +79,7 @@ const type=this.props.route.params.type
     return (
       <AssetsSelector
         options={{
-          assetsType: [type],
+          assetsType: type,
           noAssetsText: "No media found.",
           maxSelections: 5,
           margin: 3,

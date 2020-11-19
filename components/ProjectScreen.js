@@ -63,7 +63,6 @@ const wait = (timeout) => {
 
 let width = Dimensions.get("window").width;
 
-
 class ProjectScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -77,9 +76,9 @@ class ProjectScreen extends React.Component {
       note: "",
       toggleInput: false,
       toggleChange: false,
-      toggleEdit:false,
+      toggleEdit: false,
       refreshing: false,
-      editId: undefined
+      editId: undefined,
     };
   }
 
@@ -330,15 +329,22 @@ class ProjectScreen extends React.Component {
             </View>
           )}
         </View>
-        <View style={{ flexDirection: "row",  marginTop: 5 }}>
-          <Icon
-            type="FontAwesome"
-            name="calendar"
-            style={{ fontSize: width / 18, color: "black", marginRight: 10 }}
-          />
+        {this.props.completed?.includes(item.id) && (
+          <View style={{ flexDirection: "row", marginTop: 5 }}>
+            <Icon
+              type="FontAwesome"
+              name="calendar"
+              style={{ fontSize: width / 18, color: "black", marginRight: 10 }}
+            />
 
-          <Text style={{ color: "black" }}>Sep 30 - Oct 10/2020</Text>
-        </View>
+            <Text style={{ color: "black" }}>
+              {
+                this.props.timestamps.find((obj) => obj.id === item.id)
+                  ?.datestring
+              }
+            </Text>
+          </View>
+        )}
         {/* <View style={{ flexDirection: "row", alignItems: "baseline",marginTop:15 }}>
           <Text style={{ width: 100 }}>CFM:{item.value}</Text>
           <Text>Building: {item.building}</Text>
@@ -366,7 +372,7 @@ class ProjectScreen extends React.Component {
                 }
               </Text>
             </View>
-            <View style={{ flexDirection: "row",  marginTop: 5 }}>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
               <AntDesign
                 name="message1"
                 size={width / 18}
@@ -379,7 +385,7 @@ class ProjectScreen extends React.Component {
             </View>
           </View>
 
-          {this.props.completed?.includes(item.id) ? (
+          {this.props.completed?.includes(item.id) && (
             <View
               style={[
                 styles.mediaButton,
@@ -404,8 +410,6 @@ class ProjectScreen extends React.Component {
 
               <Text style={{ color: "white" }}>Done</Text>
             </View>
-          ) : (
-            <View></View>
           )}
         </View>
       </TouchableOpacity>
@@ -700,8 +704,10 @@ class ProjectScreen extends React.Component {
                         });
                         this.props.deleteNote(this.state.editId);
                         this.setState({
-                          notes: this.state.notes.filter((e) => e.id != this.state.editId),
-                          editId: undefined
+                          notes: this.state.notes.filter(
+                            (e) => e.id != this.state.editId
+                          ),
+                          editId: undefined,
                         });
                       } else {
                         this.props.postLocalProjectNote(
@@ -740,7 +746,11 @@ class ProjectScreen extends React.Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    this.setState({ toggleEdit: false, note: "", editId:undefined });
+                    this.setState({
+                      toggleEdit: false,
+                      note: "",
+                      editId: undefined,
+                    });
                   }}
                   style={{
                     padding: 8,
@@ -894,84 +904,88 @@ class ProjectScreen extends React.Component {
               marginRight: 20,
             }}
           >
-            {!this.state.toggleInput && !this.state.toggleChange && !this.state.toggleEdit && (
-              <TouchableOpacity
-                onPress={() => {
-                  this.setState({ toggleInput: true });
-                }}
-                style={{
-                  alignSelf: "center",
-                  padding: 8,
-                  backgroundColor: "black",
-                  borderRadius: 5,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  width: 130,
-                  justifyContent: "center",
-                  marginBottom: 5,
-                  // marginTop: 30,
-                }}
-              >
-                <Icon
-                  type="FontAwesome"
-                  name="plus-circle"
-                  style={{
-                    fontSize: width / 24,
-                    color: "white",
-                    marginRight: 10,
+            {!this.state.toggleInput &&
+              !this.state.toggleChange &&
+              !this.state.toggleEdit && (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setState({ toggleInput: true });
                   }}
-                />
-                <Text
                   style={{
-                    fontSize: width / 24,
-                    fontWeight: "200",
-                    color: "white",
+                    alignSelf: "center",
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 130,
+                    justifyContent: "center",
+                    marginBottom: 5,
+                    // marginTop: 30,
                   }}
                 >
-                  Add Note
-                </Text>
-              </TouchableOpacity>
-            )}
-            {!this.state.toggleInput && !this.state.toggleChange && !this.state.toggleEdit && (
-              <TouchableOpacity
-                onPress={() => {
-                  this.setState({ toggleChange: true });
-                }}
-                style={{
-                  alignSelf: "center",
-                  padding: 8,
-                  backgroundColor: "black",
-                  borderRadius: 5,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  width: 170,
-                  justifyContent: "center",
-                  marginBottom: 5,
-                  // marginTop: 30,
-                }}
-              >
-                {/* <Icon
+                  <Icon
+                    type="FontAwesome"
+                    name="plus-circle"
+                    style={{
+                      fontSize: width / 24,
+                      color: "white",
+                      marginRight: 10,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: width / 24,
+                      fontWeight: "200",
+                      color: "white",
+                    }}
+                  >
+                    Add Note
+                  </Text>
+                </TouchableOpacity>
+              )}
+            {!this.state.toggleInput &&
+              !this.state.toggleChange &&
+              !this.state.toggleEdit && (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setState({ toggleChange: true });
+                  }}
+                  style={{
+                    alignSelf: "center",
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 170,
+                    justifyContent: "center",
+                    marginBottom: 5,
+                    // marginTop: 30,
+                  }}
+                >
+                  {/* <Icon
                   type="FontAwesome"
                   name="plus-circle"
                   style={{ fontSize: 15, color: "white", marginRight: 10 }}
                 /> */}
-                <Feather
-                  name="clipboard"
-                  size={width / 24}
-                  color="white"
-                  style={{ marginRight: 6 }}
-                />
-                <Text
-                  style={{
-                    fontSize: width / 24,
-                    fontWeight: "200",
-                    color: "white",
-                  }}
-                >
-                  Change Request
-                </Text>
-              </TouchableOpacity>
-            )}
+                  <Feather
+                    name="clipboard"
+                    size={width / 24}
+                    color="white"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: width / 24,
+                      fontWeight: "200",
+                      color: "white",
+                    }}
+                  >
+                    Change Request
+                  </Text>
+                </TouchableOpacity>
+              )}
           </View>
           {notes.map(
             (obj) =>

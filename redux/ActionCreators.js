@@ -7,8 +7,9 @@ import {
   gql,
   createHttpLink,
 } from "@apollo/client";
-import { Auth } from "aws-amplify";
+// import { Auth } from "aws-amplify";
 import { executeSync } from "graphql";
+import { Auth, Storage, StorageProvider } from "aws-amplify";
 
 const httpLink = createHttpLink({
   uri: "https://bba-server.herokuapp.com/graphql",
@@ -153,8 +154,8 @@ export const deleteCompleted = (eId) => ({
 export const postDataRead = (eId, prereads, postreads) => (dispatch) => {
   const newDataRead = {
     id: eId,
-    prereads:prereads,
-    postreads:postreads
+    prereads: prereads,
+    postreads: postreads,
   };
   setTimeout(() => {
     dispatch(addDataRead(newDataRead));
@@ -171,11 +172,26 @@ export const postTimestamp = (eId) => (dispatch) => {
     id: eId,
     isStarted: true,
   };
-  const date = new Date().toLocaleTimeString();
-  newTimestamp.initial = date;
+  const date = new Date();
+  var month = new Array();
+  month[0] = "Jan";
+  month[1] = "Feb";
+  month[2] = "Mar";
+  month[3] = "Apr";
+  month[4] = "May";
+  month[5] = "Jun";
+  month[6] = "Jul";
+  month[7] = "Aug";
+  month[8] = "Sep";
+  month[9] = "Oct";
+  month[10] = "Nov";
+  month[11] = "Dec";
+  newTimestamp.initial = date.toLocaleTimeString();
   newTimestamp.starting = new Date().getTime();
   newTimestamp.stopping = "Stop tracking";
   newTimestamp.duration = 0;
+  newTimestamp.datestring =
+    month[date.getMonth()] + " " + date.getDate() + " - ";
   setTimeout(() => {
     dispatch(addTimestamp(newTimestamp));
   }, 2000);
@@ -398,55 +414,95 @@ export const addCaption = (newCaption) => ({
   payload: { ...newCaption },
 });
 
-export const uploadToStorage = (preread, postread, eId, images) => (
+export const uploadToStorage = (preread, postread, eId, images, pId) => (
   dispatch
 ) => {
-  console.log(preread, postread, eId, images);
-  var pre={...preread}
-  var post={...postread}
-  if(!pre.coil_differential_pressure_with_filter){pre.coil_differential_pressure_with_filter=0}
-  if(!pre.coil_differential_pressure_without_filter){pre.coil_differential_pressure_without_filter=0}
-  if(!pre.coil_Infrared_image_coil){pre.coil_Infrared_image_coil=0}
-  if(!pre.air_temp_reading){pre.air_temp_reading=0}
-  if(!pre.fan_speed){pre.fan_speed=0}
-  if(!pre.outside_air_damper_position){pre.outside_air_damper_position=0}
-  if(!pre.outside_air_temperature){pre.outside_air_temperature=0}
-  if(!pre.supply_air_temperature){pre.supply_air_temperature=0}
-  if(!pre.velocity){pre.velocity=0}
-  if(!post.coil_differential_pressure_with_filter){post.coil_differential_pressure_with_filter=0}
-  if(!post.coil_differential_pressure_without_filter){post.coil_differential_pressure_without_filter=0}
-  if(!post.coil_Infrared_image_coil){post.coil_Infrared_image_coil=0}
-  if(!post.air_temp_reading){post.air_temp_reading=0}
-  if(!post.fan_speed){post.fan_speed=0}
-  if(!post.outside_air_damper_position){post.outside_air_damper_position=0}
-  if(!post.outside_air_temperature){post.outside_air_temperature=0}
-  if(!post.supply_air_temperature){post.supply_air_temperature=0}
-  if(!post.velocity){post.velocity=0}
+  // console.log(preread, postread, eId, images);
+  var pre = { ...preread };
+  var post = { ...postread };
+  if (!pre.coil_differential_pressure_with_filter) {
+    pre.coil_differential_pressure_with_filter = 0;
+  }
+  if (!pre.coil_differential_pressure_without_filter) {
+    pre.coil_differential_pressure_without_filter = 0;
+  }
+  if (!pre.coil_Infrared_image_coil) {
+    pre.coil_Infrared_image_coil = 0;
+  }
+  if (!pre.air_temp_reading) {
+    pre.air_temp_reading = 0;
+  }
+  if (!pre.fan_speed) {
+    pre.fan_speed = 0;
+  }
+  if (!pre.outside_air_damper_position) {
+    pre.outside_air_damper_position = 0;
+  }
+  if (!pre.outside_air_temperature) {
+    pre.outside_air_temperature = 0;
+  }
+  if (!pre.supply_air_temperature) {
+    pre.supply_air_temperature = 0;
+  }
+  if (!pre.velocity) {
+    pre.velocity = 0;
+  }
+  if (!post.coil_differential_pressure_with_filter) {
+    post.coil_differential_pressure_with_filter = 0;
+  }
+  if (!post.coil_differential_pressure_without_filter) {
+    post.coil_differential_pressure_without_filter = 0;
+  }
+  if (!post.coil_Infrared_image_coil) {
+    post.coil_Infrared_image_coil = 0;
+  }
+  if (!post.air_temp_reading) {
+    post.air_temp_reading = 0;
+  }
+  if (!post.fan_speed) {
+    post.fan_speed = 0;
+  }
+  if (!post.outside_air_damper_position) {
+    post.outside_air_damper_position = 0;
+  }
+  if (!post.outside_air_temperature) {
+    post.outside_air_temperature = 0;
+  }
+  if (!post.supply_air_temperature) {
+    post.supply_air_temperature = 0;
+  }
+  if (!post.velocity) {
+    post.velocity = 0;
+  }
+
+  const upload = async (obj) => {
+    try {
+      console.log(obj.uri);
+      const response = await fetch(obj.uri);
+
+      const blob = await response.blob();
+
+      await Storage.put(`${pId}/${obj.filename}`, blob, {
+        contentType: "image/jpeg",
+      }).then((result) => console.log(result));
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   for (let index = 0; index < images?.length; index++) {
-    const { obj } = images[index];
-    async () => {
-      try {
-        const response = await fetch(obj.uri);
-
-        const blob = await response.blob();
-
-        Storage.put(obj.filename, blob, {
-          contentType: "image/jpeg",
-        }).then((result) => console.log(result));
-      } catch (err) {
-        console.log(err);
-      }
-    };
+    const obj = images[index];
+    console.log(obj);
+    upload(obj);
   }
 
   setTimeout(() => {
     console.log("storage done");
-    dispatch(uploadDataReads(pre, post, eId, images));
+    dispatch(uploadDataReads(pre, post, eId, images,pId));
   }, 2000);
 };
 
-export const uploadDataReads = (preread, postread, eId, images) => async (
+export const uploadDataReads = (preread, postread, eId, images,pId) => async (
   dispatch
 ) => {
   const preId = await client
@@ -507,11 +563,11 @@ export const uploadDataReads = (preread, postread, eId, images) => async (
 
   setTimeout(() => {
     console.log("data creation done");
-    dispatch(uploadData(preId, postId, eId, images));
+    dispatch(uploadData(preId, postId, eId, images,pId));
   }, 4000);
 };
 
-export const uploadData = (preId, postId, eId, images) => async (dispatch) => {
+export const uploadData = (preId, postId, eId, images,pId) => async (dispatch) => {
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -541,16 +597,16 @@ export const uploadData = (preId, postId, eId, images) => async (dispatch) => {
 
   setTimeout(() => {
     console.log("data creation done");
-    dispatch(uploadImages(eId, myId, dataId, images));
+    dispatch(uploadImages(eId, myId, dataId, images,pId));
   }, 6000);
 };
-export const uploadImages = (eId, myId, dataId, images) => (dispatch) => {
+export const uploadImages = (eId, myId, dataId, images, pId) => (dispatch) => {
   console.log(eId, myId, dataId, images);
   if (images?.length > 0) {
     for (let index = 0; index < images?.length; index++) {
       const { caption, filename, uri } = images[index];
       const name = '"' + filename + '"';
-      const urii = '"' + uri + '"';
+      const urii = '"' + pId + "/" + filename + '"';
       const captionn = '"' + caption + '"';
       console.log(name);
       client.mutate({
@@ -625,7 +681,9 @@ export const deleteProjectNote = (id) => ({
   id: id,
 });
 
-export const postLocalEquipNote = (projId, eId, author,note) =>async (dispatch) => {
+export const postLocalEquipNote = (projId, eId, author, note) => async (
+  dispatch
+) => {
   const newNote = {
     projId: projId,
     eId: eId,

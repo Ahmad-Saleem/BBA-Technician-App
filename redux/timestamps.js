@@ -25,12 +25,26 @@ export const timestamps = (state = [], action) => {
       var timestamp = { ...action.payload };
       index = state.findIndex((x) => x.id === timestamp.id);
       // console.log(index);
+      var month = new Array();
+      month[0] = "Jan";
+      month[1] = "Feb";
+      month[2] = "Mar";
+      month[3] = "Apr";
+      month[4] = "May";
+      month[5] = "Jun";
+      month[6] = "Jul";
+      month[7] = "Aug";
+      month[8] = "Sep";
+      month[9] = "oct";
+      month[10] = "Nov";
+      month[11] = "Dec";
       return state.map((obj, i) =>
         i === index
           ? {
               ...obj,
               duration: (timestamp.time-obj.starting) + obj.duration,
               stopping: timestamp.time.toLocaleTimeString(),
+              datestring: obj.datestring+ month[timestamp.time.getMonth()] + " " + timestamp.time.getDate()+"/"+timestamp.time.getFullYear(),
               isStarted:false
             }
           : obj

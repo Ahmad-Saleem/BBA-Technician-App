@@ -5,7 +5,7 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import ProjectCard from "./ProjectCard";
@@ -16,14 +16,25 @@ import { Loading } from "./LoadingComponent";
 const mapStateToProps = (state) => {
   return {
     user: state.user,
+    completed: state.completed,
   };
 };
 
-let width = Dimensions.get('window').width
+let width = Dimensions.get("window").width;
 
 class HomeScreen extends React.Component {
   render() {
-    let projects = this.props.user?.user.assigned_projects_as_technician;
+    const projects = this.props.user?.user.assigned_projects_as_technician;
+    let projectsCompleted = 0;
+    for (let index = 0; index < projects?.length; index++) {
+      let equips = projects[index].equipments;
+      let complete = equips?.map(
+        (obj) => this.props.completed?.includes(obj.id) && obj.id
+      );
+      if (equips.length === complete.length && !complete?.includes(false)) {
+        projectsCompleted++;
+      }
+    }
     let projectlist = [];
 
     projectlist = projects?.map((project) => (
@@ -53,8 +64,13 @@ class HomeScreen extends React.Component {
           <StatusBar style="light" />
           <View style={styles.pcontact}>
             <View>
-              <Text style={{ fontSize: width/15 }}>Hello, {this.props.user.user.first_name+" "+this.props.user.user.last_name}</Text>
-              <Text style={{ fontSize: width/20, color: "#616161" }}>
+              <Text style={{ fontSize: width / 15 }}>
+                Hello,{" "}
+                {this.props.user.user.first_name +
+                  " " +
+                  this.props.user.user.last_name}
+              </Text>
+              <Text style={{ fontSize: width / 20, color: "#616161" }}>
                 Check the projects here
               </Text>
             </View>
@@ -75,7 +91,9 @@ class HomeScreen extends React.Component {
               marginBottom: 20,
             }}
           >
-            <Text style={{ fontSize: width/15, fontWeight: "500" }}>Projects</Text>
+            <Text style={{ fontSize: width / 15, fontWeight: "500" }}>
+              Projects
+            </Text>
 
             <View
               style={{
@@ -91,7 +109,7 @@ class HomeScreen extends React.Component {
             >
               <MaterialCommunityIcons
                 name="check-all"
-                size={width/18}
+                size={width / 18}
                 color="#0074B1"
                 style={{ marginRight: 10 }}
               />
@@ -100,7 +118,9 @@ class HomeScreen extends React.Component {
                 name="check"
                 style={{ fontSize: 20, color: "#0074B1", marginRight: 10 }}
               /> */}
-              <Text>0/{projects.length}</Text>
+              <Text>
+                {projectsCompleted}/{projects.length}
+              </Text>
             </View>
           </View>
 

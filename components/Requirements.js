@@ -60,8 +60,8 @@ const mapDispatchToProps = (dispatch) => ({
   deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
   postEquipNote: (projId, eId, note) =>
     dispatch(postEquipNote(projId, eId, note)),
-  uploadToStorage: (preread, postread, eId, images) =>
-    dispatch(uploadToStorage(preread, postread, eId, images)),
+  uploadToStorage: (preread, postread, eId, images,pId) =>
+    dispatch(uploadToStorage(preread, postread, eId, images,pId)),
   postLocalEquipNote: (projId, eId, author, note) =>
     dispatch(postLocalEquipNote(projId, eId, author, note)),
   deleteEquipNote: (id) => dispatch(deleteEquipNote(id)),
@@ -72,7 +72,6 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 let width = Dimensions.get("window").width;
-
 
 class Requirements extends React.Component {
   constructor(props) {
@@ -363,11 +362,12 @@ class Requirements extends React.Component {
                   this.state.preread,
                   this.state.postread,
                   eId,
-                  images
+                  images,
+                  project.id
                 );
               }
             });
-            console.log(this.state.preread, this.state.postread);
+            // console.log(this.state.preread, this.state.postread);
           }}
           style={{
             width: width / 3,
@@ -915,7 +915,12 @@ class Requirements extends React.Component {
               }
               style={[styles.mediaButton]}
             >
-              <AntDesign name="picture" style={{marginRight:15}} size={width / 18} color="black" />
+              <AntDesign
+                name="picture"
+                style={{ marginRight: 15 }}
+                size={width / 18}
+                color="black"
+              />
               <Text style={styles.mediaButtonText}>Choose Photo</Text>
             </TouchableOpacity>
 
@@ -928,7 +933,12 @@ class Requirements extends React.Component {
               }
               style={styles.mediaButton}
             >
-              <Feather name="video" style={{marginRight:15}} size={width / 18} color="black" />
+              <Feather
+                name="video"
+                style={{ marginRight: 15 }}
+                size={width / 18}
+                color="black"
+              />
               <Text style={styles.mediaButtonText}>Choose Video</Text>
             </TouchableOpacity>
           </View>
@@ -947,18 +957,18 @@ class Requirements extends React.Component {
               >
                 {images.map((obj) => (
                   <TouchableOpacity
-                    onPress={() => {
-                      // try {
-                      //   const response = await fetch(obj.uri);
+                    onPress={async () => {
+                      try {
+                        const response = await fetch(obj.uri);
 
-                      //   const blob = await response.blob();
+                        const blob = await response.blob();
 
-                      //   Storage.put(obj.filename, blob, {
-                      //     contentType: "image/jpeg",
-                      //   }).then((result) => console.log(result));
-                      // } catch (err) {
-                      //   console.log(err);
-                      // }
+                        Storage.put(obj.filename, blob, {
+                          contentType: "image/jpeg",
+                        }).then((result) => console.log(result));
+                      } catch (err) {
+                        console.log(err);
+                      }
                       console.log(this.props.user.first_name);
                       this.markSelected(obj);
                     }}
@@ -1073,7 +1083,7 @@ class Requirements extends React.Component {
             <Icon
               type="FontAwesome"
               name="clock-o"
-              style={{ fontSize: width / 22, color: "white",marginRight:15 }}
+              style={{ fontSize: width / 22, color: "white", marginRight: 15 }}
             />
 
             <Text style={[styles.mediaButtonText, { color: "white" }]}>
@@ -1093,7 +1103,9 @@ class Requirements extends React.Component {
               alignItems: "center",
             }}
           >
-            <Text style={[styles.formLabelText,{alignSelf:"flex-start"}]}>Start time</Text>
+            <Text style={[styles.formLabelText, { alignSelf: "flex-start" }]}>
+              Start time
+            </Text>
 
             <View
               style={{
@@ -1111,11 +1123,7 @@ class Requirements extends React.Component {
               alignItems: "center",
             }}
           >
-            <Text
-              style={styles.formLabelText}
-            >
-              End time
-            </Text>
+            <Text style={styles.formLabelText}>End time</Text>
 
             {/* alignItems:"flex-end" */}
             <View
@@ -1134,11 +1142,7 @@ class Requirements extends React.Component {
               alignItems: "center",
             }}
           >
-            <Text
-              style={styles.formLabelText}
-            >
-              Total time
-            </Text>
+            <Text style={styles.formLabelText}>Total time</Text>
 
             <View
               style={{
@@ -1540,7 +1544,7 @@ class Requirements extends React.Component {
                     borderRightColor: "gray",
                   }}
                 >
-                  {obj.author} 
+                  {obj.author}
                 </Text>
                 <Text style={{ color: "gray" }}>(will be uploaded)</Text>
               </View>
@@ -1619,7 +1623,9 @@ class Requirements extends React.Component {
         </Button> */}
         <TouchableOpacity
           onPress={() => {
-            this.props.completed?.some((el) => el === eId)
+            timestamp?.isStarted
+              ? Alert.alert("Stop tracking first!")
+              : this.props.completed?.some((el) => el === eId)
               ? this.props.deleteCompleted(eId)
               : this.props.postCompleted(eId);
           }}
@@ -1727,7 +1733,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F4F4F4",
     borderRadius: 5,
     justifyContent: "space-around",
-    alignItems:"center",
+    alignItems: "center",
     width: 150,
   },
   mediaButtonText: {
