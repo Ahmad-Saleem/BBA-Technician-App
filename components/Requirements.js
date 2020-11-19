@@ -348,6 +348,7 @@ class Requirements extends React.Component {
     const imageSet = this.props.selectedImages?.find((item) => item.id === eId);
     const images = imageSet?.images;
     this.props.navigation.setOptions({
+      headerBackTitleVisible: false,
       headerRight: () => (
         <TouchableOpacity
           onPress={async () => {
