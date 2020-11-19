@@ -482,7 +482,7 @@ export const uploadToStorage = (preread, postread, eId, images, pId) => (
 
       const blob = await response.blob();
 
-      await Storage.put(`${pId}/${obj.filename}`, blob, {
+      await Storage.put(`/${pId}/${obj.filename}`, blob, {
         contentType: "image/jpeg",
       }).then((result) => console.log(result));
     } catch (err) {
@@ -606,7 +606,7 @@ export const uploadImages = (eId, myId, dataId, images, pId) => (dispatch) => {
     for (let index = 0; index < images?.length; index++) {
       const { caption, filename, uri } = images[index];
       const name = '"' + filename + '"';
-      const urii = '"' + pId + "/" + filename + '"';
+      const urii = '"/' + pId + "/" + filename + '"';
       const captionn = '"' + caption + '"';
       console.log(name);
       client.mutate({
