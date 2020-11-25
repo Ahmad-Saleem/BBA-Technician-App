@@ -192,6 +192,7 @@ export const postTimestamp = (eId) => (dispatch) => {
   newTimestamp.duration = 0;
   newTimestamp.datestring =
     month[date.getMonth()] + " " + date.getDate() + " - ";
+  newTimestamp.finalDateString = "";
   setTimeout(() => {
     dispatch(addTimestamp(newTimestamp));
   }, 2000);
@@ -498,11 +499,11 @@ export const uploadToStorage = (preread, postread, eId, images, pId) => (
 
   setTimeout(() => {
     console.log("storage done");
-    dispatch(uploadDataReads(pre, post, eId, images,pId));
+    dispatch(uploadDataReads(pre, post, eId, images, pId));
   }, 2000);
 };
 
-export const uploadDataReads = (preread, postread, eId, images,pId) => async (
+export const uploadDataReads = (preread, postread, eId, images, pId) => async (
   dispatch
 ) => {
   const preId = await client
@@ -563,11 +564,13 @@ export const uploadDataReads = (preread, postread, eId, images,pId) => async (
 
   setTimeout(() => {
     console.log("data creation done");
-    dispatch(uploadData(preId, postId, eId, images,pId));
+    dispatch(uploadData(preId, postId, eId, images, pId));
   }, 4000);
 };
 
-export const uploadData = (preId, postId, eId, images,pId) => async (dispatch) => {
+export const uploadData = (preId, postId, eId, images, pId) => async (
+  dispatch
+) => {
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -597,7 +600,7 @@ export const uploadData = (preId, postId, eId, images,pId) => async (dispatch) =
 
   setTimeout(() => {
     console.log("data creation done");
-    dispatch(uploadImages(eId, myId, dataId, images,pId));
+    dispatch(uploadImages(eId, myId, dataId, images, pId));
   }, 6000);
 };
 export const uploadImages = (eId, myId, dataId, images, pId) => (dispatch) => {

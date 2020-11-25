@@ -44,7 +44,7 @@ export const timestamps = (state = [], action) => {
               ...obj,
               duration: (timestamp.time-obj.starting) + obj.duration,
               stopping: timestamp.time.toLocaleTimeString(),
-              datestring: obj.datestring+ month[timestamp.time.getMonth()] + " " + timestamp.time.getDate()+"/"+timestamp.time.getFullYear(),
+              finalDateString: obj.datestring+ month[timestamp.time.getMonth()] + " " + timestamp.time.getDate()+"/"+timestamp.time.getFullYear(),
               isStarted:false
             }
           : obj

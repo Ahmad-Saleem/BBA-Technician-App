@@ -340,7 +340,7 @@ class ProjectScreen extends React.Component {
             <Text style={{ color: "black" }}>
               {
                 this.props.timestamps.find((obj) => obj.id === item.id)
-                  ?.datestring
+                  ?.finalDateString
               }
             </Text>
           </View>

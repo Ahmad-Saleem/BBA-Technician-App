@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Dimensions
 } from "react-native";
 import { connect } from "react-redux";
 import { Icon, Textarea } from "native-base";
