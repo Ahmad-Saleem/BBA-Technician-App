@@ -34,7 +34,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
 // import Amplify, { Auth } from "aws-amplify";
 import { Storage, StorageProvider } from "aws-amplify";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
 
 const mapStateToProps = (state) => {
@@ -60,8 +60,8 @@ const mapDispatchToProps = (dispatch) => ({
   deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
   postEquipNote: (projId, eId, note) =>
     dispatch(postEquipNote(projId, eId, note)),
-  uploadToStorage: (preread, postread, eId, images,pId) =>
-    dispatch(uploadToStorage(preread, postread, eId, images,pId)),
+  uploadToStorage: (preread, postread, eId, images, pId) =>
+    dispatch(uploadToStorage(preread, postread, eId, images, pId)),
   postLocalEquipNote: (projId, eId, author, note) =>
     dispatch(postLocalEquipNote(projId, eId, author, note)),
   deleteEquipNote: (id) => dispatch(deleteEquipNote(id)),
@@ -236,7 +236,6 @@ class Requirements extends React.Component {
     this.props.deleteTimestamps(eId);
   }
 
-
   markStarted(eId) {
     this.props.postTimestamp(eId);
   }
@@ -260,50 +259,50 @@ class Requirements extends React.Component {
     const project = this.state.user.assigned_projects_as_technician?.find(
       (item) => item.id === this.props.route.params.id
     );
-    const onChangePreDate = (event, selectedDate) => {
+    const onChangePreDate = ( selectedDate) => {
       const currentDate = selectedDate || this.state.preread.date;
-      this.setState({ showPreDate: Platform.OS === "ios" });
+      this.setState({ showPreDate: false });
       this.setState({
         preread: {
           ...this.state.preread,
-          date: currentDate.toLocaleDateString(),
+          date: currentDate.toLocaleString(),
         },
       });
       console.log(this.state.preread.date);
     };
-    const onChangePreTime = (event, selectedDate) => {
-      const currentDate = selectedDate || this.state.preread.time;
-      this.setState({ showPreTime: Platform.OS === "ios" });
-      this.setState({
-        preread: {
-          ...this.state.preread,
-          time: currentDate.toLocaleTimeString(),
-        },
-      });
-      console.log(this.state.preread.time);
-    };
-    const onChangePostDate = (event, selectedDate) => {
+    // const onChangePreTime = (event, selectedDate) => {
+    //   const currentDate = selectedDate || this.state.preread.time;
+    //   this.setState({ showPreTime: Platform.OS === "ios" });
+    //   this.setState({
+    //     preread: {
+    //       ...this.state.preread,
+    //       time: currentDate.toLocaleTimeString(),
+    //     },
+    //   });
+    //   console.log(this.state.preread.time);
+    // };
+    const onChangePostDate = (selectedDate) => {
       const currentDate = selectedDate || this.state.postread.date;
-      this.setState({ showPostDate: Platform.OS === "ios" });
+      this.setState({ showPostDate: false });
       this.setState({
         postread: {
           ...this.state.postread,
-          date: currentDate.toLocaleDateString(),
+          date: currentDate.toLocaleString(),
         },
       });
       console.log(this.state.postread.date);
     };
-    const onChangePostTime = (event, selectedDate) => {
-      const currentDate = selectedDate || this.state.postread.time;
-      this.setState({ showPostTime: Platform.OS === "ios" });
-      this.setState({
-        postread: {
-          ...this.state.postread,
-          time: currentDate.toLocaleTimeString(),
-        },
-      });
-      console.log(this.state.postread.time);
-    };
+    // const onChangePostTime = (event, selectedDate) => {
+    //   const currentDate = selectedDate || this.state.postread.time;
+    //   this.setState({ showPostTime: Platform.OS === "ios" });
+    //   this.setState({
+    //     postread: {
+    //       ...this.state.postread,
+    //       time: currentDate.toLocaleTimeString(),
+    //     },
+    //   });
+    //   console.log(this.state.postread.time);
+    // };
 
     const showModePreDate = () => {
       this.setState({ showPreDate: true });
@@ -401,7 +400,7 @@ class Requirements extends React.Component {
         </TouchableOpacity>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Date</Text>
+            <Text style={{ textAlign: "right" }}>Date and Time</Text>
           </View>
           <TextInput
             style={styles.formItem}
@@ -412,7 +411,7 @@ class Requirements extends React.Component {
             onTouchStart={showModePreDate}
           />
         </View>
-        <View style={styles.formRow}>
+        {/* <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Time</Text>
           </View>
@@ -424,18 +423,56 @@ class Requirements extends React.Component {
             onTouchStart={showModePreTime}
             onChangeText={(itemValue) => this.setState({ postread: itemValue })}
           />
-        </View>
-        {this.state.showPreDate && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={new Date()}
-            mode={this.state.mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChangePreDate}
-          />
+        </View> */}
+        {/* {Platform.OS === "ios" && this.state.showPreDate && (
+          <TouchableOpacity
+            style={{ alignSelf: "center", fontSize: 20 }}
+            onPress={() => this.setState({ showPreDate: false })}
+          >
+            <Text>Done</Text>
+          </TouchableOpacity>
         )}
-        {this.state.showPreTime && (
+        {Platform.OS === "ios" && this.state.showPreTime && (
+          <TouchableOpacity
+            style={{ alignSelf: "center", fontSize: 20 }}
+            onPress={() => this.setState({ showPreTime: false })}
+          >
+            <Text>Done</Text>
+          </TouchableOpacity>
+        )}
+        {Platform.OS === "ios" && this.state.showPostDate && (
+          <TouchableOpacity
+            style={{ alignSelf: "center", fontSize: 20 }}
+            onPress={() => this.setState({ showPostDate: false })}
+          >
+            <Text>Done</Text>
+          </TouchableOpacity>
+        )}
+        {Platform.OS === "ios" && this.state.showPostTime && (
+          <TouchableOpacity
+            style={{ alignSelf: "center", fontSize: 20 }}
+            onPress={() => this.setState({ showPostTime: false })}
+          >
+            <Text>Done</Text>
+          </TouchableOpacity>
+        )} */}
+
+ 
+        {this.state.showPreDate && (
+          <DateTimePickerModal
+          isVisible={this.state.showPreDate}
+          mode="datetime"
+          onConfirm={onChangePreDate}
+          onCancel={()=>this.setState({showPreDate:false})}
+        />
+        )}
+        {/* {this.state.showPreTime && (
+          <DateTimePickerModal
+          isVisible={this.state.showPostDate}
+          mode="datetime"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+        />
           <DateTimePicker
             testID="dateTimePicker"
             value={new Date()}
@@ -444,18 +481,22 @@ class Requirements extends React.Component {
             display="default"
             onChange={onChangePreTime}
           />
-        )}
+        )} */}
         {this.state.showPostDate && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={new Date()}
-            mode={this.state.mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChangePostDate}
-          />
+          <DateTimePickerModal
+          isVisible={ this.state.showPostDate}
+          mode="datetime"
+          onConfirm={onChangePostDate}
+          onCancel={()=>this.setState({showPostDate:false})}
+        />
         )}
-        {this.state.showPostTime && (
+        {/* {this.state.showPostTime && (
+          <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+        />
           <DateTimePicker
             testID="dateTimePicker"
             value={new Date()}
@@ -464,7 +505,7 @@ class Requirements extends React.Component {
             display="default"
             onChange={onChangePostTime}
           />
-        )}
+        )} */}
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>
@@ -666,7 +707,7 @@ class Requirements extends React.Component {
         </TouchableOpacity>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Date</Text>
+            <Text style={{ textAlign: "right" }}>Date and Time</Text>
           </View>
           <TextInput
             style={styles.formItem}
@@ -676,7 +717,7 @@ class Requirements extends React.Component {
             onTouchStart={showModePostDate}
           />
         </View>
-        <View style={styles.formRow}>
+        {/* <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Time</Text>
           </View>
@@ -687,7 +728,7 @@ class Requirements extends React.Component {
             defaultValue={this.state.postread?.time}
             onTouchStart={showModePostTime}
           />
-        </View>
+        </View> */}
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>
