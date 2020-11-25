@@ -124,41 +124,42 @@ class Main extends React.Component {
           component={AddCaptions}
           options={{
             headerStyle: { backgroundColor: "#000" },
+            headerTitleContainerStyle: { marginLeft: -25 },
             headerTintColor: "#fff",
-            headerTitleStyle: { color: "#fff" },
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => alert("This is a button!")}
-                style={{
-                  width: 140,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "row",
-                  borderColor: "#fff",
-                  borderWidth: 1,
-                  padding: 5,
-                  borderRadius: 5,
-                  marginRight: 20,
-                }}
-              >
-                <Icon
-                  type="FontAwesome"
-                  name="check"
-                  style={{ fontSize: 20, color: "white", marginRight: 10 }}
-                />
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontWeight: "bold",
-                    fontSize: 15,
-                    paddingTop: 3,
-                    paddingBottom: 3,
-                  }}
-                >
-                  Update
-                </Text>
-              </TouchableOpacity>
-            ),
+            headerTitleStyle: { color: "#fff", fontSize:width/20 },
+            // headerRight: () => (
+            //   <TouchableOpacity
+            //     onPress={() => alert("This is a button!")}
+            //     style={{
+            //       width: 140,
+            //       alignItems: "center",
+            //       justifyContent: "center",
+            //       flexDirection: "row",
+            //       borderColor: "#fff",
+            //       borderWidth: 1,
+            //       padding: 5,
+            //       borderRadius: 5,
+            //       marginRight: 20,
+            //     }}
+            //   >
+            //     <Icon
+            //       type="FontAwesome"
+            //       name="check"
+            //       style={{ fontSize: 20, color: "white", marginRight: 10 }}
+            //     />
+            //     <Text
+            //       style={{
+            //         color: "#fff",
+            //         fontWeight: "bold",
+            //         fontSize: 15,
+            //         paddingTop: 3,
+            //         paddingBottom: 3,
+            //       }}
+            //     >
+            //       Update
+            //     </Text>
+            //   </TouchableOpacity>
+            // ),
           }}
         />
       </Stack.Navigator>

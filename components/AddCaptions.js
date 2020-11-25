@@ -10,6 +10,7 @@ import {
 import { connect } from "react-redux";
 import { Icon, Textarea } from "native-base";
 import { postCaption, deleteImages } from "../redux/ActionCreators";
+let width = Dimensions.get("window").width;
 
 const mapStateToProps = (state) => {
   return {
@@ -39,6 +40,60 @@ class AddCaptions extends Component {
     });
   }
   render() {
+    this.props.navigation.setOptions({
+      headerBackTitleVisible: false,
+      headerRight: () => (
+        <TouchableOpacity
+          // onPress={async () => {
+          //   await this.props.postDataRead(
+          //     eId,
+          //     this.state.preread,
+          //     this.state.postread
+          //   );
+          //   NetInfo.fetch().then((state) => {
+          //     if (state.isConnected) {
+          //       this.props.uploadToStorage(
+          //         this.state.preread,
+          //         this.state.postread,
+          //         eId,
+          //         images,
+          //         project.id
+          //       );
+          //     }
+          //   });
+          //   // console.log(this.state.preread, this.state.postread);
+          // }}
+          style={{
+            width: width / 3,
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+            borderColor: "#fff",
+            borderWidth: 1,
+            // padding: 5,
+            borderRadius: 5,
+            marginRight: 20,
+          }}
+        >
+          <Icon
+            type="FontAwesome"
+            name="check"
+            style={{ fontSize: width / 20, color: "white", marginRight: 7 }}
+          />
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: width / 20,
+              paddingTop: 5,
+              paddingBottom: 5,
+            }}
+          >
+            Update
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
     const imageSet = this.props.selectedImages?.find((item) => item.id === this.props.route.params.eId,);
     const images = imageSet?.images;
     return (

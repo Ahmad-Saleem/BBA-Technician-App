@@ -236,17 +236,6 @@ class Requirements extends React.Component {
     this.props.deleteTimestamps(eId);
   }
 
-  resetForm() {
-    this.setState({
-      preread: {},
-      postread: {},
-      showModal: false,
-      image: null,
-      video: null,
-      date: new Date(),
-      mode: "date",
-    });
-  }
 
   markStarted(eId) {
     this.props.postTimestamp(eId);
