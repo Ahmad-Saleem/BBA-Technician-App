@@ -80,6 +80,7 @@ class ProjectScreen extends React.Component {
       toggleEdit: false,
       refreshing: false,
       editId: undefined,
+      editNote:""
     };
   }
 
@@ -709,9 +710,7 @@ class ProjectScreen extends React.Component {
                         });
                         this.props.deleteNote(this.state.editId);
                         this.setState({
-                          notes: this.state.notes.filter(
-                            (e) => e.id != this.state.editId
-                          ),
+                          
                           editId: undefined,
                         });
                       } else {
@@ -1061,7 +1060,11 @@ class ProjectScreen extends React.Component {
                           onPress={() => {
                             this.setState({
                               editId: obj.id,
+                              notes: this.state.notes.filter(
+                                (e) => e.id != this.state.editId
+                              ),
                               toggleEdit: true,
+                              note:obj.message
                             });
                           }}
                         >
