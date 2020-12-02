@@ -11,6 +11,7 @@ import {
   Platform,
   RefreshControl,
   Dimensions,
+  TextInput,
 } from "react-native";
 import { BaseRouter } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -563,11 +564,13 @@ class ProjectScreen extends React.Component {
           </View>
           {this.state.toggleChange && (
             <Form style={{ marginBottom: 10 }}>
-              <Textarea
+              <TextInput
                 onChangeText={(note) => this.setState({ note })}
-                rowSpan={4}
+                // multiline
+                // numberOfLines={4}
+                // rowSpan={4}
                 value={this.state.note}
-                bordered
+                // bordered
                 placeholder="Add request"
                 style={{
                   width: 300,
@@ -647,11 +650,13 @@ class ProjectScreen extends React.Component {
 
           {this.state.toggleEdit && (
             <Form style={{ marginBottom: 10 }}>
-              <Textarea
+              <TextInput
                 onChangeText={(note) => this.setState({ note })}
-                rowSpan={4}
+                // multiline
+                // numberOfLines={4}
+                // rowSpan={4}
                 value={this.state.note}
-                bordered
+                // bordered
                 placeholder="Add note"
                 style={{
                   width: 300,
@@ -778,11 +783,13 @@ class ProjectScreen extends React.Component {
 
           {this.state.toggleInput && (
             <Form style={{ marginBottom: 10 }}>
-              <Textarea
+              <TextInput
                 onChangeText={(note) => this.setState({ note })}
-                rowSpan={4}
+                // multiline
+                // numberOfLines={4}
+                // rowSpan={4}
                 value={this.state.note}
-                bordered
+                // bordered
                 placeholder="Add note"
                 style={{
                   width: 300,
@@ -828,6 +835,7 @@ class ProjectScreen extends React.Component {
                           message: this.state.note,
                           project: { id: this.props.route.params.id },
                         });
+                        console.log(this.state.note);
                         this.setState({
                           toggleInput: false,
                           note: "",
@@ -1023,7 +1031,18 @@ class ProjectScreen extends React.Component {
                       >
                         {obj.created_by.first_name}
                       </Text>
-                      <Text style={{ color: "gray" }}>03:15 PM</Text>
+                      <Text style={{ color: "gray" }}>
+                        {new Date(obj.created_at).getHours() > 12
+                          ? (
+                              "0" +
+                              (new Date(obj.created_at).getHours() - 12)
+                            ).slice(-2)
+                          : ("0" + new Date(obj.created_at).getHours()).slice(
+                              -2
+                            )}
+                        :{("0"+new Date(obj.created_at).getMinutes()).slice(-2)}{" "}
+                        {new Date(obj.created_at).getHours() > 12 ? "PM" : "AM"}
+                      </Text>
                     </View>
                     {this.props.user.id === obj.created_by.id && (
                       <View

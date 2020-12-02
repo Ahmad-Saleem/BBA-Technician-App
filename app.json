@@ -19,14 +19,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.blueboxinnovatingair.bbatechnicianapp",
-      "buildNumber": "1.0.1"
+      "buildNumber": "1.0.2"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "android": {
       "package": "com.blueboxinnovatingair.bbatechnicianapp",
-      "versionCode": 2
+      "versionCode": 3
     }
   }
 }

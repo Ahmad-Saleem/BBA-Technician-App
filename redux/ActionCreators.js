@@ -250,12 +250,15 @@ export const postNote = (projId, note, author) => async (dispatch) => {
   //   note: note,
   // };
   // newNote.date = new Date().toISOString();
+  // const newNnote = '"' + note + '"';
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
     })
     .catch((err) => console.log(err));
+    console.log(note);
   const request = '"' + note + '"';
+  console.log(request);
   var notee = {};
   await client
     .mutate({

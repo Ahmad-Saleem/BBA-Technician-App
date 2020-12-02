@@ -172,6 +172,7 @@ class Requirements extends React.Component {
       user: this.props.user,
       editId: undefined,
       toggleEdit: false,
+      editNote: "",
     };
   }
 
@@ -259,7 +260,7 @@ class Requirements extends React.Component {
     const project = this.state.user.assigned_projects_as_technician?.find(
       (item) => item.id === this.props.route.params.id
     );
-    const onChangePreDate = ( selectedDate) => {
+    const onChangePreDate = (selectedDate) => {
       const currentDate = selectedDate || this.state.preread.date;
       this.setState({ showPreDate: false });
       this.setState({
@@ -347,6 +348,7 @@ class Requirements extends React.Component {
             );
             NetInfo.fetch().then((state) => {
               if (state.isConnected) {
+                // const upload = async () => {
                 this.props.uploadToStorage(
                   this.state.preread,
                   this.state.postread,
@@ -354,6 +356,20 @@ class Requirements extends React.Component {
                   images,
                   project.id
                 );
+                // };
+                //  upload();
+                Alert.alert(
+                  "Success",
+                  "Data uploaded successfully!",
+                  [
+                    {
+                      text: "ok",
+                      // onPress: () => console.log("Not Deleted"),
+                      style: " cancel",
+                    },
+                  ],
+                  { cancelable: false }
+                )
               }
             });
             // console.log(this.state.preread, this.state.postread);
@@ -457,14 +473,13 @@ class Requirements extends React.Component {
           </TouchableOpacity>
         )} */}
 
- 
         {this.state.showPreDate && (
           <DateTimePickerModal
-          isVisible={this.state.showPreDate}
-          mode="datetime"
-          onConfirm={onChangePreDate}
-          onCancel={()=>this.setState({showPreDate:false})}
-        />
+            isVisible={this.state.showPreDate}
+            mode="datetime"
+            onConfirm={onChangePreDate}
+            onCancel={() => this.setState({ showPreDate: false })}
+          />
         )}
         {/* {this.state.showPreTime && (
           <DateTimePickerModal
@@ -484,11 +499,11 @@ class Requirements extends React.Component {
         )} */}
         {this.state.showPostDate && (
           <DateTimePickerModal
-          isVisible={ this.state.showPostDate}
-          mode="datetime"
-          onConfirm={onChangePostDate}
-          onCancel={()=>this.setState({showPostDate:false})}
-        />
+            isVisible={this.state.showPostDate}
+            mode="datetime"
+            onConfirm={onChangePostDate}
+            onCancel={() => this.setState({ showPostDate: false })}
+          />
         )}
         {/* {this.state.showPostTime && (
           <DateTimePickerModal
@@ -1230,10 +1245,12 @@ class Requirements extends React.Component {
         </View> */}
         {this.state.toggleEdit && (
           <Form>
-            <Textarea
+            <TextInput
               onChangeText={(note) => this.setState({ note })}
-              rowSpan={4}
+              // rowSpan={4}
+              // defaultValue={this.state.editNote}
               value={this.state.note}
+              // initial={this.state.editNote}
               bordered
               placeholder="Add note"
               style={{
@@ -1241,8 +1258,10 @@ class Requirements extends React.Component {
                 borderWidth: 2,
                 borderColor: "#0074B1",
                 alignSelf: "center",
-                borderRadius: 5,
+                borderRadius: 4,
                 marginBottom: 15,
+                paddingLeft: 25,
+                paddingTop: 15,
               }}
             />
             <TouchableOpacity
@@ -1279,9 +1298,6 @@ class Requirements extends React.Component {
                     });
                     this.props.deleteNote(this.state.editId);
                     this.setState({
-                      notes: this.state.notes.filter(
-                        (e) => e.id != this.state.editId
-                      ),
                       editId: undefined,
                     });
                   } else {
@@ -1319,9 +1335,9 @@ class Requirements extends React.Component {
 
         {this.state.toggleInput && (
           <Form>
-            <Textarea
+            <TextInput
               onChangeText={(note) => this.setState({ note })}
-              rowSpan={4}
+              // rowSpan={4}
               value={this.state.note}
               bordered
               placeholder="Add note"
@@ -1330,8 +1346,10 @@ class Requirements extends React.Component {
                 borderWidth: 2,
                 borderColor: "#0074B1",
                 alignSelf: "center",
-                borderRadius: 5,
+                borderRadius: 4,
                 marginBottom: 15,
+                paddingLeft: 25,
+                paddingTop: 15,
               }}
             />
             <TouchableOpacity
@@ -1466,7 +1484,17 @@ class Requirements extends React.Component {
                     >
                       {obj.created_by.first_name}
                     </Text>
-                    <Text style={{ color: "gray" }}>03:15 PM</Text>
+                    <Text style={{ color: "gray" }}>
+                      {" "}
+                      {new Date(obj.created_at).getHours() > 12
+                        ? (
+                            "0" +
+                            (new Date(obj.created_at).getHours() - 12)
+                          ).slice(-2)
+                        : ("0" + new Date(obj.created_at).getHours()).slice(-2)}
+                      :{("0" + new Date(obj.created_at).getMinutes()).slice(-2)}{" "}
+                      {new Date(obj.created_at).getHours() > 12 ? "PM" : "AM"}
+                    </Text>
                   </View>
                   {this.props.user.id === obj.created_by.id && (
                     <View
@@ -1486,7 +1514,12 @@ class Requirements extends React.Component {
                           this.setState({
                             editId: obj.id,
                             toggleEdit: true,
+                            notes: this.state.notes.filter(
+                              (e) => e.id != obj.id
+                            ),
+                            note: obj.message,
                           });
+                          // this.props.deleteNote(obj.id);
                         }}
                       >
                         <SimpleLineIcons
