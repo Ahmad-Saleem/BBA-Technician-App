@@ -82,6 +82,7 @@ export const fetchUser = () => async (dispatch) => {
                   id
                   building
                   cfm
+                  system_name
                   location{
                     location_name
                   }

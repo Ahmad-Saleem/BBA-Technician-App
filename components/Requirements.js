@@ -29,7 +29,7 @@ import {
   postLocalEquipNote,
   deleteEquipNote,
   postDataRead,
-  postImages
+  postImages,
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -336,7 +336,7 @@ class Requirements extends React.Component {
       console.log(photo);
       this.setState({ previewVisible: true });
       this.setState({ capturedImage: photo });
-     await this.props.postImages(this.props.route.params.eId, [
+      await this.props.postImages(this.props.route.params.eId, [
         this.state.capturedImage,
       ]);
       this.props.navigation.navigate("AddCaptions", {
@@ -357,6 +357,7 @@ class Requirements extends React.Component {
     const images = imageSet?.images;
     this.props.navigation.setOptions({
       headerBackTitleVisible: false,
+      headerTitle: equipment.system_name,
       headerRight: () => (
         <TouchableOpacity
           onPress={async () => {
@@ -477,7 +478,7 @@ class Requirements extends React.Component {
             <Text style={{ textAlign: "right" }}>Equipment name:</Text>
           </View>
           <Text style={[styles.formItem, { borderWidth: 0 }]}>
-            Equipment {equipment.id}
+            {equipment.system_name}
           </Text>
         </View>
         <View style={styles.formRow}>

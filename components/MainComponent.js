@@ -117,6 +117,7 @@ class Main extends React.Component {
             headerStyle: { backgroundColor: "#000" },
             headerTintColor: "#fff",
             headerTitleStyle: { color: "#fff" },
+            
           }}
         />
         <Stack.Screen
