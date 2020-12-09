@@ -532,6 +532,21 @@ class ProjectScreen extends React.Component {
               <Text style={{ fontWeight: "bold", fontSize: width / 24 }}>
                 Total pieces of equipment {" " + equipments?.length}
               </Text>
+              
+            </View>
+
+            <View
+              style={{
+                padding: 5,
+                marginTop: 7,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontWeight: "bold", fontSize: width / 24 }}>
+                Start date and time : Dec 10, 2020, 10:00 am
+              </Text>
+              
             </View>
           </View>
         </View>

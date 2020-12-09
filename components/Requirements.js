@@ -333,15 +333,19 @@ class Requirements extends React.Component {
     const __takePicture = async () => {
       if (!this.camera) return;
       const photo = await this.camera.takePictureAsync();
+      
       console.log(photo);
       this.setState({ previewVisible: true });
       this.setState({ capturedImage: photo });
       await this.props.postImages(this.props.route.params.eId, [
-        this.state.capturedImage,
+        photo,
       ]);
-      this.props.navigation.navigate("AddCaptions", {
-        eId: this.props.route.params.eId,
-      });
+      setTimeout(() => {
+        this.props.navigation.navigate("AddCaptions", {
+          eId: this.props.route.params.eId,
+        });
+      }, 2000);
+      
     };
 
     const { eId } = this.props.route.params;

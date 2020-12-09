@@ -234,8 +234,8 @@ export const postImages = (eId, images) => (dispatch) => {
   // newTimestamp.starting = new Date();
   // newTimestamp.stopping = "Stop tracking";
   // newTimestamp.duration = 0;
-  setTimeout(() => {
-    dispatch(addImages(newImageSet));
+  setTimeout(async () => {
+  await  dispatch(addImages(newImageSet));
   }, 2000);
 };
 
