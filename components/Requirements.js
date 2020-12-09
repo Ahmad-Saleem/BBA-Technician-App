@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   Dimensions,
+  ImageBackground,
 } from "react-native";
 import { connect } from "react-redux";
 import * as Permissions from "expo-permissions";
@@ -28,6 +29,7 @@ import {
   postLocalEquipNote,
   deleteEquipNote,
   postDataRead,
+  postImages
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -36,6 +38,7 @@ import { SimpleLineIcons } from "@expo/vector-icons";
 import { Storage, StorageProvider } from "aws-amplify";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
+import { Camera } from "expo-camera";
 
 const mapStateToProps = (state) => {
   return {
@@ -69,10 +72,30 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(postDataRead(id, prereads, postreads)),
   // postComment: (dishId, rating, author, comment) =>
   //   dispatch(postComment(dishId, rating, author, comment)),
+  postImages: (eId, images) => dispatch(postImages(eId, images)),
 });
 
 let width = Dimensions.get("window").width;
-
+const CameraPreview = ({ photo }) => {
+  console.log("sdsfds", photo);
+  return (
+    <View
+      style={{
+        backgroundColor: "transparent",
+        flex: 1,
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      <ImageBackground
+        source={{ uri: photo && photo.uri }}
+        style={{
+          flex: 1,
+        }}
+      />
+    </View>
+  );
+};
 class Requirements extends React.Component {
   constructor(props) {
     super(props);
@@ -173,6 +196,9 @@ class Requirements extends React.Component {
       editId: undefined,
       toggleEdit: false,
       editNote: "",
+      startCamera: false,
+      previewVisible: false,
+      capturedImage: null,
     };
   }
 
@@ -271,17 +297,6 @@ class Requirements extends React.Component {
       });
       console.log(this.state.preread.date);
     };
-    // const onChangePreTime = (event, selectedDate) => {
-    //   const currentDate = selectedDate || this.state.preread.time;
-    //   this.setState({ showPreTime: Platform.OS === "ios" });
-    //   this.setState({
-    //     preread: {
-    //       ...this.state.preread,
-    //       time: currentDate.toLocaleTimeString(),
-    //     },
-    //   });
-    //   console.log(this.state.preread.time);
-    // };
     const onChangePostDate = (selectedDate) => {
       const currentDate = selectedDate || this.state.postread.date;
       this.setState({ showPostDate: false });
@@ -293,26 +308,10 @@ class Requirements extends React.Component {
       });
       console.log(this.state.postread.date);
     };
-    // const onChangePostTime = (event, selectedDate) => {
-    //   const currentDate = selectedDate || this.state.postread.time;
-    //   this.setState({ showPostTime: Platform.OS === "ios" });
-    //   this.setState({
-    //     postread: {
-    //       ...this.state.postread,
-    //       time: currentDate.toLocaleTimeString(),
-    //     },
-    //   });
-    //   console.log(this.state.postread.time);
-    // };
 
     const showModePreDate = () => {
       this.setState({ showPreDate: true });
       this.setState({ mode: "date" });
-    };
-
-    const showModePreTime = () => {
-      this.setState({ showPreTime: true });
-      this.setState({ mode: "time" });
     };
 
     const showModePostDate = () => {
@@ -320,13 +319,33 @@ class Requirements extends React.Component {
       this.setState({ mode: "date" });
     };
 
-    const showModePostTime = () => {
-      this.setState({ showPostTime: true });
-      this.setState({ mode: "time" });
+    const __startCamera = async () => {
+      console.log("camera");
+      const { status } = await Camera.requestPermissionsAsync();
+      if (status === "granted") {
+        // start the camera
+        this.setState({ startCamera: true });
+      } else {
+        Alert.alert("Access denied");
+      }
+    };
+
+    const __takePicture = async () => {
+      if (!this.camera) return;
+      const photo = await this.camera.takePictureAsync();
+      console.log(photo);
+      this.setState({ previewVisible: true });
+      this.setState({ capturedImage: photo });
+     await this.props.postImages(this.props.route.params.eId, [
+        this.state.capturedImage,
+      ]);
+      this.props.navigation.navigate("AddCaptions", {
+        eId: this.props.route.params.eId,
+      });
     };
 
     const { eId } = this.props.route.params;
-    // const equipment = project?.equipments?.find((item) => item.id === eId);
+    const equipment = project?.equipments?.find((item) => item.id === eId);
     const localEquipNotes = this.props.localEquipNotes.filter(
       (obj) => obj.eId === eId
     );
@@ -369,7 +388,7 @@ class Requirements extends React.Component {
                     },
                   ],
                   { cancelable: false }
-                )
+                );
               }
             });
             // console.log(this.state.preread, this.state.postread);
@@ -406,11 +425,83 @@ class Requirements extends React.Component {
       ),
     });
     var dur = 0;
-    return (
+    return this.state.startCamera ? (
+      this.state.previewVisible && this.state.capturedImage ? (
+        <CameraPreview photo={this.state.capturedImage} />
+      ) : (
+        <Camera
+          style={{ flex: 1, width: "100%" }}
+          ref={(r) => {
+            this.camera = r;
+          }}
+        >
+          <View
+            style={{
+              position: "absolute",
+              bottom: 0,
+              flexDirection: "row",
+              flex: 1,
+              width: "100%",
+              padding: 20,
+              justifyContent: "space-between",
+            }}
+          >
+            <View
+              style={{
+                alignSelf: "center",
+                flex: 1,
+                alignItems: "center",
+              }}
+            >
+              <TouchableOpacity
+                onPress={__takePicture}
+                style={{
+                  width: 70,
+                  height: 70,
+                  bottom: 0,
+                  borderRadius: 50,
+                  backgroundColor: "#fff",
+                }}
+              />
+            </View>
+          </View>
+        </Camera>
+      )
+    ) : (
       <ScrollView style={{ backgroundColor: "white" }}>
         <TouchableOpacity style={styles.status}>
           <Text style={{ color: "white" }}>In Progress</Text>
         </TouchableOpacity>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Equipment name:</Text>
+          </View>
+          <Text style={[styles.formItem, { borderWidth: 0 }]}>
+            Equipment {equipment.id}
+          </Text>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Location:</Text>
+          </View>
+          <Text style={[styles.formItem, { borderWidth: 0 }]}>
+            {equipment.location.location_name}
+          </Text>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>CFM/Tonnage:</Text>
+          </View>
+          <Text style={[styles.formItem, { borderWidth: 0 }]}>
+            {equipment.cfm}
+          </Text>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Type of equipment:</Text>
+          </View>
+          <Text style={[styles.formItem, { borderWidth: 0 }]}>Coming soon</Text>
+        </View>
         <TouchableOpacity style={{ marginLeft: 15 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>Pre-reads</Text>
         </TouchableOpacity>
@@ -427,51 +518,6 @@ class Requirements extends React.Component {
             onTouchStart={showModePreDate}
           />
         </View>
-        {/* <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Time</Text>
-          </View>
-          <TextInput
-            selectedValue={this.state.preread.time}
-            style={styles.formItem}
-            placeholder={this.state.preread.time}
-            defaultValue={this.state.preread.time}
-            onTouchStart={showModePreTime}
-            onChangeText={(itemValue) => this.setState({ postread: itemValue })}
-          />
-        </View> */}
-        {/* {Platform.OS === "ios" && this.state.showPreDate && (
-          <TouchableOpacity
-            style={{ alignSelf: "center", fontSize: 20 }}
-            onPress={() => this.setState({ showPreDate: false })}
-          >
-            <Text>Done</Text>
-          </TouchableOpacity>
-        )}
-        {Platform.OS === "ios" && this.state.showPreTime && (
-          <TouchableOpacity
-            style={{ alignSelf: "center", fontSize: 20 }}
-            onPress={() => this.setState({ showPreTime: false })}
-          >
-            <Text>Done</Text>
-          </TouchableOpacity>
-        )}
-        {Platform.OS === "ios" && this.state.showPostDate && (
-          <TouchableOpacity
-            style={{ alignSelf: "center", fontSize: 20 }}
-            onPress={() => this.setState({ showPostDate: false })}
-          >
-            <Text>Done</Text>
-          </TouchableOpacity>
-        )}
-        {Platform.OS === "ios" && this.state.showPostTime && (
-          <TouchableOpacity
-            style={{ alignSelf: "center", fontSize: 20 }}
-            onPress={() => this.setState({ showPostTime: false })}
-          >
-            <Text>Done</Text>
-          </TouchableOpacity>
-        )} */}
 
         {this.state.showPreDate && (
           <DateTimePickerModal
@@ -481,22 +527,7 @@ class Requirements extends React.Component {
             onCancel={() => this.setState({ showPreDate: false })}
           />
         )}
-        {/* {this.state.showPreTime && (
-          <DateTimePickerModal
-          isVisible={this.state.showPostDate}
-          mode="datetime"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-        />
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={new Date()}
-            mode={this.state.mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChangePreTime}
-          />
-        )} */}
+
         {this.state.showPostDate && (
           <DateTimePickerModal
             isVisible={this.state.showPostDate}
@@ -505,22 +536,7 @@ class Requirements extends React.Component {
             onCancel={() => this.setState({ showPostDate: false })}
           />
         )}
-        {/* {this.state.showPostTime && (
-          <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-        />
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={new Date()}
-            mode={this.state.mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChangePostTime}
-          />
-        )} */}
+
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>
@@ -666,18 +682,6 @@ class Requirements extends React.Component {
             }
           />
         </View>
-        {/* <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={styles.formLabelText}>is_terminal</Text>
-          </View>
-          <TextInput
-            selectedValue={this.state.preread}
-            style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
-            onChangeText={(itemValue) => this.setState({ preread: {...this.state.preread, is_terminal : itemValue} })}
-          />
-        </View> */}
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Velocity</Text>
@@ -732,18 +736,6 @@ class Requirements extends React.Component {
             onTouchStart={showModePostDate}
           />
         </View>
-        {/* <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Time</Text>
-          </View>
-          <TextInput
-            selectedValue={this.state.postread?.time}
-            style={styles.formItem}
-            placeholder={this.state.postread?.time}
-            defaultValue={this.state.postread?.time}
-            onTouchStart={showModePostTime}
-          />
-        </View> */}
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>
@@ -892,18 +884,6 @@ class Requirements extends React.Component {
             }
           />
         </View>
-        {/* <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={styles.formLabelText}>is_terminal</Text>
-          </View>
-          <TextInput
-            selectedValue={this.state.postread.is_terminal}
-            style={styles.formItem}
-            placeholder="0"
-            defaultValue=""
-            onChangeText={(itemValue) => this.setState({ postread: {...this.state.postread, is_terminal : itemValue} })}
-          />
-        </View> */}
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Velocity</Text>
@@ -940,6 +920,9 @@ class Requirements extends React.Component {
           />
         </View>
 
+        {/* -------------------Camera view starts here----------------------- */}
+
+        {/* -------------------Camera view ends here----------------------- */}
         <View style={{}}>
           <View
             style={{
@@ -953,12 +936,34 @@ class Requirements extends React.Component {
             }}
           >
             <TouchableOpacity
-              onPress={() =>
-                this.props.navigation.navigate("Images", {
-                  eId: eId,
-                  type: "photo",
-                })
-              }
+              // onPress={() =>
+              //   this.props.navigation.navigate("Images", {
+              //     eId: eId,
+              //     type: "photo",
+              //   })
+              // }
+              onPress={() => {
+                Alert.alert(
+                  "Choose",
+                  "Take photo or choose from gallery?",
+                  [
+                    {
+                      text: "Camera",
+                      onPress: __startCamera,
+                      style: "cancel",
+                    },
+                    {
+                      text: "gallery",
+                      onPress: () =>
+                        this.props.navigation.navigate("Images", {
+                          eId: eId,
+                          type: "photo",
+                        }),
+                    },
+                  ],
+                  { cancelable: false }
+                );
+              }}
               style={[styles.mediaButton]}
             >
               <AntDesign

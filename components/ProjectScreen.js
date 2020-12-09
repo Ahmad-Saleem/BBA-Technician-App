@@ -530,7 +530,7 @@ class ProjectScreen extends React.Component {
                 style={{ marginRight: 6 }}
               />
               <Text style={{ fontWeight: "bold", fontSize: width / 24 }}>
-                AHU {" " + equipments?.length}
+                Total pieces of equipment {" " + equipments?.length}
               </Text>
             </View>
           </View>
@@ -551,7 +551,7 @@ class ProjectScreen extends React.Component {
                 fontSize: width / 20,
               }}
             >
-              Notes from BBA
+              Project description
             </Text>
 
             <Text style={{ marginTop: 20, color: "#616161", fontSize: 15 }}>
@@ -994,6 +994,17 @@ class ProjectScreen extends React.Component {
                 </TouchableOpacity>
               )}
           </View>
+        
+          <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: width / 20,
+                marginLeft: 20,
+              marginTop: 28,
+              }}
+            >
+              General project notes
+            </Text>
           {notes.map(
             (obj) =>
               obj.labels != "CHANGE_REQUEST" && (
@@ -1236,7 +1247,7 @@ class ProjectScreen extends React.Component {
           }}
         >
           <Text style={{ fontSize: width / 15, fontWeight: "200" }}>
-            Equipments
+            Equipment List
           </Text>
 
           <View

@@ -81,14 +81,20 @@ export const fetchUser = () => async (dispatch) => {
                 equipments {
                   id
                   building
+                  cfm
+                  location{
+                    location_name
+                  }
                   notes {
                     id
                     message
+                    
                     created_by {
                       id
                       first_name
                       last_name
                     }
+                    
                     created_at
                     labels
                   }
