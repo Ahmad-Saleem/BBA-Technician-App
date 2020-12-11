@@ -63,6 +63,7 @@ const wait = (timeout) => {
 };
 
 let width = Dimensions.get("window").width;
+let height = Dimensions.get("window").height;
 
 class ProjectScreen extends React.Component {
   constructor(props) {
@@ -80,7 +81,8 @@ class ProjectScreen extends React.Component {
       toggleEdit: false,
       refreshing: false,
       editId: undefined,
-      editNote:""
+      editNote: "",
+      popup: true,
     };
   }
 
@@ -183,7 +185,7 @@ class ProjectScreen extends React.Component {
 
       wait(2000).then(() => this.setState({ refreshing: false }));
     };
-    const { project, notes } = this.state;
+    const { project, notes, popup } = this.state;
     // const project = this.props.projects?.find(
     //   (item) => item.id === this.props.route.params.id
     // );
@@ -198,41 +200,6 @@ class ProjectScreen extends React.Component {
     const localProjectNotes = this.props.localProjectNotes.filter(
       (obj) => obj.projId === this.props.route.params.id
     );
-    // NetInfo.addEventListener(async ({isConnected}) => {
-    //     // console.log("Connection type", state.type);
-    //     console.log("Is connected?", isConnected);
-    //     if (isConnected) {
-    //       for (let i = 0; i < localProjectNotes.length; i++) {
-    //         var data = await this.props.postNote(
-    //           this.props.route.params.id,
-    //           localProjectNotes[i].note
-    //           // this.props.user.user.first_name
-    //         );
-    //         console.log(data.id);
-    //         let newNotes = [...this.state.notes];
-    //         console.log(newNotes);
-    //         newNotes.push({
-    //           created_at: data.created_at,
-    //           created_by: {
-    //             first_name: data.created_by.first_name,
-    //             id: data.created_by.id,
-    //             last_name: data.created_by.last_name,
-    //           },
-    //           id: data.id,
-    //           labels: [],
-    //           message: localProjectNotes[i].note,
-    //           project: { id: this.props.route.params.id },
-    //         });
-    //         this.setState({
-    //           toggleInput: false,
-    //           note: "",
-    //           notes: newNotes,
-    //         });
-    //         this.props.deleteProjectNote(localProjectNotes[i].id);
-    //       }
-
-    //     }
-    //   });
 
     _renderItem = (item) => (
       <TouchableOpacity
@@ -480,6 +447,178 @@ class ProjectScreen extends React.Component {
             </TouchableOpacity>
           </View>
         </View>
+        {!popup && (
+            <View
+              style={{
+                position: "absolute",
+                height: height,
+                backgroundColor: "white",
+                zIndex: 3,
+                width: width,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <View style={{ height: 300, width: width }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    padding: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 2,
+                      marginRight: 20,
+                      fontWeight: "100",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                      Equipment Name
+                    </Text>
+                  </View>
+                  <TextInput
+                    selectedValue=""
+                    style={{
+                      borderWidth: 1,
+                      width: 150,
+                      borderColor: "gray",
+                      borderRadius: 5,
+                    }}
+                    placeholder=""
+                    defaultValue=""
+                    // onChangeText={(itemValue) =>
+                    //   this.setState({
+                    //     preread: {
+                    //       ...this.state.preread,
+                    //       outside_air_temperature: itemValue,
+                    //     },
+                    //   })
+                    // }
+                  />
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    padding: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 2,
+                      marginRight: 20,
+                      fontWeight: "100",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                      Location
+                    </Text>
+                  </View>
+                  <TextInput
+                    selectedValue=""
+                    style={{
+                      borderWidth: 1,
+                      width: 150,
+                      borderColor: "gray",
+                      borderRadius: 5,
+                    }}
+                    placeholder=""
+                    defaultValue=""
+                    // onChangeText={(itemValue) =>
+                    //   this.setState({
+                    //     preread: {
+                    //       ...this.state.preread,
+                    //       outside_air_temperature: itemValue,
+                    //     },
+                    //   })
+                    // }
+                  />
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    padding: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 2,
+                      marginRight: 20,
+                      fontWeight: "100",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                      CFM/Tonnage
+                    </Text>
+                  </View>
+                  <TextInput
+                    selectedValue=""
+                    style={{
+                      borderWidth: 1,
+                      width: 150,
+                      borderColor: "gray",
+                      borderRadius: 5,
+                    }}
+                    placeholder=""
+                    defaultValue=""
+                    // onChangeText={(itemValue) =>
+                    //   this.setState({
+                    //     preread: {
+                    //       ...this.state.preread,
+                    //       outside_air_temperature: itemValue,
+                    //     },
+                    //   })
+                    // }
+                  />
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    padding: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 2,
+                      marginRight: 20,
+                      fontWeight: "100",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                      Type
+                    </Text>
+                  </View>
+                  <TextInput
+                    selectedValue=""
+                    style={{
+                      borderWidth: 1,
+                      width: 150,
+                      borderColor: "gray",
+                      borderRadius: 5,
+                    }}
+                    placeholder=""
+                    defaultValue=""
+                    // onChangeText={(itemValue) =>
+                    //   this.setState({
+                    //     preread: {
+                    //       ...this.state.preread,
+                    //       outside_air_temperature: itemValue,
+                    //     },
+                    //   })
+                    // }
+                  />
+                </View>
+              </View>
+            </View>
+          )}
         <View style={styles.headcontainer}>
           <View style={styles.address}>
             <Text
@@ -532,7 +671,6 @@ class ProjectScreen extends React.Component {
               <Text style={{ fontWeight: "bold", fontSize: width / 24 }}>
                 Total pieces of equipment {" " + equipments?.length}
               </Text>
-              
             </View>
 
             <View
@@ -546,7 +684,6 @@ class ProjectScreen extends React.Component {
               <Text style={{ fontWeight: "bold", fontSize: width / 24 }}>
                 Start date and time : Dec 10, 2020, 10:00 am
               </Text>
-              
             </View>
           </View>
         </View>
@@ -725,7 +862,6 @@ class ProjectScreen extends React.Component {
                         });
                         this.props.deleteNote(this.state.editId);
                         this.setState({
-                          
                           editId: undefined,
                         });
                       } else {
@@ -966,7 +1102,7 @@ class ProjectScreen extends React.Component {
                   </Text>
                 </TouchableOpacity>
               )}
-            {!this.state.toggleInput &&
+            {/* {!this.state.toggleInput &&
               !this.state.toggleChange &&
               !this.state.toggleEdit && (
                 <TouchableOpacity
@@ -986,11 +1122,7 @@ class ProjectScreen extends React.Component {
                     // marginTop: 30,
                   }}
                 >
-                  {/* <Icon
-                  type="FontAwesome"
-                  name="plus-circle"
-                  style={{ fontSize: 15, color: "white", marginRight: 10 }}
-                /> */}
+                  
                   <Feather
                     name="clipboard"
                     size={width / 24}
@@ -1007,19 +1139,19 @@ class ProjectScreen extends React.Component {
                     Change Request
                   </Text>
                 </TouchableOpacity>
-              )}
+              )} */}
           </View>
-        
+
           <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: width / 20,
-                marginLeft: 20,
+            style={{
+              fontWeight: "bold",
+              fontSize: width / 20,
+              marginLeft: 20,
               marginTop: 28,
-              }}
-            >
-              General project notes
-            </Text>
+            }}
+          >
+            General project notes
+          </Text>
           {notes.map(
             (obj) =>
               obj.labels != "CHANGE_REQUEST" && (
@@ -1065,7 +1197,10 @@ class ProjectScreen extends React.Component {
                           : ("0" + new Date(obj.created_at).getHours()).slice(
                               -2
                             )}
-                        :{("0"+new Date(obj.created_at).getMinutes()).slice(-2)}{" "}
+                        :
+                        {("0" + new Date(obj.created_at).getMinutes()).slice(
+                          -2
+                        )}{" "}
                         {new Date(obj.created_at).getHours() > 12 ? "PM" : "AM"}
                       </Text>
                     </View>
@@ -1090,7 +1225,7 @@ class ProjectScreen extends React.Component {
                                 (e) => e.id != this.state.editId
                               ),
                               toggleEdit: true,
-                              note:obj.message
+                              note: obj.message,
                             });
                           }}
                         >
@@ -1254,6 +1389,37 @@ class ProjectScreen extends React.Component {
             </View>
           ))}
         </View>
+        <TouchableOpacity
+          onPress={() => this.setState({ popup: !this.state.popup })}
+          style={{
+            alignSelf: "center",
+            padding: 8,
+            backgroundColor: "black",
+            borderRadius: 5,
+            flexDirection: "row",
+            alignItems: "center",
+            width: 170,
+            justifyContent: "center",
+            marginBottom: 5,
+            // marginTop: 30,
+          }}
+        >
+          <Feather
+            name="plus"
+            size={width / 24}
+            color="white"
+            style={{ marginRight: 6 }}
+          />
+          <Text
+            style={{
+              fontSize: width / 24,
+              fontWeight: "200",
+              color: "white",
+            }}
+          >
+            Add Equipment
+          </Text>
+        </TouchableOpacity>
         <View
           style={{
             flexDirection: "row",
@@ -1261,6 +1427,14 @@ class ProjectScreen extends React.Component {
             margin: 20,
           }}
         >
+          <TouchableOpacity
+            onPress={() => {
+              this.setState({ popup: true });
+              console.log(this.state.popup);
+            }}
+          >
+            <Text>Add</Text>
+          </TouchableOpacity>
           <Text style={{ fontSize: width / 15, fontWeight: "200" }}>
             Equipment List
           </Text>
@@ -1352,6 +1526,36 @@ const styles = StyleSheet.create({
   mediaButtonText: {
     fontWeight: "normal",
     fontSize: width / 24,
+  },
+
+  formRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    flexDirection: "row",
+    margin: 15,
+    marginRight: 40,
+  },
+  formLabel: {
+    flexDirection: "row",
+    flex: 2,
+    marginRight: 20,
+    fontWeight: "100",
+    justifyContent: "flex-end",
+  },
+  formLabelText: {
+    textAlign: "right",
+    fontSize: width / 20,
+  },
+
+  formItem: {
+    flex: 2,
+    padding: 5,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: "lightgray",
+    width: 100,
+    alignSelf: "flex-start",
   },
 });
 

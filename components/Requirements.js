@@ -507,6 +507,41 @@ class Requirements extends React.Component {
           </View>
           <Text style={[styles.formItem, { borderWidth: 0 }]}>Coming soon</Text>
         </View>
+        <TouchableOpacity
+                  // onPress={() => {
+                  //   this.setState({ toggleChange: true });
+                  // }}
+                  style={{
+                    alignSelf: "center",
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 170,
+                    justifyContent: "center",
+                    marginBottom: 50,
+                    // marginTop: 30,
+                  }}
+                >
+                  
+                  <Feather
+                    name="clipboard"
+                    size={width / 24}
+                    color="white"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: width / 24,
+                      fontWeight: "200",
+                      color: "white",
+                    }}
+                  >
+                    Change Request
+                  </Text>
+                </TouchableOpacity>
+        
         <TouchableOpacity style={{ marginLeft: 15 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>Pre-reads</Text>
         </TouchableOpacity>
