@@ -17,7 +17,7 @@ import { BaseRouter } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { connect } from "react-redux";
-import { Form, Textarea, Icon } from "native-base";
+import { Form, Textarea, Icon, Picker } from "native-base";
 import {
   postNote,
   deleteNote,
@@ -47,7 +47,8 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  postNote: (projId, note, author) => dispatch(postNote(projId, note, author)),
+  postNote: (projId, note, note_category) =>
+    dispatch(postNote(projId, note, note_category)),
   postRequest: (projId, note) => dispatch(postRequest(projId, note)),
   deleteNote: (id) => dispatch(deleteNote(id)),
   fetchUser: () => dispatch(fetchUser()),
@@ -76,6 +77,7 @@ class ProjectScreen extends React.Component {
         (item) => item.id === this.props.route.params.id
       ).notes,
       note: "",
+      note_category: "",
       toggleInput: false,
       toggleChange: false,
       toggleEdit: false,
@@ -83,18 +85,14 @@ class ProjectScreen extends React.Component {
       editId: undefined,
       editNote: "",
       popup: true,
+      showContacts: false,
+      equipment_name: "",
+      equipment_location: "",
+      equipment_cfm_tonnage: null,
+      equipment_type: "",
+      noteType: "type1",
     };
   }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (this.state.project != prevState.project) {
-  //     this.setState({
-  //       project: this.props.user.assigned_projects_as_technician?.find(
-  //         (item) => item.id === this.props.route.params.id
-  //       ),
-  //     });
-  //   }
-  // }
 
   componentDidMount() {
     NetInfo.fetch().then(async (state) => {
@@ -136,62 +134,22 @@ class ProjectScreen extends React.Component {
     });
   }
 
-  // handleConnectivityChange = async (connection) => {
-  //   console.log(connection);
-  //   if (connection.isConnected) {
-  //     console.log('pass here');
-  //     for (let i = 0; i < localProjectNotes.length; i++) {
-  //       var data = await this.props.postNote(
-  //         this.props.route.params.id,
-  //         localProjectNotes[i].note
-  //         // this.props.user.user.first_name
-  //       );
-  //       console.log(data.id);
-  //       let newNotes = [...this.state.notes];
-  //       console.log(newNotes);
-  //       newNotes.push({
-  //         created_at: data.created_at,
-  //         created_by: {
-  //           first_name: data.created_by.first_name,
-  //           id: data.created_by.id,
-  //           last_name: data.created_by.last_name,
-  //         },
-  //         id: data.id,
-  //         labels: [],
-  //         message: localProjectNotes[i].note,
-  //         project: { id: this.props.route.params.id },
-  //       });
-  //       this.setState({
-  //         toggleInput: false,
-  //         note: "",
-  //         notes: newNotes,
-  //       });
-  //       this.props.deleteProjectNote(localProjectNotes[i].id);
-  //     }
-
-  //   }
-  // };
-
-  // componentWillUnmount() {
-  //   if (this.netinfoUnsubscribe) {
-  //     this.netinfoUnsubscribe();
-  //     this.netinfoUnsubscribe;
-  //   }
-  // }
-
   render() {
     const onRefresh = () => {
       this.setState({ refreshing: true });
 
       wait(2000).then(() => this.setState({ refreshing: false }));
     };
-    const { project, notes, popup } = this.state;
+    const { project, notes, popup, showContacts } = this.state;
     // const project = this.props.projects?.find(
     //   (item) => item.id === this.props.route.params.id
     // );
     // const equipments = this.props.equipments.equipments.filter(
     //   (item) => item.projId === project.id
     // );
+    const category_notes = notes.filter(
+      (note) => note.category == this.state.noteType
+    );
 
     const equipments = project?.equipments;
     const completed = equipments?.map(
@@ -405,6 +363,7 @@ class ProjectScreen extends React.Component {
           />
         }
       >
+        {/*========================= Contacts Start here====================== */}
         <View
           style={[
             styles.pcontact,
@@ -447,178 +406,166 @@ class ProjectScreen extends React.Component {
             </TouchableOpacity>
           </View>
         </View>
-        {!popup && (
+        <TouchableOpacity
+          onPress={() =>
+            this.setState({ showContacts: !this.state.showContacts })
+          }
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "center",
+          }}
+        >
+          <Text>{showContacts ? "Hide" : "More Contacts"}</Text>
+          <Feather
+            name={showContacts ? "chevron-up" : "chevron-down"}
+            size={26}
+            color="#0074B1"
+          />
+        </TouchableOpacity>
+        {showContacts && (
+          <View>
             <View
-              style={{
-                position: "absolute",
-                height: height,
-                backgroundColor: "white",
-                zIndex: 3,
-                width: width,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              style={[
+                styles.pcontact,
+                { flexDirection: "row", justifyContent: "space-between" },
+              ]}
             >
-              <View style={{ height: 300, width: width }}>
-                <View
+              <View>
+                {/* <Text style={{ fontSize: width / 24, color: "#616161" }}>
+                  Primary Contact
+                </Text> */}
+                <Text
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                    padding: 10,
+                    fontSize: width / 15,
+                    fontWeight: "bold",
+                    color: "#282828",
                   }}
                 >
-                  <View
-                    style={{
-                      flex: 2,
-                      marginRight: 20,
-                      fontWeight: "100",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
-                      Equipment Name
-                    </Text>
-                  </View>
-                  <TextInput
-                    selectedValue=""
-                    style={{
-                      borderWidth: 1,
-                      width: 150,
-                      borderColor: "gray",
-                      borderRadius: 5,
-                    }}
-                    placeholder=""
-                    defaultValue=""
-                    // onChangeText={(itemValue) =>
-                    //   this.setState({
-                    //     preread: {
-                    //       ...this.state.preread,
-                    //       outside_air_temperature: itemValue,
-                    //     },
-                    //   })
-                    // }
-                  />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                    padding: 10,
-                  }}
+                  Jim Brewin
+                </Text>
+                <Text style={{ fontSize: width / 24, color: "#2C3E50" }}>
+                  Director of Institute
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: 70,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`sms:8094050767`)}
                 >
-                  <View
-                    style={{
-                      flex: 2,
-                      marginRight: 20,
-                      fontWeight: "100",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
-                      Location
-                    </Text>
-                  </View>
-                  <TextInput
-                    selectedValue=""
-                    style={{
-                      borderWidth: 1,
-                      width: 150,
-                      borderColor: "gray",
-                      borderRadius: 5,
-                    }}
-                    placeholder=""
-                    defaultValue=""
-                    // onChangeText={(itemValue) =>
-                    //   this.setState({
-                    //     preread: {
-                    //       ...this.state.preread,
-                    //       outside_air_temperature: itemValue,
-                    //     },
-                    //   })
-                    // }
+                  <MaterialCommunityIcons
+                    name="tooltip-text-outline"
+                    size={width / 12}
+                    color="#0074B1"
                   />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                    padding: 10,
-                  }}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`tel:8094050767`)}
                 >
-                  <View
-                    style={{
-                      flex: 2,
-                      marginRight: 20,
-                      fontWeight: "100",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
-                      CFM/Tonnage
-                    </Text>
-                  </View>
-                  <TextInput
-                    selectedValue=""
-                    style={{
-                      borderWidth: 1,
-                      width: 150,
-                      borderColor: "gray",
-                      borderRadius: 5,
-                    }}
-                    placeholder=""
-                    defaultValue=""
-                    // onChangeText={(itemValue) =>
-                    //   this.setState({
-                    //     preread: {
-                    //       ...this.state.preread,
-                    //       outside_air_temperature: itemValue,
-                    //     },
-                    //   })
-                    // }
-                  />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                    padding: 10,
-                  }}
-                >
-                  <View
-                    style={{
-                      flex: 2,
-                      marginRight: 20,
-                      fontWeight: "100",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Text style={{ fontSize: width / 20, textAlign: "right" }}>
-                      Type
-                    </Text>
-                  </View>
-                  <TextInput
-                    selectedValue=""
-                    style={{
-                      borderWidth: 1,
-                      width: 150,
-                      borderColor: "gray",
-                      borderRadius: 5,
-                    }}
-                    placeholder=""
-                    defaultValue=""
-                    // onChangeText={(itemValue) =>
-                    //   this.setState({
-                    //     preread: {
-                    //       ...this.state.preread,
-                    //       outside_air_temperature: itemValue,
-                    //     },
-                    //   })
-                    // }
-                  />
-                </View>
+                  <Feather name="phone-call" size={26} color="#0074B1" />
+                </TouchableOpacity>
               </View>
             </View>
-          )}
+            <View
+              style={[
+                styles.pcontact,
+                { flexDirection: "row", justifyContent: "space-between" },
+              ]}
+            >
+              <View>
+                {/* <Text style={{ fontSize: width / 24, color: "#616161" }}>
+                  Primary Contact
+                </Text> */}
+                <Text
+                  style={{
+                    fontSize: width / 15,
+                    fontWeight: "bold",
+                    color: "#282828",
+                  }}
+                >
+                  Jim Brewin
+                </Text>
+                <Text style={{ fontSize: width / 24, color: "#2C3E50" }}>
+                  Director of Institute
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: 70,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`sms:8094050767`)}
+                >
+                  <MaterialCommunityIcons
+                    name="tooltip-text-outline"
+                    size={width / 12}
+                    color="#0074B1"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`tel:8094050767`)}
+                >
+                  <Feather name="phone-call" size={26} color="#0074B1" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View
+              style={[
+                styles.pcontact,
+                { flexDirection: "row", justifyContent: "space-between" },
+              ]}
+            >
+              <View>
+                {/* <Text style={{ fontSize: width / 24, color: "#616161" }}>
+                  Primary Contact
+                </Text> */}
+                <Text
+                  style={{
+                    fontSize: width / 15,
+                    fontWeight: "bold",
+                    color: "#282828",
+                  }}
+                >
+                  Jim Brewin
+                </Text>
+                <Text style={{ fontSize: width / 24, color: "#2C3E50" }}>
+                  Director of Institute
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: 70,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`sms:8094050767`)}
+                >
+                  <MaterialCommunityIcons
+                    name="tooltip-text-outline"
+                    size={width / 12}
+                    color="#0074B1"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`tel:8094050767`)}
+                >
+                  <Feather name="phone-call" size={26} color="#0074B1" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+        {/* ====================Contacts End here============================= */}
         <View style={styles.headcontainer}>
           <View style={styles.address}>
             <Text
@@ -687,7 +634,6 @@ class ProjectScreen extends React.Component {
             </View>
           </View>
         </View>
-
         <View>
           <View
             style={{
@@ -952,6 +898,22 @@ class ProjectScreen extends React.Component {
                   paddingTop: 15,
                 }}
               />
+              <Picker
+                mode="dropdown"
+                iosHeader="Select note category"
+                iosIcon={<Icon name="arrow-down" />}
+                style={{ width: 110, marginLeft: 23 }}
+                selectedValue={this.state.note_category}
+                onValueChange={(value) =>
+                  this.setState({ note_category: value })
+                }
+              >
+                <Picker.Item label="type1" value="type1" />
+                <Picker.Item label="type2" value="type2" />
+                <Picker.Item label="type3" value="type3" />
+                <Picker.Item label="type4" value="type4" />
+                <Picker.Item label="type5" value="type5" />
+              </Picker>
               <View
                 style={{
                   flexDirection: "row",
@@ -960,6 +922,7 @@ class ProjectScreen extends React.Component {
                 }}
               >
                 <TouchableOpacity
+                  disabled={!this.state.note_category.length>0 && !this.state.note.length>0}
                   onPress={async () => {
                     NetInfo.fetch().then(async (state) => {
                       console.log("Connection type", state.type);
@@ -967,7 +930,8 @@ class ProjectScreen extends React.Component {
                       if (state.isConnected) {
                         var data = await this.props.postNote(
                           this.props.route.params.id,
-                          this.state.note
+                          this.state.note,
+                          this.state.note_category
                           // this.props.user.user.first_name
                         );
                         console.log(data.id);
@@ -980,6 +944,7 @@ class ProjectScreen extends React.Component {
                             id: data.created_by.id,
                             last_name: data.created_by.last_name,
                           },
+                          category:data.noteType,
                           id: data.id,
                           labels: [],
                           message: this.state.note,
@@ -1152,7 +1117,21 @@ class ProjectScreen extends React.Component {
           >
             General project notes
           </Text>
-          {notes.map(
+          <Picker
+            mode="dropdown"
+            iosHeader="Select note category"
+            iosIcon={<Icon name="arrow-down" />}
+            style={{ width: 110, marginLeft: 15 }}
+            selectedValue={this.state.noteType}
+            onValueChange={(value) => this.setState({ noteType: value })}
+          >
+            <Picker.Item label="type1" value="type1" />
+            <Picker.Item label="type2" value="type2" />
+            <Picker.Item label="type3" value="type3" />
+            <Picker.Item label="type4" value="type4" />
+            <Picker.Item label="type5" value="type5" />
+          </Picker>
+          {category_notes.map(
             (obj) =>
               obj.labels != "CHANGE_REQUEST" && (
                 <View
@@ -1389,37 +1368,254 @@ class ProjectScreen extends React.Component {
             </View>
           ))}
         </View>
-        <TouchableOpacity
-          onPress={() => this.setState({ popup: !this.state.popup })}
-          style={{
-            alignSelf: "center",
-            padding: 8,
-            backgroundColor: "black",
-            borderRadius: 5,
-            flexDirection: "row",
-            alignItems: "center",
-            width: 170,
-            justifyContent: "center",
-            marginBottom: 5,
-            // marginTop: 30,
-          }}
-        >
-          <Feather
-            name="plus"
-            size={width / 24}
-            color="white"
-            style={{ marginRight: 6 }}
-          />
-          <Text
+        {!popup && (
+          <View
             style={{
-              fontSize: width / 24,
-              fontWeight: "200",
-              color: "white",
+              // position: "absolute",
+              // height: height,
+              backgroundColor: "white",
+              // zIndex: 3,
+              width: width,
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            Add Equipment
-          </Text>
-        </TouchableOpacity>
+            <View style={{ height: 300, width: width }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  padding: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flex: 2,
+                    marginRight: 20,
+                    fontWeight: "100",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                    Equipment Name
+                  </Text>
+                </View>
+                <TextInput
+                  selectedValue=""
+                  style={{
+                    borderWidth: 1,
+                    width: 150,
+                    borderColor: "gray",
+                    borderRadius: 5,
+                  }}
+                  placeholder=""
+                  defaultValue=""
+                  onChangeText={(itemValue) =>
+                    this.setState({
+                      equipment_name: itemValue,
+                    })
+                  }
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  padding: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flex: 2,
+                    marginRight: 20,
+                    fontWeight: "100",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                    Location
+                  </Text>
+                </View>
+                <TextInput
+                  selectedValue=""
+                  style={{
+                    borderWidth: 1,
+                    width: 150,
+                    borderColor: "gray",
+                    borderRadius: 5,
+                  }}
+                  placeholder=""
+                  defaultValue=""
+                  onChangeText={(itemValue) =>
+                    this.setState({
+                      equipment_location: itemValue,
+                    })
+                  }
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  padding: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flex: 2,
+                    marginRight: 20,
+                    fontWeight: "100",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                    CFM/Tonnage
+                  </Text>
+                </View>
+                <TextInput
+                  selectedValue=""
+                  style={{
+                    borderWidth: 1,
+                    width: 150,
+                    borderColor: "gray",
+                    borderRadius: 5,
+                  }}
+                  placeholder=""
+                  defaultValue=""
+                  onChangeText={(itemValue) =>
+                    this.setState({
+                      equipment_cfm_tonnage: itemValue,
+                    })
+                  }
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  padding: 10,
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flex: 2,
+                    marginRight: 20,
+                    fontWeight: "100",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <Text style={{ fontSize: width / 20, textAlign: "right" }}>
+                    Type
+                  </Text>
+                </View>
+                <Picker
+                  mode="dropdown"
+                  iosHeader="Select your SIM"
+                  iosIcon={<Icon name="arrow-down" />}
+                  style={{ width: 50 }}
+                  selectedValue={this.state.equipment_type}
+                  onValueChange={(value) =>
+                    this.setState({ equipment_type: value })
+                  }
+                >
+                  <Picker.Item label="type1" value="key0" />
+                  <Picker.Item label="type2" value="key1" />
+                  <Picker.Item label="type3" value="key2" />
+                  <Picker.Item label="type4" value="key3" />
+                  <Picker.Item label="type5" value="key4" />
+                </Picker>
+              </View>
+              <View
+                style={{ flexDirection: "row", justifyContent: "space-around" }}
+              >
+                <TouchableOpacity
+                  onPress={() => this.setState({ popup: !this.state.popup })}
+                  style={{
+                    alignSelf: "center",
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 170,
+                    justifyContent: "center",
+                    marginBottom: 5,
+                    // marginTop: 30,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: width / 24,
+                      fontWeight: "200",
+                      color: "white",
+                    }}
+                  >
+                    Submit
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => this.setState({ popup: !this.state.popup })}
+                  style={{
+                    alignSelf: "center",
+                    padding: 8,
+                    backgroundColor: "black",
+                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: 170,
+                    justifyContent: "center",
+                    marginBottom: 5,
+                    // marginTop: 30,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: width / 24,
+                      fontWeight: "200",
+                      color: "white",
+                    }}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+        {popup && (
+          <TouchableOpacity
+            onPress={() => this.setState({ popup: !this.state.popup })}
+            style={{
+              alignSelf: "center",
+              padding: 8,
+              backgroundColor: "black",
+              borderRadius: 5,
+              flexDirection: "row",
+              alignItems: "center",
+              width: 170,
+              justifyContent: "center",
+              marginBottom: 5,
+              // marginTop: 30,
+            }}
+          >
+            <Feather
+              name="plus"
+              size={width / 24}
+              color="white"
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={{
+                fontSize: width / 24,
+                fontWeight: "200",
+                color: "white",
+              }}
+            >
+              Add Equipment
+            </Text>
+          </TouchableOpacity>
+        )}
         <View
           style={{
             flexDirection: "row",
@@ -1427,14 +1623,6 @@ class ProjectScreen extends React.Component {
             margin: 20,
           }}
         >
-          <TouchableOpacity
-            onPress={() => {
-              this.setState({ popup: true });
-              console.log(this.state.popup);
-            }}
-          >
-            <Text>Add</Text>
-          </TouchableOpacity>
           <Text style={{ fontSize: width / 15, fontWeight: "200" }}>
             Equipment List
           </Text>
@@ -1464,9 +1652,7 @@ class ProjectScreen extends React.Component {
             </Text>
           </View>
         </View>
-
         {equipments?.map((item) => _renderItem(item))}
-
         <View
           style={{
             height: 50,
@@ -1503,6 +1689,7 @@ const styles = StyleSheet.create({
   headcontainer: {
     justifyContent: "center",
     fontFamily: "sans-serif",
+    marginTop: 25,
   },
   address: {
     marginLeft: 20,
@@ -1510,6 +1697,7 @@ const styles = StyleSheet.create({
   pcontact: {
     paddingBottom: 30,
     margin: 20,
+    marginBottom: 5,
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
     alignItems: "center",

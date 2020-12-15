@@ -63,6 +63,7 @@ export const fetchUser = () => async (dispatch) => {
                 close_date
                 notes {
                   id
+                  category
                   message
                   created_by {
                     id
@@ -250,7 +251,7 @@ export const deleteImages = (eId, images) => ({
   payload: images,
 });
 
-export const postNote = (projId, note, author) => async (dispatch) => {
+export const postNote = (projId, note, category) => async (dispatch) => {
   // const newNote = {
   //   projId: projId,
   //   // author: author,
@@ -265,6 +266,7 @@ export const postNote = (projId, note, author) => async (dispatch) => {
     .catch((err) => console.log(err));
     console.log(note);
   const request = '"' + note + '"';
+  const note_category = '"' + category + '"';
   console.log(request);
   var notee = {};
   await client
@@ -275,6 +277,7 @@ export const postNote = (projId, note, author) => async (dispatch) => {
         project_id:${projId}
         created_by:${myId},
         message:${request},
+        category:${note_category},
       })
       {
         id
@@ -284,6 +287,7 @@ export const postNote = (projId, note, author) => async (dispatch) => {
           last_name
         }
         created_at
+        category
       }
     }
   `,
@@ -292,6 +296,7 @@ export const postNote = (projId, note, author) => async (dispatch) => {
       notee.id = data.createNote.id;
       notee.created_by = data.createNote.created_by;
       notee.created_at = data.createNote.created_at;
+      notee.noteType = data.createNote.category
     });
   return notee;
   // setTimeout(() => {
@@ -717,3 +722,27 @@ export const deleteEquipNote = (id) => ({
   type: ActionTypes.DELETE_EQUIPNOTE,
   id: id,
 });
+
+// export const updateEquipment = (eId, dataId) => (dispatch) => {
+//   console.log(eId, dataId);
+//   client
+//     .mutate({
+//       mutation: gql`
+//     mutation {
+//       createEquipment(
+//         where: {id:${eId}}
+//         data: {data: ${dataId}}
+//       ) {
+//         id
+//         }
+//       }
+//   `,
+//     })
+//     .then(({ data }) => {
+//       console.log(data.updateEquipment.id);
+//     });
+
+//   setTimeout(() => {
+//     dispatch(fetchUser());
+//   }, 2000);
+// };
