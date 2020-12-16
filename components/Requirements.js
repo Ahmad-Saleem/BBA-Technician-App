@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { connect } from "react-redux";
 import * as Permissions from "expo-permissions";
-import { Icon, Form, Textarea } from "native-base";
+import { Icon, Form, Textarea, Picker } from "native-base";
 import {
   postTimestamp,
   postCompleted,
@@ -61,8 +61,8 @@ const mapDispatchToProps = (dispatch) => ({
   postCompleted: (eId) => dispatch(postCompleted(eId)),
   deleteCompleted: (eId) => dispatch(deleteCompleted(eId)),
   deleteImages: (eId, images) => dispatch(deleteImages(eId, images)),
-  postEquipNote: (projId, eId, note) =>
-    dispatch(postEquipNote(projId, eId, note)),
+  postEquipNote: (projId, eId, note, note_category) =>
+    dispatch(postEquipNote(projId, eId, note, note_category)),
   uploadToStorage: (preread, postread, eId, images, pId) =>
     dispatch(uploadToStorage(preread, postread, eId, images, pId)),
   postLocalEquipNote: (projId, eId, author, note) =>
@@ -181,6 +181,7 @@ class Requirements extends React.Component {
       },
       duration: 0,
       note: "",
+      note_category: "",
       notes: this.props.projects
         ?.find((item) => item.id === this.props.route.params.id)
         .equipments.find((item) => item.id === this.props.route.params.eId)
@@ -1397,7 +1398,38 @@ class Requirements extends React.Component {
                 paddingTop: 15,
               }}
             />
+             <View
+                style={{
+                  width: 300,
+                  alignSelf: "center",
+                  borderWidth: 2,
+                  borderColor: "#0074B1",
+                  borderRadius: 4,
+                  marginBottom: 15,
+                }}
+              >
+                <Picker
+                  mode="dropdown"
+                  iosHeader="Select note category"
+                  iosIcon={<Icon name="arrow-down" />}
+                  selectedValue={this.state.note_category}
+                  renderHeader={<Text>Choose category</Text>}
+                  onValueChange={(value) =>
+                    this.setState({ note_category: value })
+                  }
+                >
+                  <Picker.Item label="type1" value="type1" />
+                  <Picker.Item label="type2" value="type2" />
+                  <Picker.Item label="type3" value="type3" />
+                  <Picker.Item label="type4" value="type4" />
+                  <Picker.Item label="type5" value="type5" />
+                </Picker>
+              </View>
             <TouchableOpacity
+            disabled={
+              !this.state.note_category.length > 0 ||
+              !this.state.note.length > 0
+            }
               onPress={async () => {
                 NetInfo.fetch().then(async (state) => {
                   console.log("Connection type", state.type);
@@ -1406,7 +1438,8 @@ class Requirements extends React.Component {
                     var data = await this.props.postEquipNote(
                       project?.id,
                       eId,
-                      this.state.note
+                      this.state.note,
+                      this.state.note_category
                     );
                     console.log(data.id);
                     let newNotes = [...this.state.notes];
@@ -1418,6 +1451,7 @@ class Requirements extends React.Component {
                         id: data.created_by.id,
                         last_name: data.created_by.last_name,
                       },
+                      category: data.noteType,
                       id: data.id,
                       labels: [],
                       message: this.state.note,

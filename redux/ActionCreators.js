@@ -236,7 +236,7 @@ export const postImages = (eId, images) => (dispatch) => {
   // newTimestamp.stopping = "Stop tracking";
   // newTimestamp.duration = 0;
   setTimeout(async () => {
-  await  dispatch(addImages(newImageSet));
+    await dispatch(addImages(newImageSet));
   }, 2000);
 };
 
@@ -264,7 +264,7 @@ export const postNote = (projId, note, category) => async (dispatch) => {
       return user.attributes["custom:userId"];
     })
     .catch((err) => console.log(err));
-    console.log(note);
+  console.log(note);
   const request = '"' + note + '"';
   const note_category = '"' + category + '"';
   console.log(request);
@@ -296,7 +296,7 @@ export const postNote = (projId, note, category) => async (dispatch) => {
       notee.id = data.createNote.id;
       notee.created_by = data.createNote.created_by;
       notee.created_at = data.createNote.created_at;
-      notee.noteType = data.createNote.category
+      notee.noteType = data.createNote.category;
     });
   return notee;
   // setTimeout(() => {
@@ -318,7 +318,9 @@ export const postNote = (projId, note, category) => async (dispatch) => {
 //   "message": "Hey",
 // }
 
-export const postEquipNote = (projId, eId, note) => async (dispatch) => {
+export const postEquipNote = (projId, eId, note, category) => async (
+  dispatch
+) => {
   // const newNote = {
   //   projId: projId,
   //   // author: author,
@@ -331,6 +333,7 @@ export const postEquipNote = (projId, eId, note) => async (dispatch) => {
     })
     .catch((err) => console.log(err));
   const request = '"' + note + '"';
+  const note_category = '"' + category + '"';
   var notee = {};
   await client
     .mutate({
@@ -340,7 +343,8 @@ export const postEquipNote = (projId, eId, note) => async (dispatch) => {
         project_id:${projId},
         created_by:${myId},
         message:${request},
-        equipment:${eId}
+        equipment:${eId},
+        category:${note_category},
       })
       {
         id
@@ -350,6 +354,7 @@ export const postEquipNote = (projId, eId, note) => async (dispatch) => {
           last_name
         }
         created_at
+        category
       }
     }
   `,
@@ -358,6 +363,7 @@ export const postEquipNote = (projId, eId, note) => async (dispatch) => {
       notee.id = data.createNote.id;
       notee.created_by = data.createNote.created_by;
       notee.created_at = data.createNote.created_at;
+      notee.noteType = data.createNote.category;
     });
   return notee;
 };

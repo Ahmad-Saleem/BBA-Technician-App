@@ -894,26 +894,38 @@ class ProjectScreen extends React.Component {
                   alignSelf: "center",
                   borderRadius: 4,
                   marginBottom: 15,
-                  paddingLeft: 25,
-                  paddingTop: 15,
+                  paddingLeft: 10,
+                  padding: 9,
                 }}
               />
-              <Picker
-                mode="dropdown"
-                iosHeader="Select note category"
-                iosIcon={<Icon name="arrow-down" />}
-                style={{ width: 110, marginLeft: 23 }}
-                selectedValue={this.state.note_category}
-                onValueChange={(value) =>
-                  this.setState({ note_category: value })
-                }
+              <View
+                style={{
+                  width: 300,
+                  alignSelf: "center",
+                  borderWidth: 2,
+                  borderColor: "#0074B1",
+                  borderRadius: 4,
+                  marginBottom: 15,
+                }}
               >
-                <Picker.Item label="type1" value="type1" />
-                <Picker.Item label="type2" value="type2" />
-                <Picker.Item label="type3" value="type3" />
-                <Picker.Item label="type4" value="type4" />
-                <Picker.Item label="type5" value="type5" />
-              </Picker>
+                <Picker
+                  mode="dropdown"
+                  iosHeader="Select note category"
+                  iosIcon={<Icon name="arrow-down" />}
+                  selectedValue={this.state.note_category}
+                  renderHeader={<Text>Choose category</Text>}
+                  onValueChange={(value) =>
+                    this.setState({ note_category: value })
+                  }
+                >
+                  <Picker.Item label="type1" value="type1" />
+                  <Picker.Item label="type2" value="type2" />
+                  <Picker.Item label="type3" value="type3" />
+                  <Picker.Item label="type4" value="type4" />
+                  <Picker.Item label="type5" value="type5" />
+                </Picker>
+              </View>
+
               <View
                 style={{
                   flexDirection: "row",
@@ -922,7 +934,10 @@ class ProjectScreen extends React.Component {
                 }}
               >
                 <TouchableOpacity
-                  disabled={!this.state.note_category.length>0 && !this.state.note.length>0}
+                  disabled={
+                    !this.state.note_category.length > 0 ||
+                    !this.state.note.length > 0
+                  }
                   onPress={async () => {
                     NetInfo.fetch().then(async (state) => {
                       console.log("Connection type", state.type);
@@ -944,7 +959,7 @@ class ProjectScreen extends React.Component {
                             id: data.created_by.id,
                             last_name: data.created_by.last_name,
                           },
-                          category:data.noteType,
+                          category: data.noteType,
                           id: data.id,
                           labels: [],
                           message: this.state.note,
@@ -1117,20 +1132,31 @@ class ProjectScreen extends React.Component {
           >
             General project notes
           </Text>
-          <Picker
-            mode="dropdown"
-            iosHeader="Select note category"
-            iosIcon={<Icon name="arrow-down" />}
-            style={{ width: 110, marginLeft: 15 }}
-            selectedValue={this.state.noteType}
-            onValueChange={(value) => this.setState({ noteType: value })}
+          <View
+            style={{
+              width: 120,
+              // alignSelf: "center",
+              borderWidth: 2,
+              borderColor: "#0074B1",
+              borderRadius: 4,
+              margin: 20,
+            }}
           >
-            <Picker.Item label="type1" value="type1" />
-            <Picker.Item label="type2" value="type2" />
-            <Picker.Item label="type3" value="type3" />
-            <Picker.Item label="type4" value="type4" />
-            <Picker.Item label="type5" value="type5" />
-          </Picker>
+            <Picker
+              mode="dropdown"
+              iosHeader="Select note category"
+              iosIcon={<Icon name="arrow-down" />}
+              selectedValue={this.state.noteType}
+              onValueChange={(value) => this.setState({ noteType: value })}
+            >
+              <Picker.Item label="type1" value="type1" />
+              <Picker.Item label="type2" value="type2" />
+              <Picker.Item label="type3" value="type3" />
+              <Picker.Item label="type4" value="type4" />
+              <Picker.Item label="type5" value="type5" />
+            </Picker>
+          </View>
+
           {category_notes.map(
             (obj) =>
               obj.labels != "CHANGE_REQUEST" && (
