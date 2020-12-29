@@ -752,3 +752,34 @@ export const deleteEquipNote = (id) => ({
 //     dispatch(fetchUser());
 //   }, 2000);
 // };
+
+export const postLocalNote = (
+  id,
+  projId,
+  category,
+  author,
+  note,
+  eId
+) => async (dispatch) => {
+  const newNote = {
+    id: id,
+    projId: projId,
+    eId: eId || null,
+    author: author,
+    note: note,
+    category: category,
+  };
+  setTimeout(() => {
+    dispatch(addLocalNote(newNote));
+  }, 2000);
+};
+
+export const addLocalNote = (newNote) => ({
+  type: ActionTypes.ADD_LOCALNOTE,
+  payload: newNote,
+});
+
+export const deleteLocalNote = (id) => ({
+  type: ActionTypes.DELETE_LOCALNOTE,
+  id: id,
+});

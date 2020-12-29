@@ -39,6 +39,7 @@ import { Storage, StorageProvider } from "aws-amplify";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
 import { Camera } from "expo-camera";
+import shortid from "shortid";
 
 const mapStateToProps = (state) => {
   return {
@@ -178,6 +179,18 @@ class Requirements extends React.Component {
         supply_air_temperature: this.props.dataReads?.find(
           (item) => item.id === this.props.route.params.eId
         )?.postreads?.supply_air_temperature,
+      },
+      questions: {
+        manufacturer:"",
+        system_type:"Push",
+        vfd:"Yes",
+        blower_type:"Single Blower",
+        no_separate_coils:"1",
+        coil_depth:"4 row",
+        condition_of_equipment:"Excellent",
+        is_damaged:"No",
+        visible_hydrocarbon_fouling:"",
+        biofouling:""
       },
       duration: 0,
       note: "",
@@ -334,19 +347,17 @@ class Requirements extends React.Component {
     const __takePicture = async () => {
       if (!this.camera) return;
       const photo = await this.camera.takePictureAsync();
-      
+
       console.log(photo);
       this.setState({ previewVisible: true });
+      photo.id = shortid.generate();
       this.setState({ capturedImage: photo });
-      await this.props.postImages(this.props.route.params.eId, [
-        photo,
-      ]);
+      await this.props.postImages(this.props.route.params.eId, [photo]);
       setTimeout(() => {
         this.props.navigation.navigate("AddCaptions", {
           eId: this.props.route.params.eId,
         });
       }, 2000);
-      
     };
 
     const { eId } = this.props.route.params;
@@ -509,40 +520,303 @@ class Requirements extends React.Component {
           <Text style={[styles.formItem, { borderWidth: 0 }]}>Coming soon</Text>
         </View>
         <TouchableOpacity
-                  // onPress={() => {
-                  //   this.setState({ toggleChange: true });
-                  // }}
-                  style={{
-                    alignSelf: "center",
-                    padding: 8,
-                    backgroundColor: "black",
-                    borderRadius: 5,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    width: 170,
-                    justifyContent: "center",
-                    marginBottom: 50,
-                    // marginTop: 30,
-                  }}
-                >
-                  
-                  <Feather
-                    name="clipboard"
-                    size={width / 24}
-                    color="white"
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text
-                    style={{
-                      fontSize: width / 24,
-                      fontWeight: "200",
-                      color: "white",
-                    }}
-                  >
-                    Change Request
-                  </Text>
-                </TouchableOpacity>
+          // onPress={() => {
+          //   this.setState({ toggleChange: true });
+          // }}
+          style={{
+            alignSelf: "center",
+            padding: 8,
+            backgroundColor: "black",
+            borderRadius: 5,
+            flexDirection: "row",
+            alignItems: "center",
+            width: 170,
+            justifyContent: "center",
+            marginBottom: 50,
+            // marginTop: 30,
+          }}
+        >
+          <Feather
+            name="clipboard"
+            size={width / 24}
+            color="white"
+            style={{ marginRight: 6 }}
+          />
+          <Text
+            style={{
+              fontSize: width / 24,
+              fontWeight: "200",
+              color: "white",
+            }}
+          >
+            Change Request
+          </Text>
+        </TouchableOpacity>
+
+        {/* Questions for tech */}
+
+        <TouchableOpacity style={{ marginLeft: 15 }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>Update the following information</Text>
+        </TouchableOpacity>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Manufacturer:</Text>
+          </View>
+          <TextInput
+            selectedValue={this.state.questions?.manufacturer}
+            style={styles.formItem}
+            placeholder={this.state.questions?.manufacturer}
+            defaultValue={this.state.questions?.manufacturer}
+            onChangeText={(itemValue) =>
+              this.setState({
+                preread: { ...this.state.questions, manufacturer: itemValue },
+              })
+            }
+          />
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>System Type:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.system_type}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions, system_type: value },
+                  })
+                }
+              >
+                <Picker.Item label="Push" value="Push" />
+                <Picker.Item label="Draw" value="Draw" />
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>VFD:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.vfd}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions, vfd: value },
+                  })
+                }
+              >
+                <Picker.Item label="Yes" value="Yes" />
+                <Picker.Item label="No" value="No" />
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Blower Type:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.blower_type}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions, blower_type: value },
+                  })
+                }
+              >
+                <Picker.Item label="Single Blower" value="Single Blower" />
+                <Picker.Item label="Fan Array" value="Fan Array" />
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>How many separate coils:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.no_separate_coils}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions,no_separate_coils : value },
+                  })
+                }
+              >
+                <Picker.Item label="1" value="1" />
+                <Picker.Item label="2" value="2" />
+                <Picker.Item label="3" value="3" />
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Coil depth:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.coil_depth}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions,coil_depth : value },
+                  })
+                }
+              >
+                <Picker.Item label="4 row" value="4 row" />
+                <Picker.Item label="6 row" value="6 row" />
+                <Picker.Item label="8 row" value="8 row" />
+                <Picker.Item label="12 row" value="12 row" />
+                <Picker.Item label="16 row" value="16 row" />
+                <Picker.Item label="18 row" value="18 row" />
+                <Picker.Item label="24 row" value="24 row" />
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Condition of equipment:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.condition_of_equipment}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions,condition_of_equipment : value },
+                  })
+                }
+              >
+                <Picker.Item label="Excellent" value="Excellent" />
+                <Picker.Item label="good" value="good" />
+                <Picker.Item label="bad" value="bad" />
+              
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Is the equipment damaged?:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.is_damaged}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions,is_damaged : value },
+                  })
+                }
+              >
+                <Picker.Item label="No" value="No" />
+                <Picker.Item label="Yes" value="Yes" />
+               
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Visible hydrocarbon fouling or mold?:</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.visible_hydrocarbon_fouling}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions,visible_hydrocarbon_fouling : value },
+                  })
+                }
+              >
+                <Picker.Item label="No" value="No" />
+                <Picker.Item label="Yes" value="Yes" />
+
+              </Picker>
+          </View>
+        </View>
+        <View style={styles.formRow}>
+          <View style={styles.formLabel}>
+            <Text style={{ textAlign: "right" }}>Biofouling?</Text>
+          </View>
+          <View style={[styles.formItem, { borderWidth: 0 }]}>
+          <Picker
+                mode="dropdown"
+                iosHeader="Select"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.questions.biofouling}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({
+                    preread: { ...this.state.questions,biofouling : value },
+                  })
+                }
+              >
+                <Picker.Item label="No" value="No" />
+                <Picker.Item label="Yes" value="Yes" />
+
+              </Picker>
+          </View>
+        </View>
+      
         
+        
+        <TouchableOpacity
+          // onPress={() => {
+          //   this.setState({ toggleChange: true });
+          // }}
+          style={{
+            alignSelf: "center",
+            padding: 8,
+            backgroundColor: "black",
+            borderRadius: 5,
+            flexDirection: "row",
+            alignItems: "center",
+            width: 170,
+            justifyContent: "center",
+            marginBottom: 50,
+            // marginTop: 30,
+          }}
+        >
+
+          <Text
+            style={{
+              fontSize: width / 24,
+              fontWeight: "200",
+              color: "white",
+            }}
+          >
+            Save
+          </Text>
+        </TouchableOpacity>
+
+        {/* Questions for tech */}
+
         <TouchableOpacity style={{ marginLeft: 15 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>Pre-reads</Text>
         </TouchableOpacity>
@@ -1000,6 +1274,7 @@ class Requirements extends React.Component {
                           eId: eId,
                           type: "photo",
                         }),
+                      style: "cancel",
                     },
                   ],
                   { cancelable: false }
@@ -1398,38 +1673,41 @@ class Requirements extends React.Component {
                 paddingTop: 15,
               }}
             />
-             <View
-                style={{
-                  width: 300,
-                  alignSelf: "center",
-                  borderWidth: 2,
-                  borderColor: "#0074B1",
-                  borderRadius: 4,
-                  marginBottom: 15,
-                }}
+            <View
+              style={{
+                width: 300,
+                alignSelf: "center",
+                borderWidth: 2,
+                borderColor: "#0074B1",
+                borderRadius: 4,
+                marginBottom: 15,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              {!this.state.note_category && <Text>Choose note category</Text>}
+              <Picker
+                mode="dropdown"
+                iosHeader="Select note category"
+                iosIcon={<Icon name="arrow-down" />}
+                selectedValue={this.state.note_category}
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) =>
+                  this.setState({ note_category: value })
+                }
               >
-                <Picker
-                  mode="dropdown"
-                  iosHeader="Select note category"
-                  iosIcon={<Icon name="arrow-down" />}
-                  selectedValue={this.state.note_category}
-                  renderHeader={<Text>Choose category</Text>}
-                  onValueChange={(value) =>
-                    this.setState({ note_category: value })
-                  }
-                >
-                  <Picker.Item label="type1" value="type1" />
-                  <Picker.Item label="type2" value="type2" />
-                  <Picker.Item label="type3" value="type3" />
-                  <Picker.Item label="type4" value="type4" />
-                  <Picker.Item label="type5" value="type5" />
-                </Picker>
-              </View>
+                <Picker.Item label="type1" value="type1" />
+                <Picker.Item label="type2" value="type2" />
+                <Picker.Item label="type3" value="type3" />
+                <Picker.Item label="type4" value="type4" />
+                <Picker.Item label="type5" value="type5" />
+              </Picker>
+            </View>
             <TouchableOpacity
-            disabled={
-              !this.state.note_category.length > 0 ||
-              !this.state.note.length > 0
-            }
+              disabled={
+                !this.state.note_category.length > 0 ||
+                !this.state.note.length > 0
+              }
               onPress={async () => {
                 NetInfo.fetch().then(async (state) => {
                   console.log("Connection type", state.type);

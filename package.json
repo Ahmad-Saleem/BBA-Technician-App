@@ -20,6 +20,7 @@
     "aws-amplify-react-native": "^4.2.7",
     "expo": "~38.0.8",
     "expo-av": "~8.2.1",
+    "expo-camera": "~8.3.1",
     "expo-font": "~8.2.1",
     "expo-images-picker": "^1.0.6",
     "expo-permissions": "~9.0.1",
@@ -43,7 +44,7 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
-    "expo-camera": "~8.3.1"
+    "shortid": "^2.2.16"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

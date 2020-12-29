@@ -25,6 +25,7 @@ import {
   fetchUser,
   postLocalProjectNote,
   deleteProjectNote,
+  postLocalNote,
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -43,6 +44,7 @@ const mapStateToProps = (state) => {
     timestamps: state.timestamps,
     selectedImages: state.selectedImages,
     localProjectNotes: state.localProjectNotes,
+    localNotes: state.localNotes,
   };
 };
 
@@ -55,6 +57,8 @@ const mapDispatchToProps = (dispatch) => ({
   postLocalProjectNote: (projId, note, author) =>
     dispatch(postLocalProjectNote(projId, note, author)),
   deleteProjectNote: (id) => dispatch(deleteProjectNote(id)),
+  postLocalNote: (id, projId, category, note, eId) =>
+    dispatch(postLocalNote(id, projId, category, author, note, eId)),
 });
 
 const wait = (timeout) => {
@@ -89,8 +93,8 @@ class ProjectScreen extends React.Component {
       equipment_name: "",
       equipment_location: "",
       equipment_cfm_tonnage: null,
-      equipment_type: "",
-      noteType: "type1",
+      equipment_type: "Air Handler Units",
+      noteType: "All",
     };
   }
 
@@ -147,9 +151,10 @@ class ProjectScreen extends React.Component {
     // const equipments = this.props.equipments.equipments.filter(
     //   (item) => item.projId === project.id
     // );
-    const category_notes = notes.filter(
-      (note) => note.category == this.state.noteType
-    );
+    const category_notes =
+      this.state.noteType == "All"
+        ? notes
+        : notes.filter((note) => note.category == this.state.noteType);
 
     const equipments = project?.equipments;
     const completed = equipments?.map(
@@ -906,23 +911,27 @@ class ProjectScreen extends React.Component {
                   borderColor: "#0074B1",
                   borderRadius: 4,
                   marginBottom: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
+                {!this.state.note_category && <Text>Choose note category</Text>}
                 <Picker
                   mode="dropdown"
                   iosHeader="Select note category"
                   iosIcon={<Icon name="arrow-down" />}
                   selectedValue={this.state.note_category}
-                  renderHeader={<Text>Choose category</Text>}
+                  // renderHeader={<Text>Choose category</Text>}
                   onValueChange={(value) =>
                     this.setState({ note_category: value })
                   }
                 >
-                  <Picker.Item label="type1" value="type1" />
-                  <Picker.Item label="type2" value="type2" />
-                  <Picker.Item label="type3" value="type3" />
-                  <Picker.Item label="type4" value="type4" />
-                  <Picker.Item label="type5" value="type5" />
+                  <Picker.Item
+                    label="Project Overview"
+                    value="Project Overview"
+                  />
+                  <Picker.Item label="Project Update" value="Project Update" />
+                  <Picker.Item label="Request" value="Request" />
                 </Picker>
               </View>
 
@@ -1149,11 +1158,17 @@ class ProjectScreen extends React.Component {
               selectedValue={this.state.noteType}
               onValueChange={(value) => this.setState({ noteType: value })}
             >
-              <Picker.Item label="type1" value="type1" />
-              <Picker.Item label="type2" value="type2" />
-              <Picker.Item label="type3" value="type3" />
-              <Picker.Item label="type4" value="type4" />
-              <Picker.Item label="type5" value="type5" />
+              <Picker.Item label="All" value="All" />
+              <Picker.Item
+                label="Project Description"
+                value="Project Description"
+              />
+              <Picker.Item label="Service Notes" value="Service Notes" />
+              <Picker.Item label="Updates" value="Updates" />
+              <Picker.Item
+                label="Directions / Meeting Location"
+                value="Directions / Meeting Location"
+              />
             </Picker>
           </View>
 
@@ -1537,7 +1552,7 @@ class ProjectScreen extends React.Component {
                 </View>
                 <Picker
                   mode="dropdown"
-                  iosHeader="Select your SIM"
+                  iosHeader="Select "
                   iosIcon={<Icon name="arrow-down" />}
                   style={{ width: 50 }}
                   selectedValue={this.state.equipment_type}
@@ -1545,11 +1560,10 @@ class ProjectScreen extends React.Component {
                     this.setState({ equipment_type: value })
                   }
                 >
-                  <Picker.Item label="type1" value="key0" />
-                  <Picker.Item label="type2" value="key1" />
-                  <Picker.Item label="type3" value="key2" />
-                  <Picker.Item label="type4" value="key3" />
-                  <Picker.Item label="type5" value="key4" />
+                  <Picker.Item label="Air Handler Units" value="Air Handler Units" />
+                  <Picker.Item label="Fan Coil Units" value="Fan Coil Units" />
+                  <Picker.Item label="Condenser Coils" value="Condenser Coils" />
+
                 </Picker>
               </View>
               <View

@@ -9,7 +9,7 @@ import {
   Dimensions
 } from "react-native";
 import { connect } from "react-redux";
-import { Icon, Textarea } from "native-base";
+import { Icon, Textarea, Picker } from "native-base";
 import { postCaption, deleteImages } from "../redux/ActionCreators";
 let width = Dimensions.get("window").width;
 
@@ -111,7 +111,7 @@ class AddCaptions extends Component {
             {obj.caption != "" && <Text>{obj.caption}</Text>}
             {this.state.showInput && this.state.imgId === obj.id && (
               <View>
-                <Textarea
+                {/* <Textarea
                   onChangeText={(caption) => this.setState({ caption })}
                   rowSpan={4}
                   //   value={this.state.note}
@@ -127,7 +127,33 @@ class AddCaptions extends Component {
                     paddingLeft: 25,
                     paddingTop: 15,
                   }}
-                />
+                /> */}
+                <View>
+                 <Picker
+                  mode="dropdown"
+                  iosHeader="Select note category"
+                  iosIcon={<Icon name="arrow-down" />}
+                  selectedValue={this.state.note_category}
+                  // renderHeader={<Text>Choose category</Text>}
+                  onValueChange={(value) =>
+                    this.setState({ caption:value })
+                  }
+                >
+                  <Picker.Item label="UNIT BEFORE CLEANING" value="UNIT BEFORE CLEANING" />
+                  <Picker.Item label="DURING TREATMENT" value="DURING TREATMENT" />
+                  <Picker.Item label="PRE-READ" value="PRE-READ" />
+                  <Picker.Item label="POST-READ" value="POST-READ" />
+                  <Picker.Item label="BREAKTHROUGH" value="BREAKTHROUGH" />
+                  <Picker.Item label="BIOFOULING" value="BIOFOULING" />
+                  <Picker.Item label="HYDROCARBON FOULING" value="HYDROCARBON FOULING" />
+                  <Picker.Item label="FRONT OF COILS - BEFORE" value="FRONT OF COILS - BEFORE" />
+                  <Picker.Item label="FRONT OF COILS - AFTER" value="FRONT OF COILS - AFTER" />
+                  <Picker.Item label="BACKSIDE COILS - BEFORE" value="BACKSIDE COILS - BEFORE" />
+                  <Picker.Item label="BACKSIDE COILS - AFTER" value="BACKSIDE COILS - AFTER" />
+                  <Picker.Item label="DAMAGE" value="DAMAGE" />
+                  <Picker.Item label="OTHER" value="OTHER" />
+                </Picker>
+               </View>
                 <TouchableOpacity
                   style={{
                     padding: 8,
