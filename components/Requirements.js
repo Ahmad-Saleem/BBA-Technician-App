@@ -1268,7 +1268,7 @@ class Requirements extends React.Component {
                       style: "cancel",
                     },
                     {
-                      text: "gallery",
+                      text: "Gallery",
                       onPress: () =>
                         this.props.navigation.navigate("Images", {
                           eId: eId,
@@ -1685,7 +1685,7 @@ class Requirements extends React.Component {
                 alignItems: "center",
               }}
             >
-              {!this.state.note_category && <Text>Choose note category</Text>}
+              {/* {!this.state.note_category && <Text>Choose note category</Text>} */}
               <Picker
                 mode="dropdown"
                 iosHeader="Select note category"
@@ -1696,11 +1696,25 @@ class Requirements extends React.Component {
                   this.setState({ note_category: value })
                 }
               >
-                <Picker.Item label="type1" value="type1" />
-                <Picker.Item label="type2" value="type2" />
-                <Picker.Item label="type3" value="type3" />
-                <Picker.Item label="type4" value="type4" />
-                <Picker.Item label="type5" value="type5" />
+                <Picker.Item label="COIL DAMAGE(MINOR)" value="COIL DAMAGE(MINOR)" />
+                <Picker.Item label="COIL DAMAGE(MODERATE)" value="COIL DAMAGE(MODERATE)" />
+                <Picker.Item label="COIL DAMAGE(MAJOR)" value="COIL DAMAGE(MAJOR)" />
+                <Picker.Item label="DAMAGE TYPE-PRESSURE WASHING" value="DAMAGE TYPE-PRESSURE WASHING" />
+                <Picker.Item label="DAMAGE TYPE-CORROSION" value="DAMAGE TYPE-CORROSION" />
+                <Picker.Item label="AIR GAPS - COILS" value="AIR GAPS - COILS" />
+                <Picker.Item label="AIR GAPS - FILTERs" value="AIR GAPS - FILTERs" />
+                <Picker.Item label="BIO FOULING-MINOR" value="BIO FOULING-MINOR" />
+                <Picker.Item label="BIO FOULING-MODERATE" value="BIO FOULING-MODERATE" />
+                <Picker.Item label="BIO FOULING-MAJOR" value="BIO FOULING-MAJOR" />
+                <Picker.Item label="BIO TYPE-BACTERIA" value="BIO TYPE-BACTERIA" />
+                <Picker.Item label="BIO TYPE-FUNGI" value="BIO TYPE-FUNGI" />
+                <Picker.Item label="BIO TYPE-SLIME" value="BIO TYPE-SLIME" />
+                <Picker.Item label="OTHER FOULING-MINOR" value="OTHER FOULING-MINOR" />
+                <Picker.Item label="OTHER FOULING-MODERATE" value="OTHER FOULING-MODERATE" />
+                <Picker.Item label="OTHER FOULING-MAJOR" value="OTHER FOULING-MAJOR" />
+                <Picker.Item label="FOULING TYPE - HYDROCARBON" value="FOULING TYPE - HYDROCARBON" />
+                <Picker.Item label="FOULING TYPE - DRYWALL" value="FOULING TYPE - DRYWALL" />
+                <Picker.Item label="FOULING TYPE - MISC" value="FOULING TYPE - MISC" />
               </Picker>
             </View>
             <TouchableOpacity

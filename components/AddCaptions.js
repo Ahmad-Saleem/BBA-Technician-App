@@ -131,9 +131,9 @@ class AddCaptions extends Component {
                 <View>
                  <Picker
                   mode="dropdown"
-                  iosHeader="Select note category"
+                  iosHeader="Select Captions"
                   iosIcon={<Icon name="arrow-down" />}
-                  selectedValue={this.state.note_category}
+                  selectedValue={this.state.caption}
                   // renderHeader={<Text>Choose category</Text>}
                   onValueChange={(value) =>
                     this.setState({ caption:value })

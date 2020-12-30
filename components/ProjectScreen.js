@@ -1550,21 +1550,45 @@ class ProjectScreen extends React.Component {
                     Type
                   </Text>
                 </View>
-                <Picker
-                  mode="dropdown"
-                  iosHeader="Select "
-                  iosIcon={<Icon name="arrow-down" />}
-                  style={{ width: 50 }}
-                  selectedValue={this.state.equipment_type}
-                  onValueChange={(value) =>
-                    this.setState({ equipment_type: value })
-                  }
+                <View
+                  style={{
+                    width: 150,
+                    alignItems:"flex-end",
+                    flexDirection:"row"
+                  }}
                 >
-                  <Picker.Item label="Air Handler Units" value="Air Handler Units" />
-                  <Picker.Item label="Fan Coil Units" value="Fan Coil Units" />
-                  <Picker.Item label="Condenser Coils" value="Condenser Coils" />
-
-                </Picker>
+                  <Picker
+                    mode="dropdown"
+                    iosHeader="Select "
+                    iosIcon={<Icon name="arrow-down" />}
+                    style={{ width: 50 }}
+                    selectedValue={this.state.equipment_type}
+                    onValueChange={(value) =>
+                      this.setState({ equipment_type: value })
+                    }
+                  >
+                    <Picker.Item
+                      label="Air Handler Units"
+                      value="Air Handler Units"
+                    />
+                    <Picker.Item
+                      label="Fan Coil(CEILING) Units"
+                      value="Fan Coil(CEILING) Units"
+                    />
+                    <Picker.Item
+                      label="Fan Coil(WALL) Units"
+                      value="Fan Coil(WALL) Units"
+                    />
+                    <Picker.Item
+                      label="Fan Coil(PTAC) Units"
+                      value="Fan Coil(PTAC) Units"
+                    />
+                    <Picker.Item
+                      label="Condenser Coils"
+                      value="Condenser Coils"
+                    />
+                  </Picker>
+                </View>
               </View>
               <View
                 style={{ flexDirection: "row", justifyContent: "space-around" }}
