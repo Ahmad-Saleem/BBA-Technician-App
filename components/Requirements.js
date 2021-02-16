@@ -30,6 +30,8 @@ import {
   deleteEquipNote,
   postDataRead,
   postImages,
+  updateEquipmentOnRequest,
+  postAnswers
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -50,6 +52,7 @@ const mapStateToProps = (state) => {
     selectedImages: state.selectedImages,
     localEquipNotes: state.localEquipNotes,
     dataReads: state.dataReads,
+    questions: state.questions,
   };
 };
 
@@ -74,6 +77,9 @@ const mapDispatchToProps = (dispatch) => ({
   // postComment: (dishId, rating, author, comment) =>
   //   dispatch(postComment(dishId, rating, author, comment)),
   postImages: (eId, images) => dispatch(postImages(eId, images)),
+  updateEquipmentOnRequest: (equipment, eid, data) =>
+    dispatch(updateEquipmentOnRequest(equipment, eid, data)),
+    postAnswers: (eId, answers) => dispatch(postAnswers(eId, answers)),
 });
 
 let width = Dimensions.get("window").width;
@@ -180,18 +186,9 @@ class Requirements extends React.Component {
           (item) => item.id === this.props.route.params.eId
         )?.postreads?.supply_air_temperature,
       },
-      questions: {
-        manufacturer:"",
-        system_type:"Push",
-        vfd:"Yes",
-        blower_type:"Single Blower",
-        no_separate_coils:"1",
-        coil_depth:"4 row",
-        condition_of_equipment:"Excellent",
-        is_damaged:"No",
-        visible_hydrocarbon_fouling:"",
-        biofouling:""
-      },
+      answers: this.props.questions.map((question) => {
+        return { qId: question.id, answer: question.options[0] };
+      }),
       duration: 0,
       note: "",
       note_category: "",
@@ -213,11 +210,28 @@ class Requirements extends React.Component {
       startCamera: false,
       previewVisible: false,
       capturedImage: null,
+      toggleChangeRequest: false,
+      changeRequestEquipment: {
+        name: this.props.user.assigned_projects_as_technician
+          ?.find((item) => item.id === this.props.route.params.id)
+          ?.equipments?.find((item) => item.id === this.props.route.params.eId)
+          ?.system_name,
+        location: this.props.user.assigned_projects_as_technician
+          ?.find((item) => item.id === this.props.route.params.id)
+          ?.equipments?.find((item) => item.id === this.props.route.params.eId)
+          ?.sub_location,
+        cfm: this.props.user.assigned_projects_as_technician
+          ?.find((item) => item.id === this.props.route.params.id)
+          ?.equipments?.find((item) => item.id === this.props.route.params.eId)
+          ?.cfm,
+        type: "type1",
+      },
     };
   }
 
   componentDidMount() {
     this.getPermissionAsync();
+
     NetInfo.fetch().then(async (state) => {
       const localEquipNotes = this.props.localEquipNotes.filter(
         (obj) => obj.eId === this.props.route.params.eId
@@ -493,25 +507,59 @@ class Requirements extends React.Component {
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Equipment name:</Text>
           </View>
-          <Text style={[styles.formItem, { borderWidth: 0 }]}>
-            {equipment.system_name}
-          </Text>
+          <TextInput
+            style={styles.formItem}
+            placeholder="equipment name"
+            defaultValue={equipment.system_name}
+            editable={this.state.toggleChangeRequest}
+            onChangeText={(itemValue) =>
+              this.setState({
+                changeRequestEquipment: {
+                  ...this.state.changeRequestEquipment,
+                  name: itemValue,
+                },
+              })
+            }
+          />
         </View>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>Location:</Text>
           </View>
-          <Text style={[styles.formItem, { borderWidth: 0 }]}>
-            {equipment.location.location_name}
-          </Text>
+
+          <TextInput
+            style={styles.formItem}
+            placeholder="equipment location"
+            defaultValue={equipment.sub_location}
+            editable={this.state.toggleChangeRequest}
+            onChangeText={(itemValue) =>
+              this.setState({
+                changeRequestEquipment: {
+                  ...this.state.changeRequestEquipment,
+                  location: itemValue,
+                },
+              })
+            }
+          />
         </View>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
             <Text style={{ textAlign: "right" }}>CFM/Tonnage:</Text>
           </View>
-          <Text style={[styles.formItem, { borderWidth: 0 }]}>
-            {equipment.cfm}
-          </Text>
+          <TextInput
+            style={styles.formItem}
+            placeholder="CFM/tonnage"
+            defaultValue={`${equipment.cfm}`}
+            editable={this.state.toggleChangeRequest}
+            onChangeText={(itemValue) =>
+              this.setState({
+                changeRequestEquipment: {
+                  ...this.state.changeRequestEquipment,
+                  cfm: itemValue,
+                },
+              })
+            }
+          />
         </View>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
@@ -519,44 +567,83 @@ class Requirements extends React.Component {
           </View>
           <Text style={[styles.formItem, { borderWidth: 0 }]}>Coming soon</Text>
         </View>
-        <TouchableOpacity
-          // onPress={() => {
-          //   this.setState({ toggleChange: true });
-          // }}
-          style={{
-            alignSelf: "center",
-            padding: 8,
-            backgroundColor: "black",
-            borderRadius: 5,
-            flexDirection: "row",
-            alignItems: "center",
-            width: 170,
-            justifyContent: "center",
-            marginBottom: 50,
-            // marginTop: 30,
-          }}
-        >
-          <Feather
-            name="clipboard"
-            size={width / 24}
-            color="white"
-            style={{ marginRight: 6 }}
-          />
-          <Text
+        {!this.state.toggleChangeRequest && (
+          <TouchableOpacity
+            onPress={() => {
+              console.log(this.state.answers);
+              // this.setState({ toggleChangeRequest: true });
+            }}
             style={{
-              fontSize: width / 24,
-              fontWeight: "200",
-              color: "white",
+              alignSelf: "center",
+              padding: 8,
+              backgroundColor: "black",
+              borderRadius: 5,
+              flexDirection: "row",
+              alignItems: "center",
+              width: 170,
+              justifyContent: "center",
+              marginBottom: 50,
+              // marginTop: 30,
             }}
           >
-            Change Request
-          </Text>
-        </TouchableOpacity>
+            <Feather
+              name="clipboard"
+              size={width / 24}
+              color="white"
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={{
+                fontSize: width / 24,
+                fontWeight: "200",
+                color: "white",
+              }}
+            >
+              Change Request
+            </Text>
+          </TouchableOpacity>
+        )}
 
+        {this.state.toggleChangeRequest && (
+          <TouchableOpacity
+            onPress={() => {
+              this.setState({ toggleChangeRequest: false });
+              this.props.updateEquipmentOnRequest(
+                equipment,
+                eId,
+                this.state.changeRequestEquipment
+              );
+            }}
+            style={{
+              alignSelf: "center",
+              padding: 8,
+              backgroundColor: "black",
+              borderRadius: 5,
+              flexDirection: "row",
+              alignItems: "center",
+              width: 170,
+              justifyContent: "center",
+              marginBottom: 50,
+              // marginTop: 30,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: width / 24,
+                fontWeight: "200",
+                color: "white",
+              }}
+            >
+              Save
+            </Text>
+          </TouchableOpacity>
+        )}
         {/* Questions for tech */}
 
         <TouchableOpacity style={{ marginLeft: 15 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>Update the following information</Text>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+            Update the following information
+          </Text>
         </TouchableOpacity>
         <View style={styles.formRow}>
           <View style={styles.formLabel}>
@@ -569,227 +656,50 @@ class Requirements extends React.Component {
             defaultValue={this.state.questions?.manufacturer}
             onChangeText={(itemValue) =>
               this.setState({
-                preread: { ...this.state.questions, manufacturer: itemValue },
+                questions: { ...this.state.questions, manufacturer: itemValue },
               })
             }
           />
         </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>System Type:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
+        {this.props.questions.map((question) => (
+          <View style={styles.formRow} key={question.id}>
+            <View style={styles.formLabel}>
+              <Text style={{ textAlign: "right" }}>{question.text}:</Text>
+            </View>
+            <View style={[styles.formItem, { borderWidth: 0 }]}>
+              <Picker
                 mode="dropdown"
                 iosHeader="Select"
                 iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.system_type}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions, system_type: value },
-                  })
+                selectedValue={
+                  this.state.answers.find((ans) => ans.qId == question.id)
+                    .answer
                 }
+                // renderHeader={<Text>Choose category</Text>}
+                onValueChange={(value) => {
+                  let newAnswers = [...this.state.answers];
+                  newAnswers= newAnswers.map((ans) => {
+                    if (ans.qId == question.id) {
+                      return { ...ans, answer: value };
+                    } else {
+                      return ans;
+                    }
+                  });
+                  this.setState({ answers: [...newAnswers] });
+                }}
               >
-                <Picker.Item label="Push" value="Push" />
-                <Picker.Item label="Draw" value="Draw" />
+                {question.options.map((option) => (
+                  <Picker.Item label={option} value={option} />
+                ))}
               </Picker>
+            </View>
           </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>VFD:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.vfd}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions, vfd: value },
-                  })
-                }
-              >
-                <Picker.Item label="Yes" value="Yes" />
-                <Picker.Item label="No" value="No" />
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Blower Type:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.blower_type}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions, blower_type: value },
-                  })
-                }
-              >
-                <Picker.Item label="Single Blower" value="Single Blower" />
-                <Picker.Item label="Fan Array" value="Fan Array" />
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>How many separate coils:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.no_separate_coils}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions,no_separate_coils : value },
-                  })
-                }
-              >
-                <Picker.Item label="1" value="1" />
-                <Picker.Item label="2" value="2" />
-                <Picker.Item label="3" value="3" />
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Coil depth:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.coil_depth}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions,coil_depth : value },
-                  })
-                }
-              >
-                <Picker.Item label="4 row" value="4 row" />
-                <Picker.Item label="6 row" value="6 row" />
-                <Picker.Item label="8 row" value="8 row" />
-                <Picker.Item label="12 row" value="12 row" />
-                <Picker.Item label="16 row" value="16 row" />
-                <Picker.Item label="18 row" value="18 row" />
-                <Picker.Item label="24 row" value="24 row" />
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Condition of equipment:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.condition_of_equipment}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions,condition_of_equipment : value },
-                  })
-                }
-              >
-                <Picker.Item label="Excellent" value="Excellent" />
-                <Picker.Item label="good" value="good" />
-                <Picker.Item label="bad" value="bad" />
-              
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Is the equipment damaged?:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.is_damaged}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions,is_damaged : value },
-                  })
-                }
-              >
-                <Picker.Item label="No" value="No" />
-                <Picker.Item label="Yes" value="Yes" />
-               
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Visible hydrocarbon fouling or mold?:</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.visible_hydrocarbon_fouling}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions,visible_hydrocarbon_fouling : value },
-                  })
-                }
-              >
-                <Picker.Item label="No" value="No" />
-                <Picker.Item label="Yes" value="Yes" />
+        ))}
 
-              </Picker>
-          </View>
-        </View>
-        <View style={styles.formRow}>
-          <View style={styles.formLabel}>
-            <Text style={{ textAlign: "right" }}>Biofouling?</Text>
-          </View>
-          <View style={[styles.formItem, { borderWidth: 0 }]}>
-          <Picker
-                mode="dropdown"
-                iosHeader="Select"
-                iosIcon={<Icon name="arrow-down" />}
-                selectedValue={this.state.questions.biofouling}
-                // renderHeader={<Text>Choose category</Text>}
-                onValueChange={(value) =>
-                  this.setState({
-                    preread: { ...this.state.questions,biofouling : value },
-                  })
-                }
-              >
-                <Picker.Item label="No" value="No" />
-                <Picker.Item label="Yes" value="Yes" />
-
-              </Picker>
-          </View>
-        </View>
-      
-        
-        
         <TouchableOpacity
-          // onPress={() => {
-          //   this.setState({ toggleChange: true });
-          // }}
+          onPress={() => {
+            this.props.postAnswers(eId,this.state.answers)
+          }}
           style={{
             alignSelf: "center",
             padding: 8,
@@ -803,7 +713,6 @@ class Requirements extends React.Component {
             // marginTop: 30,
           }}
         >
-
           <Text
             style={{
               fontSize: width / 24,
@@ -1441,11 +1350,17 @@ class Requirements extends React.Component {
               styles.mediaButton,
               { marginRight: 8, backgroundColor: "black" },
             ]}
-            onPress={() =>
-              !timestamp?.isStarted
-                ? this.markStarted(eId)
-                : this.markStopped(eId)
-            }
+            onPress={() => {
+              if (!timestamp?.isStarted) {
+                this.markStarted(eId);
+                NetInfo.fetch().then((state) => {
+                  if (state.isConnected) {
+                  }
+                });
+              }
+              // ? this.markStarted(eId)
+              // : this.markStopped(eId);
+            }}
           >
             <Icon
               type="FontAwesome"
@@ -1696,25 +1611,76 @@ class Requirements extends React.Component {
                   this.setState({ note_category: value })
                 }
               >
-                <Picker.Item label="COIL DAMAGE(MINOR)" value="COIL DAMAGE(MINOR)" />
-                <Picker.Item label="COIL DAMAGE(MODERATE)" value="COIL DAMAGE(MODERATE)" />
-                <Picker.Item label="COIL DAMAGE(MAJOR)" value="COIL DAMAGE(MAJOR)" />
-                <Picker.Item label="DAMAGE TYPE-PRESSURE WASHING" value="DAMAGE TYPE-PRESSURE WASHING" />
-                <Picker.Item label="DAMAGE TYPE-CORROSION" value="DAMAGE TYPE-CORROSION" />
-                <Picker.Item label="AIR GAPS - COILS" value="AIR GAPS - COILS" />
-                <Picker.Item label="AIR GAPS - FILTERs" value="AIR GAPS - FILTERs" />
-                <Picker.Item label="BIO FOULING-MINOR" value="BIO FOULING-MINOR" />
-                <Picker.Item label="BIO FOULING-MODERATE" value="BIO FOULING-MODERATE" />
-                <Picker.Item label="BIO FOULING-MAJOR" value="BIO FOULING-MAJOR" />
-                <Picker.Item label="BIO TYPE-BACTERIA" value="BIO TYPE-BACTERIA" />
+                <Picker.Item
+                  label="COIL DAMAGE(MINOR)"
+                  value="COIL DAMAGE(MINOR)"
+                />
+                <Picker.Item
+                  label="COIL DAMAGE(MODERATE)"
+                  value="COIL DAMAGE(MODERATE)"
+                />
+                <Picker.Item
+                  label="COIL DAMAGE(MAJOR)"
+                  value="COIL DAMAGE(MAJOR)"
+                />
+                <Picker.Item
+                  label="DAMAGE TYPE-PRESSURE WASHING"
+                  value="DAMAGE TYPE-PRESSURE WASHING"
+                />
+                <Picker.Item
+                  label="DAMAGE TYPE-CORROSION"
+                  value="DAMAGE TYPE-CORROSION"
+                />
+                <Picker.Item
+                  label="AIR GAPS - COILS"
+                  value="AIR GAPS - COILS"
+                />
+                <Picker.Item
+                  label="AIR GAPS - FILTERs"
+                  value="AIR GAPS - FILTERs"
+                />
+                <Picker.Item
+                  label="BIO FOULING-MINOR"
+                  value="BIO FOULING-MINOR"
+                />
+                <Picker.Item
+                  label="BIO FOULING-MODERATE"
+                  value="BIO FOULING-MODERATE"
+                />
+                <Picker.Item
+                  label="BIO FOULING-MAJOR"
+                  value="BIO FOULING-MAJOR"
+                />
+                <Picker.Item
+                  label="BIO TYPE-BACTERIA"
+                  value="BIO TYPE-BACTERIA"
+                />
                 <Picker.Item label="BIO TYPE-FUNGI" value="BIO TYPE-FUNGI" />
                 <Picker.Item label="BIO TYPE-SLIME" value="BIO TYPE-SLIME" />
-                <Picker.Item label="OTHER FOULING-MINOR" value="OTHER FOULING-MINOR" />
-                <Picker.Item label="OTHER FOULING-MODERATE" value="OTHER FOULING-MODERATE" />
-                <Picker.Item label="OTHER FOULING-MAJOR" value="OTHER FOULING-MAJOR" />
-                <Picker.Item label="FOULING TYPE - HYDROCARBON" value="FOULING TYPE - HYDROCARBON" />
-                <Picker.Item label="FOULING TYPE - DRYWALL" value="FOULING TYPE - DRYWALL" />
-                <Picker.Item label="FOULING TYPE - MISC" value="FOULING TYPE - MISC" />
+                <Picker.Item
+                  label="OTHER FOULING-MINOR"
+                  value="OTHER FOULING-MINOR"
+                />
+                <Picker.Item
+                  label="OTHER FOULING-MODERATE"
+                  value="OTHER FOULING-MODERATE"
+                />
+                <Picker.Item
+                  label="OTHER FOULING-MAJOR"
+                  value="OTHER FOULING-MAJOR"
+                />
+                <Picker.Item
+                  label="FOULING TYPE - HYDROCARBON"
+                  value="FOULING TYPE - HYDROCARBON"
+                />
+                <Picker.Item
+                  label="FOULING TYPE - DRYWALL"
+                  value="FOULING TYPE - DRYWALL"
+                />
+                <Picker.Item
+                  label="FOULING TYPE - MISC"
+                  value="FOULING TYPE - MISC"
+                />
               </Picker>
             </View>
             <TouchableOpacity

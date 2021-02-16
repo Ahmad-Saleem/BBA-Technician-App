@@ -47,7 +47,7 @@ export default class LoginScreen extends React.Component {
         await Auth.signIn(email, password);
         console.log(" Success");
         updateAuthState("loggedIn");
-        console.log(Auth.currentUserInfo());
+        // console.log(Auth.currentUserInfo());
       } catch (error) {
         console.log(" Error signing in...", error);
       }

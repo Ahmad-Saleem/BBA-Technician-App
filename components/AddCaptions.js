@@ -45,25 +45,6 @@ class AddCaptions extends Component {
       headerBackTitleVisible: false,
       headerRight: () => (
         <TouchableOpacity
-          // onPress={async () => {
-          //   await this.props.postDataRead(
-          //     eId,
-          //     this.state.preread,
-          //     this.state.postread
-          //   );
-          //   NetInfo.fetch().then((state) => {
-          //     if (state.isConnected) {
-          //       this.props.uploadToStorage(
-          //         this.state.preread,
-          //         this.state.postread,
-          //         eId,
-          //         images,
-          //         project.id
-          //       );
-          //     }
-          //   });
-          //   // console.log(this.state.preread, this.state.postread);
-          // }}
           style={{
             width: width / 3,
             alignItems: "center",

@@ -10,7 +10,8 @@ import { localEquipNotes } from "./equipNotes";
 import { timestamps } from "./timestamps";
 import { dataReads } from "./dataReads";
 import { selectedImages } from "./selectedImages";
-
+import { timerId } from "./timerId";
+import { questions } from "./questions";
 
 const config = {
   key: "root",
@@ -27,7 +28,9 @@ export const ConfigureStore = () => {
       selectedImages,
       localProjectNotes,
       localEquipNotes,
-      dataReads
+      dataReads,
+      timerId,
+      questions
     }),
     applyMiddleware(thunk, logger)
   );

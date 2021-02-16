@@ -47,10 +47,9 @@ export const fetchUser = () => async (dispatch) => {
     .catch((err) => console.log(err));
   // const myId = user.attributes["custom:userId"]
 
-  return (
-    client
-      .query({
-        query: gql`
+  return client
+    .query({
+      query: gql`
           query {
             user(id: ${myId}){
               id
@@ -84,9 +83,7 @@ export const fetchUser = () => async (dispatch) => {
                   building
                   cfm
                   system_name
-                  location{
-                    location_name
-                  }
+                  sub_location
                   notes {
                     id
                     message
@@ -105,29 +102,33 @@ export const fetchUser = () => async (dispatch) => {
             }
           }
         `,
-      })
-      // .then(
-      //   (response) => {
-      //     if (response.ok) {
-      //       return response;
-      //     } else {
-      //       var error = new Error(
-      //         "Error " + response.status + ": " + response.statusText
-      //       );
-      //       error.response = response;
-      //       throw error;
-      //     }
-      //   },
-      //   (error) => {
-      //     var errmess = new Error(error.message);
-      //     throw errmess;
-      //   }
-      // )
-      // .then((response) => response.json())
-      .then(({ data }) => dispatch(addUser(data.user)))
-      .catch((error) => dispatch(userFailed(error.message)))
-  );
+    })
+
+    .then(({ data }) => dispatch(addUser(data.user)))
+    .catch((error) => dispatch(userFailed(error.message)));
 };
+
+export const fetchQuestions = () => async (dispatch) => {
+  client
+    .query({
+      query: gql`
+        query {
+          questions {
+            id
+            text
+            options
+          }
+        }
+      `,
+    })
+    .then(({ data }) => dispatch(addQuestions(data.questions)))
+    .catch((error) => console.log(error));
+};
+
+export const addQuestions = (questions) => ({
+  type: ActionTypes.ADD_QUESTIONS,
+  payload: questions,
+});
 
 export const userLoading = () => ({
   type: ActionTypes.USER_LOADING,
@@ -366,31 +367,6 @@ export const postEquipNote = (projId, eId, note, category) => async (
       notee.noteType = data.createNote.category;
     });
   return notee;
-};
-
-export const postRequest = (projId, note) => async (dispatch) => {
-  const myId = await Auth.currentAuthenticatedUser()
-    .then((user) => {
-      return user.attributes["custom:userId"];
-    })
-    .catch((err) => console.log(err));
-  const request = '"' + note + '"';
-
-  client.mutate({
-    mutation: gql`
-    mutation {
-      createNote(input: {
-        project_id:${projId}
-        created_by:${myId},
-        message:${request},
-        labels: [CHANGE_REQUEST]
-      })
-      {
-        id
-      }
-    }
-  `,
-  });
 };
 
 export const deleteNote = (id) => async (dispatch) => {
@@ -783,3 +759,161 @@ export const deleteLocalNote = (id) => ({
   type: ActionTypes.DELETE_LOCALNOTE,
   id: id,
 });
+
+export const startTimer = (eId) => async (dispatch) => {
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  client
+    .mutate({
+      mutation: gql`
+  mutation{
+    createTimer(equipmentId: ${eId}, userId:${myId}){
+      id
+    }
+  }
+`,
+    })
+    .then(({ data }) => {
+      console.log(data.createTimer.id);
+      dispatch(addTimerId(data.createTimer.id));
+      client.mutate({
+        mutation: gql`
+          mutation {
+            startTimer(timerId: ${data.createTimer.id}) {
+              start_time
+            }
+          }
+        `,
+      });
+    });
+  setTimeout(() => {
+    dispatch(fetchUser());
+  }, 2000);
+};
+export const addTimerId = (id) => ({
+  type: ActionTypes.ADD_TIMERID,
+  payload: id,
+});
+export const stopTimer = (id) => async (dispatch) => {
+  client
+    .mutate({
+      mutation: gql`
+  mutation{
+    createTimer(equipmentId: ${eId}, userId:${myId}){
+      id
+    }
+  }
+`,
+    })
+    .then(({ data }) => {
+      console.log(data.createTimer.id);
+      dispatch(addTimerId(data.createTimer.id));
+      client.mutate({
+        mutation: gql`
+          mutation {
+            startTimer(timerId: ${data.createTimer.id}) {
+              start_time
+            }
+          }
+        `,
+      });
+    });
+  setTimeout(() => {
+    dispatch(fetchUser());
+  }, 2000);
+};
+export const removeTimerId = (id) => ({
+  type: ActionTypes.REMOVE_TIMERID,
+  payload: id,
+});
+
+export const updateEquipmentOnRequest = (equipment, eId, data) => (
+  dispatch
+) => {
+  console.log(eId, data);
+  let { name, location, cfm, type } = data;
+  let name1 = '"' + name + '"';
+  let location1 = '"' + location + '"';
+  let type1 = '"' + type + '"';
+
+  client
+    .mutate({
+      mutation: gql`
+    mutation {
+      updateEquipment(
+        where: {id:${eId}}
+        data: {system_name: ${name1}, sub_location: ${location1}, cfm: ${cfm}, type: ${type1}}
+      ) {
+        id
+        }
+      }
+  `,
+    })
+    .then(({ data }) => {
+      console.log(data.updateEquipment.id);
+      dispatch(
+        postRequest(
+          data.updateEquipment.id,
+          `CFM/Tonnage: ${equipment.cfm} changed to ${cfm}, Location: ${equipment.sub_location} changed to ${location}, Name: ${equipment.system_name} changed to ${name}, Equipment type: ${equipment.type} changed to ${type}`
+        )
+      );
+    });
+
+  // setTimeout(() => {
+  //   dispatch(fetchUser());
+  // }, 2000);
+};
+
+export const postRequest = (eId, note) => async (dispatch) => {
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  const request = '"' + note + '"';
+  console.log("request", note);
+  client.mutate({
+    mutation: gql`
+    mutation {
+      createNote(input: {
+        equipment:${eId},
+        created_by:${myId},
+        message:${request},
+        labels: [CHANGE_REQUEST]
+      })
+      {
+        id
+      }
+    }
+  `,
+  });
+};
+
+export const postAnswers = (eId, answers) => async (dispatch) => {
+  const myId = await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      return user.attributes["custom:userId"];
+    })
+    .catch((err) => console.log(err));
+  answers.map((ans) => {
+    let correct_answer = '"' + ans.answer + '"';
+    client.mutate({
+      mutation: gql`
+  mutation {
+    saveAnswers(
+      equipmentId:${eId},
+      questionId:${ans.qId},
+      userId:${myId},
+      answer: ${correct_answer}
+    )
+    {
+      id
+    }
+  }
+`,
+    });
+  });
+};

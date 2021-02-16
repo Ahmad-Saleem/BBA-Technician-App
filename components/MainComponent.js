@@ -10,7 +10,7 @@ import Requirements from "./Requirements";
 import AddCaptions from "./AddCaptions";
 import { connect } from "react-redux";
 import { Icon } from "native-base";
-import { fetchUser } from "../redux/ActionCreators";
+import { fetchUser, fetchQuestions } from "../redux/ActionCreators";
 import NetInfo from '@react-native-community/netinfo';
 
 let width = Dimensions.get("window").width;
@@ -23,6 +23,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   fetchUser: () => dispatch(fetchUser()),
+  fetchQuestions: () => dispatch(fetchQuestions()),
 });
 
 const Stack = createStackNavigator();
@@ -34,6 +35,7 @@ class Main extends React.Component {
       console.log('Is connected?', state.isConnected);
       if(state.isConnected){
         this.props.fetchUser();
+        this.props.fetchQuestions();
       }
     });
   }
