@@ -249,7 +249,6 @@ export const deleteImages = (eId, images) => ({
 });
 
 export const postNote = (projId, note, category) => async (dispatch) => {
-
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -295,11 +294,9 @@ export const postNote = (projId, note, category) => async (dispatch) => {
   // }, 2000);
 };
 
-
 export const postEquipNote = (projId, eId, note, category) => async (
   dispatch
 ) => {
-
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -770,29 +767,16 @@ export const addTimerId = (id) => ({
   payload: id,
 });
 export const stopTimer = (id) => async (dispatch) => {
-  client
-    .mutate({
-      mutation: gql`
+  client.mutate({
+    mutation: gql`
   mutation{
-    createTimer(equipmentId: ${eId}, userId:${myId}){
+    stopTimer(timerId: ${id}){
       id
     }
   }
 `,
-    })
-    .then(({ data }) => {
-      console.log(data.createTimer.id);
-      dispatch(addTimerId(data.createTimer.id));
-      client.mutate({
-        mutation: gql`
-          mutation {
-            startTimer(timerId: ${data.createTimer.id}) {
-              start_time
-            }
-          }
-        `,
-      });
-    });
+  });
+
   setTimeout(() => {
     dispatch(fetchUser());
   }, 2000);
