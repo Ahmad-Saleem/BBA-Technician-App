@@ -231,11 +231,7 @@ export const postImages = (eId, images) => (dispatch) => {
     id: eId,
     images: newImages,
   };
-  // const date=new Date().toLocaleTimeString();
-  // newTimestamp.initial = date;
-  // newTimestamp.starting = new Date();
-  // newTimestamp.stopping = "Stop tracking";
-  // newTimestamp.duration = 0;
+
   setTimeout(async () => {
     await dispatch(addImages(newImageSet));
   }, 2000);
@@ -253,13 +249,7 @@ export const deleteImages = (eId, images) => ({
 });
 
 export const postNote = (projId, note, category) => async (dispatch) => {
-  // const newNote = {
-  //   projId: projId,
-  //   // author: author,
-  //   note: note,
-  // };
-  // newNote.date = new Date().toISOString();
-  // const newNnote = '"' + note + '"';
+
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];
@@ -305,29 +295,11 @@ export const postNote = (projId, note, category) => async (dispatch) => {
   // }, 2000);
 };
 
-// Object {
-//   "__typename": "Note",
-//   "created_at": "2020-11-05T19:03:40.396Z",
-//   "created_by": Object {
-//     "__typename": "User",
-//     "first_name": "tech",
-//     "id": "94",
-//     "last_name": "tech ",
-//   },
-//   "id": "159",
-//   "labels": Array [],
-//   "message": "Hey",
-// }
 
 export const postEquipNote = (projId, eId, note, category) => async (
   dispatch
 ) => {
-  // const newNote = {
-  //   projId: projId,
-  //   // author: author,
-  //   note: note,
-  // };
-  // newNote.date = new Date().toISOString();
+
   const myId = await Auth.currentAuthenticatedUser()
     .then((user) => {
       return user.attributes["custom:userId"];

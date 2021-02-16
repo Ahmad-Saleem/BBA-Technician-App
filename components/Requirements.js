@@ -31,7 +31,9 @@ import {
   postDataRead,
   postImages,
   updateEquipmentOnRequest,
-  postAnswers
+  postAnswers,
+  startTimer,
+  stopTimer,
 } from "../redux/ActionCreators";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -53,6 +55,7 @@ const mapStateToProps = (state) => {
     localEquipNotes: state.localEquipNotes,
     dataReads: state.dataReads,
     questions: state.questions,
+    timerId: state.timerId,
   };
 };
 
@@ -79,7 +82,8 @@ const mapDispatchToProps = (dispatch) => ({
   postImages: (eId, images) => dispatch(postImages(eId, images)),
   updateEquipmentOnRequest: (equipment, eid, data) =>
     dispatch(updateEquipmentOnRequest(equipment, eid, data)),
-    postAnswers: (eId, answers) => dispatch(postAnswers(eId, answers)),
+  postAnswers: (eId, answers) => dispatch(postAnswers(eId, answers)),
+  startTimer: (eId) => dispatch(startTimer(eId)),
 });
 
 let width = Dimensions.get("window").width;
@@ -293,10 +297,12 @@ class Requirements extends React.Component {
 
   markStarted(eId) {
     this.props.postTimestamp(eId);
+    this.props.startTimer(eId);
   }
 
   markStopped(eId) {
     this.props.updateTimestamp(eId);
+    this.props.stopTimer(this.props.timerId);
   }
 
   markSelected(uri) {
@@ -678,7 +684,7 @@ class Requirements extends React.Component {
                 // renderHeader={<Text>Choose category</Text>}
                 onValueChange={(value) => {
                   let newAnswers = [...this.state.answers];
-                  newAnswers= newAnswers.map((ans) => {
+                  newAnswers = newAnswers.map((ans) => {
                     if (ans.qId == question.id) {
                       return { ...ans, answer: value };
                     } else {
@@ -698,7 +704,7 @@ class Requirements extends React.Component {
 
         <TouchableOpacity
           onPress={() => {
-            this.props.postAnswers(eId,this.state.answers)
+            this.props.postAnswers(eId, this.state.answers);
           }}
           style={{
             alignSelf: "center",
