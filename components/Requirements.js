@@ -576,8 +576,8 @@ class Requirements extends React.Component {
         {!this.state.toggleChangeRequest && (
           <TouchableOpacity
             onPress={() => {
-              console.log(this.state.answers);
-              // this.setState({ toggleChangeRequest: true });
+              // console.log(this.state.answers);
+              this.setState({ toggleChangeRequest: true });
             }}
             style={{
               alignSelf: "center",
